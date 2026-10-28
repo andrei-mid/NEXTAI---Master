@@ -5,6 +5,7 @@ import AlertsSidebar from './components/AlertsSidebar.jsx';
 import ReviewPanel from './components/ReviewPanel.jsx';
 import CompanyDetail from './components/CompanyDetail.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import { ANALYSTS } from './mock/analysts.js';
 
 const VIEWS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -13,6 +14,8 @@ const VIEWS = [
 
 export default function App() {
   const [view, setView] = useState('dashboard');
+  // Signed-in account (mock: no login yet, the switcher stands in for it).
+  const [analystId, setAnalystId] = useState(ANALYSTS[0].id);
   const [items, setItems] = useState([]);
   const [error, setError] = useState(null);
   const [selectedCui, setSelectedCui] = useState(null);
@@ -59,11 +62,26 @@ export default function App() {
             ))}
           </nav>
         </div>
-        {DATA_MODE === 'api' ? (
-          <span className="pill pill-outcome">Live API</span>
-        ) : (
-          <span className="pill pill-mock">MOCK DATA</span>
-        )}
+        <div className="topbar-right">
+          {DATA_MODE === 'api' ? (
+            <span className="pill pill-outcome">Live API</span>
+          ) : (
+            <span className="pill pill-mock">MOCK DATA</span>
+          )}
+          <label className="account">
+            <span className="muted small">Signed in as</span>
+            <select value={analystId} onChange={(e) => setAnalystId(e.target.value)}>
+              {ANALYSTS.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} ({a.role})
+                </option>
+              ))}
+            </select>
+            <span className="pill pill-mock pill-xs" title="Mock accounts, no real login yet">
+              MOCK
+            </span>
+          </label>
+        </div>
       </header>
 
       {view === 'dashboard' ? (
@@ -83,6 +101,7 @@ export default function App() {
                 key={selected.cui}
                 item={selected}
                 sessionReviews={reviews[selected.cui] ?? []}
+                analystId={analystId}
               />
             )}
           </main>
@@ -91,6 +110,7 @@ export default function App() {
             <ReviewPanel
               key={selected.cui}
               company={selected}
+              analystId={analystId}
               history={reviews[selected.cui] ?? []}
               onSubmit={(review) => addReview(selected.cui, review)}
             />
