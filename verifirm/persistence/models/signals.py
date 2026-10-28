@@ -1,13 +1,33 @@
-"""STUB. Owner: @role-1-database. Signals produced by agents (after entity resolution).
+"""Signals produced by agents (after entity resolution). Owner: @role-1-database.
 
-Planned tables (write them as SQLAlchemy 2.0 typed models: `class X(Base)` with `Mapped[...]`,
-then generate the migration `alembic revision --autogenerate -m "signals_create_tables"`):
-- signals_signals: (run_id, signal_id) PK, cui, agent, component, rule_id, severity, validated, auto_stop_candidate, confidence, evidence_date, payload JSONB (schema.signals.Signal)
-- indexes: (cui, run_id), rule_id, severity
+signals_signals: (run_id, signal_id) PK, so re-saving a run never duplicates. The indexed columns
+mirror the Signal fields we filter on; payload = schema.signals.Signal is the source of truth.
 """
 
 from __future__ import annotations
 
-from verifirm.persistence.models.base import Base
+from datetime import date
+from typing import Any
 
-__all__ = ["Base"]
+from sqlalchemy import Index, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from verifirm.persistence.models.base import Base, CreatedAtMixin
+
+
+class SignalRow(CreatedAtMixin, Base):
+    __tablename__ = "signals_signals"
+    __table_args__ = (Index("ix_signals_signals_cui_run_id", "cui", "run_id"),)
+
+    run_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    signal_id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    cui: Mapped[str] = mapped_column(String(16))
+    agent: Mapped[str] = mapped_column(String(32))
+    component: Mapped[str] = mapped_column(String(16))
+    rule_id: Mapped[str] = mapped_column(String(64), index=True)
+    severity: Mapped[str] = mapped_column(String(16), index=True)
+    validated: Mapped[bool]
+    auto_stop_candidate: Mapped[bool]
+    confidence: Mapped[float]
+    evidence_date: Mapped[date | None]
+    payload: Mapped[dict[str, Any]]
