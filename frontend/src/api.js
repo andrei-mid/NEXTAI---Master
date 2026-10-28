@@ -1,24 +1,29 @@
 // The ONLY place the frontend gets data from. Shapes = the API's Pydantic models
 // (verifirm/schema/api.py, exported as JSON Schema in docs/schema/).
 //
-// Three modes, picked in this order:
-//  - "api": VITE_API_URL set (e.g. http://localhost:8000). Calls the real API.
-//  - "snapshot": no VITE_API_URL, but snapshot/data.json exists (made by `npm run snapshot`).
-//    The API's answers saved earlier, read offline. Git-ignored.
+// Three modes:
+//  - "snapshot": snapshot/data.json, the API's answers saved by `npm run snapshot` and read
+//    offline (git-ignored). The default whenever that file exists.
+//  - "api": calls the real API at VITE_API_URL. Used when there is no snapshot, or when
+//    VITE_DATA_SOURCE=live asks for the live server explicitly.
 //  - "mock": neither. The team's fixture files (read-only).
 // Our invented UI companies (FICTIV) are added in every mode, always read locally.
 
 import { companiesResponse as uiMock, companyDetails, signalsByCui } from './mock/build.js';
 import { fixtureCompanies } from './mock/realFixtures.js';
 
-const API_URL = import.meta.env.VITE_API_URL;
-
 // Optional file: the glob is simply empty when no snapshot has been taken.
 const SNAPSHOT = Object.values(
   import.meta.glob('../snapshot/data.json', { eager: true, import: 'default' }),
 )[0];
 
-export const DATA_MODE = API_URL ? 'api' : SNAPSHOT ? 'snapshot' : 'mock';
+const WANT_LIVE = import.meta.env.VITE_DATA_SOURCE === 'live';
+
+export const DATA_MODE =
+  SNAPSHOT && !WANT_LIVE ? 'snapshot' : import.meta.env.VITE_API_URL ? 'api' : 'mock';
+
+// Set only in "api" mode, so nothing else can reach the server by accident.
+const API_URL = DATA_MODE === 'api' ? import.meta.env.VITE_API_URL : undefined;
 
 /** When the snapshot in use was taken (ISO string), or null. */
 export const SNAPSHOT_TAKEN_AT = DATA_MODE === 'snapshot' ? SNAPSHOT.taken_at : null;

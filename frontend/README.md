@@ -28,12 +28,16 @@ Open http://localhost:5173. On Windows PowerShell, if `npm` is blocked by the ex
 
 Shapes follow the API's Pydantic models (`verifirm/schema/api.py`, JSON Schemas in `docs/schema/`).
 
-- **Live API:** copy `.env.example` to `.env.local` and set `VITE_API_URL` (e.g. `http://localhost:8000`,
-  or the tunnel URL from the backend team), then restart `npm run dev`. The top bar shows "Live API".
-- **Snapshot:** while the API is reachable, run `npm run snapshot`. It saves the API's answers to
-  `snapshot/data.json` (git-ignored: it can hold real-company figures). Remove or comment out
-  `VITE_API_URL` and restart: the site reads the snapshot offline. The top bar shows "Snapshot · date".
-- **Mock:** no `VITE_API_URL` and no snapshot. Shows the team's fixtures
+Copy `.env.example` to `.env.local` and set `VITE_API_URL` (e.g. `http://localhost:8000`, or the
+tunnel URL from the backend team). Then:
+
+- **Snapshot (the default once you have one):** while the API is reachable, run `npm run snapshot`.
+  It saves the API's answers to `snapshot/data.json` (git-ignored: it can hold real-company figures).
+  From then on the site reads that local copy and makes no server calls. The top bar shows
+  "Snapshot · date". Run `npm run snapshot` again to refresh it.
+- **Live API:** no snapshot yet, or `VITE_DATA_SOURCE=live` in `.env.local`. Restart `npm run dev`.
+  The top bar shows "Live API".
+- **Mock:** no snapshot and no `VITE_API_URL`. Shows the team's fixtures
   (`fixtures/companies/*/api/*.json`, read-only). The top bar shows "MOCK DATA".
 
 In every mode, 10 invented companies from `src/mock/` are added, labelled FICTIV.

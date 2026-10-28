@@ -35,11 +35,12 @@ Nothing else is installed. Adding a dependency needs the owner's approval (CLAUD
 `src/api.js` is the only place that loads data. Shapes are the API's Pydantic models
 (`verifirm/schema/api.py`, JSON Schemas in `docs/schema/`). The mode is chosen in this order:
 
-1. **Live API**: `VITE_API_URL` set in `.env.local` (git-ignored). Calls `GET /companies`,
-   `/companies/{cui}`, `/companies/{cui}/signals`, `/companies/{cui}/history`. Top bar: "Live API".
-2. **Snapshot**: no `VITE_API_URL`, but `snapshot/data.json` exists. Made with `npm run snapshot`
-   while the API is reachable; read offline. **Git-ignored: it can hold real-company figures
-   (rule 11).** Top bar: "Snapshot · date".
+1. **Snapshot** (default when it exists): `snapshot/data.json`, made with `npm run snapshot` from
+   `VITE_API_URL` while the API is reachable; read offline, no server calls. **Git-ignored: it can
+   hold real-company figures (rule 11).** Top bar: "Snapshot · date".
+2. **Live API**: no snapshot, or `VITE_DATA_SOURCE=live` in `.env.local` (git-ignored). Calls
+   `GET /companies`, `/companies/{cui}`, `/companies/{cui}/signals`, `/companies/{cui}/history` at
+   `VITE_API_URL`. Top bar: "Live API".
 3. **Mock**: neither. Reads the team's fixtures `fixtures/companies/*/api/*.json` (read-only,
    through `import.meta.glob`). Top bar: "MOCK DATA".
 
