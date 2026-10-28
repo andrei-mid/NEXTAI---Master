@@ -4,8 +4,20 @@
  *  - origin "backend": served by the API (or its fixtures) -> BACKEND DATA,
  *    plus FICTIV when the backend marks it fictional (team rule: never hide FICTIV),
  *    or REAL when it is a real company.
+ * compact: only FICTIV or REAL (for tight lists; the full set is on the company page).
  */
-export default function OriginBadges({ origin, fictional }) {
+export default function OriginBadges({ origin, fictional, compact = false }) {
+  if (compact) {
+    return origin === 'ui-mock' || fictional ? (
+      <span className="pill pill-fictiv pill-xs" title="Made-up company">
+        FICTIV
+      </span>
+    ) : (
+      <span className="pill pill-real pill-xs" title="A real company">
+        REAL
+      </span>
+    );
+  }
   if (origin === 'ui-mock') {
     return (
       <span className="pill pill-fictiv" title="Made up in the frontend mockup">
