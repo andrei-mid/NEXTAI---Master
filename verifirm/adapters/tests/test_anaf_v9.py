@@ -33,7 +33,7 @@ from verifirm.core.ports.rate_limiter import RateLimit, RateLimiter
 FIXTURES = Path(__file__).resolve().parents[3] / "fixtures"
 NOW = datetime(2026, 10, 28, 4, 0, tzinfo=UTC)
 TODAY = NOW.date()
-HISTORY = 12
+HISTORY = 4  # quarter-ends
 
 
 class _CountingLimiter(RateLimiter):
@@ -112,13 +112,16 @@ def test_request_body_shape() -> None:
     ]
 
 
-def test_history_dates_are_month_ends() -> None:
-    dates = history_dates(date(2026, 10, 28), 12)
-    assert dates[:3] == [date(2026, 9, 30), date(2026, 8, 31), date(2026, 7, 31)]
-    assert dates[-1] == date(2025, 10, 31)
-    assert date(2026, 2, 28) in dates
-    assert len(dates) == len(set(dates)) == 12
-    assert history_dates(date(2024, 3, 5), 1) == [date(2024, 2, 29)]  # leap year
+def test_history_dates_are_quarter_ends() -> None:
+    assert history_dates(date(2026, 10, 28), 4) == [
+        date(2026, 9, 30),
+        date(2026, 6, 30),
+        date(2026, 3, 31),
+        date(2025, 12, 31),
+    ]
+    assert history_dates(date(2026, 1, 1), 1) == [date(2025, 12, 31)]  # first day of a quarter
+    assert history_dates(date(2024, 4, 5), 1) == [date(2024, 3, 31)]
+    assert history_dates(date(2026, 12, 31), 2) == [date(2026, 9, 30), date(2026, 6, 30)]
 
 
 def test_split_response_never_invents_a_clean_answer() -> None:
@@ -192,7 +195,7 @@ async def test_read_path_never_calls_anaf(tmp_path: Path) -> None:
 
 
 # --------------------------------------------------- sync: multiple dated entries per firm
-async def test_first_sync_is_one_request_with_today_and_12_month_ends(tmp_path: Path) -> None:
+async def test_first_sync_is_one_request_with_today_and_4_quarter_ends(tmp_path: Path) -> None:
     anaf = _Anaf()
     report = await _adapter(tmp_path, anaf=anaf, network=True).sync("99000025")
 
@@ -214,7 +217,7 @@ async def test_every_date_is_stored_separately(tmp_path: Path) -> None:
     addresses = {
         day: rec["date_generale"]["adresa"] for day, rec in snapshots.items() if rec is not None
     }
-    assert addresses["2025-10-31"] == "Str. Data nr. 2025-10-31"
+    assert addresses["2025-12-31"] == "Str. Data nr. 2025-12-31"
     assert addresses[TODAY.isoformat()] == f"Str. Data nr. {TODAY.isoformat()}"
     assert len(set(addresses.values())) == 1 + HISTORY  # nothing overwrote anything
 
@@ -239,18 +242,18 @@ async def test_next_day_only_today_is_asked_again(tmp_path: Path) -> None:
     assert anaf.requests[1] == [{"cui": 99000025, "data": "2026-10-29"}]  # past never again
 
 
-async def test_new_month_adds_one_month_end(tmp_path: Path) -> None:
+async def test_new_quarter_adds_one_quarter_end(tmp_path: Path) -> None:
     anaf = _Anaf()
     await _adapter(tmp_path, anaf=anaf, network=True).sync("99000025")
-    november = datetime(2026, 11, 3, 4, 0, tzinfo=UTC)
-    await _adapter(tmp_path, anaf=anaf, network=True, now=november).sync("99000025")
-    assert [e["data"] for e in anaf.requests[1]] == ["2026-11-03", "2026-10-31"]
+    january = datetime(2027, 1, 3, 4, 0, tzinfo=UTC)
+    await _adapter(tmp_path, anaf=anaf, network=True, now=january).sync("99000025")
+    assert [e["data"] for e in anaf.requests[1]] == ["2027-01-03", "2026-12-31"]
 
 
 async def test_more_than_100_missing_entries_wait_for_the_next_sync(tmp_path: Path) -> None:
     anaf = _Anaf()
     syncer = _adapter(tmp_path, anaf=anaf, network=True)
-    syncer.history_months = 150  # 151 entries wanted
+    syncer.history_quarters = 150  # 151 entries wanted
     first = await syncer.sync("99000025")
     assert [len(r) for r in anaf.requests] == [MAX_BATCH]  # ONE request, never a second one
     assert first.downloaded == 1
@@ -372,10 +375,10 @@ async def test_malformed_response_stores_nothing(tmp_path: Path) -> None:
 async def test_corrupt_entries_are_downloaded_again(tmp_path: Path) -> None:
     syncer = _adapter(tmp_path, anaf=_Anaf(), network=True)
     await syncer.sync("99000025")
-    await syncer.store_in_mirror("99000025:2026-09-30", b"not json", None)  # corrupt one date
+    await syncer.store_in_mirror("99000025:2026-06-30", b"not json", None)  # corrupt one date
     healthy = _Anaf()
     report = await _adapter(tmp_path, anaf=healthy, network=True).sync("99000025")
-    assert healthy.requests == [[{"cui": 99000025, "data": "2026-09-30"}]]
+    assert healthy.requests == [[{"cui": 99000025, "data": "2026-06-30"}]]
     assert report.downloaded == 1
 
 

@@ -4,11 +4,22 @@
 
 ---
 
+## 2026-10-28: Real data the safe way: the ANAF fetch tool (role 3) · ACTION NEEDED for a shared server
+
+**What:** `apps/worker/jobs/sweep_anaf_v9.py` is now **the ONE place a human triggers ANAF requests**: dry run by default, `--send` sends exactly ONE request, at least 1.1 s between requests even across runs (lock file), no retries, real CUIs only. `v9`: one request for all given companies (today + 4 quarter-ends each, only what's missing, max 100 entries). `bilant`: one request per run (newest missing year of the 5 the financials agent reads). `status`: what's in the mirror, no request. The scheduled `run()` is **not automated on purpose**. Commands: `verifirm/adapters/anaf_v9.md` §7. `anaf_v9` keeps 4 quarter-ends now (5 data points per company), not 12 month-ends.
+
+**What you must do:**
+- **Whoever runs a shared server: set `SYNC_ON_APPLICATION=0`.** Otherwise every "recheck" click from the frontend runs a sync, which means ANAF requests nobody approved. Data then comes only from the fetch tool, and the pipeline reads the mirror.
+- **Don't use `make seed-real` with sync on** (it sends about 7 requests per company in a loop). Fetch with the tool, then `SYNC_ON_APPLICATION=0 uv run python -m apps.worker.seed <CUIs>` (0 requests).
+- **Role 2 / role 5:** real and fictional companies on one server need a per-CUI switch (PENDING in DECISIONS.md, "Dedeman live run while FIXTURE_MODE=1", option b).
+
+---
+
 ## 2026-10-28: anaf_v9 keeps several dated snapshots per company (role 3)
 
 **What:** ANAF v9 answers "as of a date" (`data` in the request), and one request can ask the same CUI for several dates. `adapters/anaf_v9.py` now stores, per company:
 - `CUI`: the latest record (unchanged: `lookup` reads it).
-- `CUI:date`: what ANAF answered for that date. `sync()` asks for **today plus the previous 12 month-ends in ONE request** (13 entries), only the ones missing. A past date never changes, so it is downloaded once, ever. After the first sync, a company costs at most one entry per request.
+- `CUI:date`: what ANAF answered for that date. `sync()` asks for **today plus the previous 4 quarter-ends in ONE request** (5 entries; first version had 12 month-ends), only the ones missing. A past date never changes, so it is downloaded once, ever. After the first sync, a company costs at most one entry per request.
 - New READ method **`history(cui, dates=None) -> Sourced[{ISO date: record | None}]`**: mirror only, never the network. In FIXTURE_MODE it has today's fixture only.
 - ANAF's limit counts **entries (cui+date)**: max 100 per request. The batch code chunks by entries.
 - `split_entries()` matches answers on `date_generale.cui` **and** `date_generale.data`, so two dates of one CUI never overwrite each other.
@@ -16,7 +27,7 @@
 - `tax/rules.check_vat_cancelled` accepts `perioade_TVA` as a single object too, as ANAF's documentation shows it.
 - **Safety (ANAF: max 100 CUIs per request, 1 request/second, overloading is punished): in `anaf_v9`, one call = at most one request.** No chunking loop, no retries (429, 5xx, timeout: reported, the old copy is served stale). More than 100 entries raises `ValueError` before anything is sent. `lookup_batch` takes at most 100 CUIs, so **role 2's `sweep_anaf_v9` must schedule batches**, never loop. PENDING in DECISIONS.md: the same rule for `anaf_bilant` (6 requests per sync, with retries) and the per-process rate limiter.
 
-**What you can do with it:** name, address, CAEN and legal form **as of each month-end**, from an official source. Role 3 will use it for `ID-OFFICE-CHANGE-01` (live ONRC has no office history). Role 5 / identity sheet: `history()` can fill `names` and `office_history`.
+**What you can do with it:** name, address, CAEN and legal form **as of each quarter-end**, from an official source. Role 3 will use it for `ID-OFFICE-CHANGE-01` (live ONRC has no office history). Role 5 / identity sheet: `history()` can fill `names` and `office_history`.
 
 ---
 

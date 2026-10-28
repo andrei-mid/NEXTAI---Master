@@ -23,9 +23,9 @@ Local-first (docs/LOCAL_DATA.md). Mirror entries, each shaped like a v9 response
                (Not keyed by date only: a run before the daily sweep would find nothing.)
 - `CUI:date`   a dated snapshot: what ANAF answered for that date. A past date never changes,
                so it is downloaded ONCE, ever (like a filed balance sheet).
-- `sync(cui)`: ONE request with today + the last day of each of the previous `history_months`
-  months, only the entries not in the mirror yet. First sync of a company: 13 entries. Later:
-  at most today's entry (plus a new month-end once a month).
+- `sync(cui)`: ONE request with today + the last day of each of the previous
+  `history_quarters` quarters, only the entries not in the mirror yet. First sync of a company:
+  5 entries. Later: at most today's entry (plus a new quarter-end once a quarter).
 - `lookup_batch(cuis)` with network (sweep job): ONE request for at most 100 CUIs, stores the
   latest record and today's snapshot per CUI. History builds up on its own.
 - READ methods (`lookup`, `history`, `lookup_batch` without network) never call ANAF.
@@ -136,12 +136,14 @@ def split_entries(
     return out
 
 
-def history_dates(today: date, months: int) -> list[date]:
-    """The last day of each of the `months` months before today's month, newest first."""
-    out, day = [], today.replace(day=1) - timedelta(days=1)
-    for _ in range(months):
+def history_dates(today: date, quarters: int) -> list[date]:
+    """The last day of each of the `quarters` quarters before today's quarter, newest first.
+    2026-10-28 -> 2026-09-30, 2026-06-30, 2026-03-31, 2025-12-31."""
+    first_month = (today.month - 1) // 3 * 3 + 1
+    out, day = [], today.replace(month=first_month, day=1) - timedelta(days=1)
+    for _ in range(quarters):
         out.append(day)
-        day = day.replace(day=1) - timedelta(days=1)
+        day = day.replace(month=day.month - 2, day=1) - timedelta(days=1)
     return out
 
 
@@ -175,35 +177,47 @@ class AnafV9Adapter(BaseAdapter):
     rate_limit_key = "anaf_webservicesp"  # same host as /bilant, so they share one limit
     mirror_max_age_s = 86_400  # inactive / VAT status can change any day
     retry_statuses = frozenset[int]()  # never retry anything (see SAFETY)
-    history_months = 12  # month-end snapshots kept per company (13 entries with today)
+    history_quarters = 4  # quarter-end snapshots kept per company (5 entries with today)
 
     # ------------------------------------------------------------------ sync (network)
     async def sync(self, cui: str) -> SyncReport:
         """ONE request for what's missing for one company: today's record if the latest entry is
-        not fresh, plus the month-end snapshots not in the mirror yet (newest first). Capped at
+        not fresh, plus the quarter-end snapshots not in the mirror yet (newest first). Capped at
         MAX_BATCH entries; anything beyond waits for the next sync, never a second request."""
         report = SyncReport(adapter=self.name, cui=cui)
-        today = self.deps.clock.today()
-        latest = await self.from_mirror(cui)
-        latest_ok = latest is not None and _record_of(latest, cui)[0]
-        need_today = not (latest_ok and latest is not None and self._fresh(latest))
-        wanted = [today] if need_today else []
-        for day in history_dates(today, self.history_months):
-            snapshot = await self.from_mirror(_dated(cui, day))
-            if snapshot is None or not _record_of(snapshot, cui)[0]:
-                wanted.append(day)
-        report.reused = 1 + self.history_months - len(wanted)
+        wanted = await self.missing(cui)
+        report.reused = 1 + self.history_quarters - len(wanted)
         wanted = wanted[:MAX_BATCH]  # the rest goes in the next sync's single request
         if not wanted:
             return report
         try:
-            records = await self._download([(cui, day) for day in wanted])
+            records = await self.download([(cui, day) for day in wanted])
         except SourceUnavailable:
             report.failed.append(cui)
             return report
         report.downloaded = 1
         report.failed = [_dated(cui, day) for day in wanted if (cui, day) not in records]
         return report
+
+    async def missing(self, cui: str) -> list[date]:
+        """Dates `sync` would ask for (newest first): today if the latest entry is missing, stale
+        or corrupt, plus the quarter-ends without a usable snapshot. Mirror only, no network."""
+        today = self.deps.clock.today()
+        latest = await self.from_mirror(cui)
+        fresh = latest is not None and _record_of(latest, cui)[0] and self._fresh(latest)
+        wanted = [] if fresh else [today]
+        for day in history_dates(today, self.history_quarters):
+            snapshot = await self.from_mirror(_dated(cui, day))
+            if snapshot is None or not _record_of(snapshot, cui)[0]:
+                wanted.append(day)
+        return wanted
+
+    async def download(self, entries: list[Entry]) -> dict[Entry, dict[str, Any] | None]:
+        """EXACTLY ONE request for these entries (max MAX_BATCH, else ValueError before sending).
+        For sync code and the fetch tool only: agents never get a network adapter."""
+        if not self.network:
+            raise SourceUnavailable(self.name, "this adapter has no network (agents never call)")
+        return await self._download(entries)
 
     # ------------------------------------------------------------------ READ (mirror only)
     async def lookup(self, cui: str, on_date: date) -> Sourced[dict[str, Any] | None]:
@@ -220,10 +234,10 @@ class AnafV9Adapter(BaseAdapter):
         self, cui: str, dates: list[date] | None = None
     ) -> Sourced[dict[str, dict[str, Any] | None]]:
         """{ISO date: record or None} for the snapshots in the mirror. Default dates: today plus
-        the month-ends `sync` keeps. Dates without a snapshot are left out (unknown). Fixture
+        the quarter-ends `sync` keeps. Dates without a snapshot are left out (unknown). Fixture
         mode has today's fixture only. Never calls the network."""
         today = self.deps.clock.today()
-        days = dates or [today, *history_dates(today, self.history_months)]
+        days = dates or [today, *history_dates(today, self.history_quarters)]
         out: dict[str, dict[str, Any] | None] = {}
         source = None
         for day in days:
