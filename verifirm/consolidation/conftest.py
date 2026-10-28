@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from datetime import UTC, date, datetime
 from typing import Any
@@ -35,7 +36,10 @@ CUI = "99000033"
 
 def source(name: str = "ANAF", type_: SourceType = SourceType.OFFICIAL) -> SourceRef:
     return SourceRef(
-        name=name, type=type_, url=f"https://{name.lower()}.example/x", retrieved_at=NOW
+        name=name,
+        type=type_,
+        url=f"https://{re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')}.example/x",
+        retrieved_at=NOW,
     )
 
 

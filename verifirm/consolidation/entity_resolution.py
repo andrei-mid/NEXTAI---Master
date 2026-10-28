@@ -190,9 +190,9 @@ def resolve(
     out: list[AgentResult] = []
     for i, result in enumerate(results):
         # Original order, each surviving signal in the result that owns it.
-        signals = [survivors[s.signal_id][1] for s in kept[i] if survivors[s.signal_id][0] == i]
-        seen_ids: set[str] = set()
-        signals = [s for s in signals if not (s.signal_id in seen_ids or seen_ids.add(s.signal_id))]
+        signals = [s for s in kept[i] if (survivors.get(s.signal_id) or (-1, s))[0] == i]
+        signals = [survivors[s.signal_id][1] for s in signals]
+        signals = list({s.signal_id: s for s in signals}.values())  # same id twice in one result
         notes = [result.notes] if result.notes else []
         if dropped_entity.get(i):
             notes.append(
