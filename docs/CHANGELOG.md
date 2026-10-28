@@ -9,6 +9,7 @@
 **What:**
 - **`verifirm/agents/tax/`** is done: 5 rules, `config.yaml`, tests with the **real adapters** in `FIXTURE_MODE`. Zephyria's and Brunaldo's output matches `api/signals.json` field by field. Decisions are in its README.
 - **`adapters/anaf_v9.py`** is implemented. READ `lookup` / `lookup_batch` reads the mirror only. `sync()` makes 1 request per applicant. `lookup_batch` on a network adapter sends 100 CUIs per request and stores one mirror entry per CUI. It **never retries an HTTP 429**. The mirror key is the **CUI** (latest record), not `cui:date`; the reason is in DECISIONS.md.
+- **`anaf_v9` was written twice in parallel** (role 2 in "Live end to end" below, role 3 here). Merged into one file. The public API is unchanged (`lookup`, `lookup_batch`, `sync`, `split_response`), and both test suites are kept. Role 3 added: **no retry on HTTP 429**, a corrupt mirror entry is downloaded again instead of being reused for 24h, and duplicate CUIs are dropped from batches.
 - **`adapters/anaf_efactura_registry.py`** is derived from the v9 mirror entry: no call, no sync.
 - **All 6 mocks** (`restante`, `d300`, `efactura`, `bpi`, `shareholders`, `pep`) are implemented on a shared `mocks.MockAdapter`. A missing file or wrong shape gives `SourceUnavailable`, never "nothing found".
 - `docs/SOURCES.md` now has the **production route** for every mock (the applicant's documents or a paid provider).
@@ -19,6 +20,31 @@
 - **Role 2 (`sweep_anaf_v9`, change detection):** use `AnafV9Adapter.lookup_batch(cuis, date)` on a `sync_adapters` instance. It handles the 100-CUI chunks and the mirror. Never loop over `lookup` to call ANAF.
 - **Role 5 (`identity_sheet`, `documents`):** read v9 through `anaf_v9.lookup(cui, today)`. When `documents.extract` lands, the tax agent picks up `ctx.submitted` with no change.
 - **Role 6 (fixtures):** optional. Add `"on_white_list": true|false` to `restante.json` if you want the demo to show ANAF's no-arrears list.
+
+---
+
+## 2026-10-28: Live end to end: ANAF → mirror → agents → Postgres → API (role 2, with role 3/5 pieces)
+
+**What works now (tested on DEDEMAN SRL with real ANAF data):** `POST /companies/{cui}/recheck` → sync downloads ANAF v9 + 6 balance sheets into the local mirror → identity sheet → 8 agents → scoring → saved in Postgres → `GET /companies` serves it. Guide: [infra/local/README.md](../infra/local/README.md).
+
+- `verifirm/adapters/anaf_v9.py` (**role 3: done by role 2**): `lookup`, `sync`, `lookup_batch` (100/POST, one mirror entry per CUI). Tests: `adapters/tests/test_anaf_v9.py`. @role-3: the `sweep_anaf_v9` job can now call `lookup_batch`.
+- `verifirm/consolidation/identity_sheet.py` (**role 5: done by role 2**): built from ANAF v9 (required) + ONRC (optional) + mock shareholders (optional). Tests: `consolidation/tests/test_identity_sheet.py`. @role-5: extend freely.
+- `verifirm/adapters/onrc_bulk.py` (**role 1**): `company()` and `companies_at_address()` read fixtures in FIXTURE_MODE. Live they report unavailable until `ingest_onrc` exists. @role-1: replace the live branch with table reads.
+- `EMBEDDED_WORKER=1`: the API runs the queue consumer in-process (single box, in-memory queue). `apps/api/main.py`.
+- **Tests never touch your dev database any more:** `./conftest.py` swaps `DATABASE_URL` for `TEST_DATABASE_URL` (see `.env.example`). Persistence tests insert rows they never delete, and they used to fill the dev portfolio with test companies.
+- `tests/e2e` now runs the whole pipeline and skips with the list of agents still missing: tax, network, litigation, sanctions, media, presence.
+
+**What you must do:** local Postgres users: create `verifirm_test` and set `TEST_DATABASE_URL`. Agent authors: your agent is the only thing missing for its component. Copy `agents/financials/` + `adapters/anaf_bilant.py`.
+
+---
+
+## 2026-10-28: Pipeline never hangs on a memo/LLM failure (role 2)
+
+**What:** `apps/worker/orchestrator.py`. If the memo or critic step raises (LLM down, invalid output, no API key), the run now ends **COMPLETED** with its deterministic score saved and `RunStatus.error = "memo not generated: …"`. Any other unexpected exception ends the run **FAILED** with the error. Before, both escaped `run_pipeline`: the worker retried, and the SSE stream never sent `done`.
+
+**What you must do:** role 5 / frontend: a completed run can have no memo (`GET /companies/{cui}/memo` → 404). Show "memo unavailable" and keep showing the score. Tests: `apps/worker/tests/test_orchestrator.py`.
+
+**Integration status (smoke test on the demo companies, fixture mode):** only `financials` produces signals end to end. `identity` is implemented but reports unavailable until the `anaf_v9` + `onrc_bulk` adapters exist (roles 3/1). `consolidation/identity_sheet.py` (role 5) is still a stub, so the full pipeline stops at step 2 and `tests/e2e` stays skipped.
 
 ---
 

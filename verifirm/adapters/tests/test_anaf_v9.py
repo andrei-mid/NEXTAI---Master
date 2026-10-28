@@ -14,7 +14,7 @@ from typing import Any
 import httpx
 import pytest
 
-from verifirm.adapters.anaf_v9 import MAX_BATCH, AnafV9Adapter
+from verifirm.adapters.anaf_v9 import MAX_BATCH, AnafV9Adapter, split_response
 from verifirm.adapters.base import AdapterDeps, SourceUnavailable
 from verifirm.core.config import Settings
 from verifirm.core.impl_local.cache import MemoryCache
@@ -207,3 +207,22 @@ def test_request_body_shape() -> None:
     from verifirm.adapters.anaf_v9 import _body
 
     assert _body(["99000025"], date(2026, 10, 28)) == [{"cui": 99000025, "data": "2026-10-28"}]
+
+
+def test_split_response_never_invents_a_clean_answer() -> None:
+    payload = {"found": [{"date_generale": {"cui": 2816464}}], "notFound": [123]}
+    out = split_response(payload, ["2816464", "123", "999"])
+    assert out["2816464"] is not None and out["123"] is None and "999" not in out
+
+
+async def test_cod_message_wrapper_around_a_real_answer_is_tolerated(tmp_path: Path) -> None:
+    wrapped = {
+        "cod": 200,
+        "message": "SUCCESS",
+        "found": [_record(99000025)],
+        "notFound": [],
+    }
+    report = await _adapter(tmp_path, anaf=_Anaf(body=wrapped), network=True).sync("99000025")
+    assert report.downloaded == 1
+    record = await _adapter(tmp_path).lookup("99000025", TODAY)
+    assert record.data is not None

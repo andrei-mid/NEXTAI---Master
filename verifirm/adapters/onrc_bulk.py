@@ -23,13 +23,27 @@ Local-first (docs/LOCAL_DATA.md): bulk: the ingest_onrc job downloads and COPYs 
 
 from __future__ import annotations
 
+import csv
+import io
+import re
 from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+import httpx
+
+from verifirm.adapters.base import BaseAdapter, Sourced, SourceUnavailable
 from verifirm.core.registry import register_adapter
 from verifirm.schema.signals import SourceType
+
+
+async def _no_network(client: httpx.AsyncClient) -> httpx.Response:
+    raise SourceUnavailable("onrc_bulk", "ONRC is bulk-only: never fetched per company")
+
+
+def _norm_address(address: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", address.casefold()).strip()
+
 
 DATASET_PAGE = (
     "https://data.gov.ro/dataset/firme-inregistrate-la-registrul-comertului-pana-la-data-de"
@@ -61,12 +75,42 @@ class OnrcBulkAdapter(BaseAdapter):
 
     async def company(self, cui: str) -> Sourced[dict[str, Any] | None]:
         """Per-company view from the ingested tables: names (with history if available),
-        reg. no., address, status, CAEN (main + authorized), legal representatives."""
-        raise NotImplementedError
+        reg. no., address, status, CAEN (main + authorized), legal representatives.
+
+        Implemented for FIXTURE_MODE (fixtures/companies/<cui>_<slug>/onrc.json, None if the
+        company has no ONRC fixture). Live: TODO role 1, read the onrc_* tables written by
+        ingest_onrc. Until then it reports unavailable, never clean."""
+        if not self.settings.fixture_mode:
+            raise SourceUnavailable(
+                self.name, "ONRC bulk tables not ingested yet (ingest_onrc, role 1)"
+            )
+        fixture = self.company_fixture(cui, "onrc.json")
+        if fixture is None:
+            if self.company_fixture_dir(cui) is None:
+                raise SourceUnavailable(self.name, f"no ONRC fixture for {cui}")
+            return Sourced(
+                data=None, source=self._source_ref(None, None, None, self.deps.clock.now())
+            )
+        result = await self.fetch(cache_key=f"company:{cui}", request=_no_network, fixture=fixture)
+        return Sourced(data=result.json(), source=result.source)
 
     async def companies_at_address(self, normalized_address: str) -> Sourced[list[str]]:
-        """CUIs registered at the same normalized address (rule ID-SHARED-OFFICE-01)."""
-        raise NotImplementedError
+        """CUIs registered at the same normalized address (rule ID-SHARED-OFFICE-01).
+
+        Implemented for FIXTURE_MODE (fixtures/sources/onrc/OD_FIRME_sample.csv). Live: TODO
+        role 1, query the onrc_companies table by address_normalized."""
+        if not self.settings.fixture_mode:
+            raise SourceUnavailable(
+                self.name, "ONRC bulk tables not ingested yet (ingest_onrc, role 1)"
+            )
+        sample = self.shared_fixture("onrc/OD_FIRME_sample.csv")
+        if sample is None:
+            raise SourceUnavailable(self.name, "no ONRC sample fixture")
+        result = await self.fetch(cache_key="od_firme_sample", request=_no_network, fixture=sample)
+        wanted = _norm_address(normalized_address)
+        rows = csv.DictReader(io.StringIO(result.text()), delimiter="^")
+        cuis = [r["CUI"] for r in rows if _norm_address(r.get("ADRESA_COMPLETA", "")) == wanted]
+        return Sourced(data=cuis, source=result.source)
 
     async def companies_of_person(self, person_name: str) -> Sourced[list[dict[str, Any]]]:
         """Companies where this person is or was a legal representative (network agent).

@@ -7,8 +7,9 @@ Owner: @role-5-ai-api.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +25,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     configure_logging(settings.log_level, settings.log_json)
     app.state.infra = build_infra(settings)
+    # Single box / local: EMBEDDED_WORKER=1 runs the queue consumer inside the API process,
+    # so POST /applications and /recheck are processed without a separate worker (needed
+    # with the in-memory queue, which other processes can't see).
+    worker = None
+    if settings.embedded_worker:
+        from apps.worker.main import consume_forever
+
+        worker = asyncio.create_task(consume_forever(app.state.infra), name="embedded-worker")
     yield
+    if worker is not None:
+        worker.cancel()
+        with suppress(asyncio.CancelledError):
+            await worker
     await app.state.infra.aclose()
 
 

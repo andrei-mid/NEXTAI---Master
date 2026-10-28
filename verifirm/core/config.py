@@ -55,9 +55,10 @@ class Settings(BaseSettings):
     )
     mirror_max_age_overrides_s: dict[str, int] = Field(default_factory=dict)  # per-adapter, JSON
     sync_timeout_s: float = 180.0  # per adapter, for the pipeline sync step and sync jobs
-    sync_on_application: bool = (
-        True  # new applications and rechecks download once before agents run
-    )
+    # new applications and rechecks download once before agents run
+    sync_on_application: bool = True
+    # run the queue consumer inside the API process (single box / local dev)
+    embedded_worker: bool = False
     http_timeout_s: float = 20.0
     http_max_retries: int = 3
     scoring_config_path: Path = REPO_ROOT / "verifirm" / "scoring" / "config" / "weights.yaml"
