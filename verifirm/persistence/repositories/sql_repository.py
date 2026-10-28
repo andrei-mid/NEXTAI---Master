@@ -22,12 +22,14 @@ from datetime import date, datetime
 from verifirm.core.config import Settings
 from verifirm.core.ports.repository import Repository
 from verifirm.persistence.engine import session_scope
+from verifirm.persistence.repositories.analyst import AnalystStore
 from verifirm.persistence.repositories.audit import AuditStore
 from verifirm.persistence.repositories.companies import CompaniesStore
 from verifirm.persistence.repositories.memos import MemosStore
 from verifirm.persistence.repositories.runs import RunsStore
 from verifirm.persistence.repositories.scores import ScoresStore
 from verifirm.persistence.repositories.signals import SignalsStore
+from verifirm.schema.analyst import AnalystOpinion, CompanyDossier
 from verifirm.schema.api import DecisionRecord
 from verifirm.schema.financials import SubmittedFinancials
 from verifirm.schema.identity import IdentitySheet
@@ -158,3 +160,12 @@ class SqlRepository(Repository):
         """Analyst decisions recorded in [since, until], oldest first."""
         async with session_scope(self.settings) as s:
             return await AuditStore(s).list_decisions(cui, since, until)
+
+    # ------------------------------------------------------------------ AI analyst opinion
+    async def save_analyst_opinion(self, opinion: AnalystOpinion, dossier: CompanyDossier) -> None:
+        async with session_scope(self.settings) as s:
+            await AnalystStore(s).save_opinion(opinion, dossier)
+
+    async def get_latest_analyst_opinion(self, cui: str) -> AnalystOpinion | None:
+        async with session_scope(self.settings) as s:
+            return await AnalystStore(s).get_latest_opinion(cui)

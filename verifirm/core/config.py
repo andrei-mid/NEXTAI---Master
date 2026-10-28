@@ -76,6 +76,7 @@ class Settings(BaseSettings):
     llm_model_critic: str | None = None
     llm_model_classify: str | None = None
     llm_model_analyst: str | None = None  # AI analyst opinion (docs/DECISIONS.md)
+    analyst_enabled: bool = True  # run the AI analyst step after scoring (one LLM call per run)
 
     # --- web search (D10: Tavily)
     web_search_provider: Literal["tavily", "fixture"] = "tavily"

@@ -15,5 +15,7 @@ analyst. The opinion **never changes the official score or band** (hard rule 8) 
 Model: `LLM_MODEL_ANALYST` (falls back to `LLM_MODEL_DEFAULT`). A large model is recommended
 (tested: `Qwen/Qwen2.5-72B-Instruct` via Featherless, 4/4 flags backed on Zephyria).
 
-**Not done yet:** the pipeline step (after scoring, next to the memo), storage
-(`analyst_opinions` table, role 1) and `GET /companies/{cui}/analyst-opinion` (role 5).
+**Pipeline:** `analyse()` runs in `apps/worker/orchestrator.py` after scoring, independent of
+the memo (`ANALYST_ENABLED=0` switches it off). A failure (LLM down, invalid output, no key)
+completes the run without an opinion and keeps the official score. Stored in `analyst_opinions`
+(with the dossier the model saw), served by `GET /companies/{cui}/analyst-opinion`.

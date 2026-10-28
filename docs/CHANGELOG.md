@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-10-29: AI analyst opinion runs in the pipeline, is stored and served (role 1, steps 4-6) · CONTRACT ADDITION
+
+**What:** every run now also produces the AI analyst's opinion, after scoring (see the 2026-10-28 entry below for what it is).
+
+- **`apps/worker/orchestrator.py` (role 2's folder):** step 9 `analyse()`, independent of the memo: if one LLM step fails the other still runs. A failure completes the run (the error says `analyst opinion not generated: …`) and **keeps the official score**. `ANALYST_ENABLED=0` switches it off (one LLM call per run). Sources switched off for the run (`disabled_sources`) are reported as such in the dossier.
+- **`core/ports/repository.py` + `MemoryRepository` (role 2's folder):** `save_analyst_opinion(opinion, dossier)`, `get_latest_analyst_opinion(cui)`.
+- **`persistence` (role 1):** table `analyst_opinions` (migration `analyst_create_tables`, new area `analyst`), with the dossier the model saw for audit and replay. `AnalystStore.get_dossier(run_id)`.
+- **`apps/api` (role 5's folder):** `GET /companies/{cui}/analyst-opinion` (contract in `docs/SOLUTION.md`). `404` until a run produced one.
+
+**What you must do:**
+- **Whoever hosts the database (Bianca):** run `uv run alembic -c verifirm/persistence/alembic.ini upgrade head` (new table `analyst_opinions`).
+- **Role 6:** show the opinion next to the official score, never instead of it, and always show `disclaimer`.
+- **Everyone running live:** `LLM_MODEL_ANALYST` in `.env` (a large model). Without an LLM key, runs complete without an opinion.
+- **Role 2 / role 5:** review the changes in your folders.
+
+---
+
 ## 2026-10-29: Tavily web search live + a hidden ANAF request fixed (role 3, role 4's `web_search.py` with the human's approval)
 
 **What:**

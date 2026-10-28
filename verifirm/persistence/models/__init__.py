@@ -9,6 +9,7 @@ Conventions for @role-1-database:
 """
 
 from verifirm.persistence.models import (  # noqa: F401  (register tables)
+    analyst,
     audit,
     companies,
     graph,

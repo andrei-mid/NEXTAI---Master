@@ -1,7 +1,7 @@
 """Pipeline flow. The skeleton is real: each step calls its owner's (possibly stub) function.
 
     CUI gate -> identity sheet -> submitted docs -> 8 agents in parallel (time budget)
-    -> entity resolution -> scoring (no LLM) -> memo -> critic -> persist
+    -> entity resolution -> scoring (no LLM) -> memo -> critic -> AI analyst opinion -> persist
 
 Agents are DISCOVERED (registry). Adding an agent never edits this file.
 A step that is not implemented yet ends the run as FAILED with a clear error, never as clean.
@@ -17,6 +17,7 @@ from apps.wiring import Infra
 from apps.worker.sync import sync_company
 from verifirm.adapters.base import SourceUnavailable
 from verifirm.agents.base import AgentContext, BaseAgent
+from verifirm.consolidation.analyst.agent import analyse
 from verifirm.consolidation.critic.agent import verify_memo
 from verifirm.consolidation.entity_resolution import resolve
 from verifirm.consolidation.identity_sheet import build_identity_sheet
@@ -160,8 +161,10 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
                 score=run_score,
                 generated_at=clock.now(),
             )
-            # The score is deterministic and already saved: a memo failure (LLM down, invalid
-            # output, no API key) must not throw it away. The run completes without a memo.
+            # The score is deterministic and already saved: a memo or analyst failure (LLM down,
+            # invalid output, no API key) must not throw it away. The run completes without
+            # that output, and the two LLM steps never block each other.
+            llm_errors: list[str] = []
             try:
                 memo = await write_memo(report, infra.llm, settings.model_for("memo"))
                 await publish(AgentProgressEvent(run_id=request.run_id, agent="memo"))
@@ -172,10 +175,29 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
                 raise
             except Exception as exc:
                 log.warning("memo step failed, run completes without a memo", exc_info=True)
+                llm_errors.append(f"memo not generated: {type(exc).__name__}: {exc}")
+
+            # 9. AI analyst opinion: shown next to the official score, never changes it.
+            if settings.analyst_enabled:
+                try:
+                    dossier, opinion = await analyse(
+                        report,
+                        infra.adapters,
+                        infra.llm,
+                        settings.model_for("analyst"),
+                        today=clock.today(),
+                        disabled=frozenset(request.disabled_sources),
+                    )
+                    await repo.save_analyst_opinion(opinion, dossier)
+                    await publish(AgentProgressEvent(run_id=request.run_id, agent="analyst"))
+                except NotImplementedError:
+                    raise
+                except Exception as exc:
+                    log.warning("analyst step failed, run completes without it", exc_info=True)
+                    llm_errors.append(f"analyst opinion not generated: {type(exc).__name__}: {exc}")
+            if llm_errors:
                 return await finish(
-                    RunState.COMPLETED,
-                    band=run_score.band,
-                    error=f"memo not generated: {type(exc).__name__}: {exc}"[:500],
+                    RunState.COMPLETED, band=run_score.band, error="; ".join(llm_errors)[:500]
                 )
         except NotImplementedError:
             log.warning("pipeline step not implemented yet", exc_info=True)

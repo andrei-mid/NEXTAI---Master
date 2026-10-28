@@ -66,12 +66,17 @@ async def collect_inputs(
     *,
     last_year: int,
     years: int,
+    disabled: frozenset[str] = frozenset(),
 ) -> DossierInputs:
     """Read every source the dossier needs from the local mirror / tables. Never raises for a
-    failing source: it lands in `failures` (unavailable, never clean)."""
+    failing source: it lands in `failures` (unavailable, never clean). `disabled` are the sources
+    switched off for this run (RunRequest.disabled_sources)."""
     inputs = DossierInputs()
 
     async def read(name: str, method: str, *args: Any) -> Any:
+        if name in disabled:
+            inputs.failures[name] = "source switched off for this run"
+            return None
         adapter = adapters.get(name)
         if adapter is None:
             inputs.failures[name] = "adapter not configured"

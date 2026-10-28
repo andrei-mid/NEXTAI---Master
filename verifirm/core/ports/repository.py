@@ -16,6 +16,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 
+from verifirm.schema.analyst import AnalystOpinion, CompanyDossier
 from verifirm.schema.api import DecisionRecord
 from verifirm.schema.financials import SubmittedFinancials
 from verifirm.schema.identity import IdentitySheet
@@ -114,3 +115,12 @@ class Repository(ABC):
         self, cui: str, since: datetime | None = None, until: datetime | None = None
     ) -> list[DecisionRecord]:
         """Analyst decisions recorded in [since, until], oldest first."""
+
+    # --- AI analyst opinion (docs/DECISIONS.md, "AI analyst opinion")
+    @abstractmethod
+    async def save_analyst_opinion(self, opinion: AnalystOpinion, dossier: CompanyDossier) -> None:
+        """Upsert by run_id. The dossier is stored next to it: exactly what the model saw."""
+
+    @abstractmethod
+    async def get_latest_analyst_opinion(self, cui: str) -> AnalystOpinion | None:
+        """The opinion of the company's newest run that has one."""

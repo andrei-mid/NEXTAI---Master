@@ -19,6 +19,7 @@ from apps.api.deps import _store, get_infra, valid_cui
 from apps.api.read_model import RepoReadModel, end_of
 from apps.api.routes.runs import enqueue_run
 from apps.wiring import Infra
+from verifirm.schema.analyst import AnalystOpinion
 from verifirm.schema.api import (
     CompanyDetail,
     CompanyHistory,
@@ -145,6 +146,22 @@ async def get_history(
         events=sorted(events, key=lambda e: (e.evidence_date or date.min, e.signal_id)),
         decisions=[],
     )
+
+
+@router.get("/{cui}/analyst-opinion", response_model=AnalystOpinion)
+async def get_analyst_opinion(
+    cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)
+) -> AnalystOpinion:
+    """The AI analyst's educated opinion on the company's newest run that has one. Shown next to
+    the official score, never instead of it (docs/DECISIONS.md, "AI analyst opinion").
+    Fixture mode: `api/analyst_opinion.json` if the fixture has one, else what a recheck in this
+    process produced."""
+    if infra.settings.fixture_mode:
+        store = _store(infra.settings.fixtures_dir)
+        directory = store.dir_for(cui)
+        if directory is not None and (directory / "api" / "analyst_opinion.json").exists():
+            return AnalystOpinion.model_validate(store.read(cui, "analyst_opinion.json"))
+    return await RepoReadModel(infra.repository).analyst_opinion(cui)
 
 
 @router.get("/{cui}/memo", response_model=MemoResponse)

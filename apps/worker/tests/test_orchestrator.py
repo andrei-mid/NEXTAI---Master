@@ -99,3 +99,69 @@ async def test_unexpected_crash_fails_the_run_instead_of_hanging(
     status = await run_pipeline(_request("99000025"), infra)
     await infra.aclose()
     assert status.state == RunState.FAILED and "scoring exploded" in (status.error or "")
+
+
+# ---------------------------------------------------------------------- AI analyst step
+ZEPHYRIA_DRAFT = {
+    "flags": [
+        {
+            "title": "Negative equity on a growing turnover",
+            "claim": "Equity was -111000 RON in 2025 while turnover was 18600000 RON.",
+            "category": "financial_inconsistency",
+            "severity": "high",
+            "evidence": [
+                {"path": "financials.2025.equity", "value": "-111000"},
+                {"path": "financials.2025.turnover", "value": "18600000"},
+            ],
+        }
+    ],
+    "opinion_score": 30,
+    "explanation": "Turnover of 18600000 RON in 2025 sits on negative equity.",
+}
+
+
+async def test_analyst_opinion_is_saved_next_to_the_unchanged_score(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from verifirm.core.impl_local.llm import FakeLLMClient
+
+    _fixture_identity(monkeypatch)
+    events: list[AgentProgressEvent] = []
+
+    async def publish(e: AgentProgressEvent) -> None:
+        events.append(e)
+
+    infra = build_infra(Settings(fixture_mode=True, llm_provider="fake"))
+    infra.llm = FakeLLMClient(json_responses={"AnalystDraft": ZEPHYRIA_DRAFT})
+    status = await run_pipeline(_request("99000025"), infra, publish)
+    score = await infra.repository.get_latest_score("99000025")
+    opinion = await infra.repository.get_latest_analyst_opinion("99000025")
+    await infra.aclose()
+    assert status.state == RunState.COMPLETED and score is not None and opinion is not None
+    assert [f.title for f in opinion.flags] == ["Negative equity on a growing turnover"]
+    assert opinion.official_band == score.band == status.band  # the opinion changes nothing
+    assert opinion.opinion_score == 30 and opinion.run_id == "t-99000025"
+    assert "analyst" in {e.agent for e in events}
+    # No canned memo: the memo fails on its own, the analyst still ran.
+    assert (status.error or "").startswith("memo not generated")
+    assert "analyst" not in (status.error or "")
+
+
+async def test_analyst_failure_keeps_the_score(monkeypatch: pytest.MonkeyPatch) -> None:
+    _fixture_identity(monkeypatch)
+    infra = build_infra(Settings(fixture_mode=True, llm_provider="fake"))
+    status = await run_pipeline(_request("99000025"), infra)
+    score = await infra.repository.get_latest_score("99000025")
+    opinion = await infra.repository.get_latest_analyst_opinion("99000025")
+    await infra.aclose()
+    assert status.state == RunState.COMPLETED and score is not None and opinion is None
+    assert "analyst opinion not generated" in (status.error or "")
+
+
+async def test_analyst_can_be_switched_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    _fixture_identity(monkeypatch)
+    infra = build_infra(Settings(fixture_mode=True, llm_provider="fake", analyst_enabled=False))
+    status = await run_pipeline(_request("99000025"), infra)
+    opinion = await infra.repository.get_latest_analyst_opinion("99000025")
+    await infra.aclose()
+    assert opinion is None and "analyst" not in (status.error or "")

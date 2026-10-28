@@ -9,17 +9,21 @@ opinion never changes the official score or band, and never decides.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from datetime import date
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel
 
+from verifirm.adapters.base import BaseAdapter
 from verifirm.consolidation.analyst.citations import check_flags, clean_explanation
+from verifirm.consolidation.analyst.dossier import build_dossier, collect_inputs
 from verifirm.core.ports.llm import LLMClient
 from verifirm.llm.json_output import complete_validated, load_prompt, split_prompt
 from verifirm.llm.untrusted import wrap_untrusted
 from verifirm.schema.analyst import AnalystDraft, AnalystOpinion, CompanyDossier
+from verifirm.schema.memo import ConsolidatedReport
 
 PROMPT = Path(__file__).parent / "prompts" / "analyst.md"
 CONFIG_PATH = Path(__file__).parent / "config.yaml"
@@ -74,3 +78,28 @@ async def write_opinion(
         official_band=dossier.official_score.band,
         official_score=dossier.official_score.trust_score,
     )
+
+
+async def analyse(
+    report: ConsolidatedReport,
+    adapters: Mapping[str, BaseAdapter],
+    llm: LLMClient,
+    model: str,
+    *,
+    today: date,
+    disabled: frozenset[str] = frozenset(),
+    cfg: AnalystConfig | None = None,
+) -> tuple[CompanyDossier, AnalystOpinion]:
+    """The pipeline step: dossier (mirror only) -> opinion. Raises on an invalid LLM answer or
+    a missing provider, like the memo step: the caller keeps the run and the official score."""
+    cfg = cfg or load_config()
+    inputs = await collect_inputs(
+        report.cui,
+        adapters,
+        today,
+        last_year=last_expected_year(today, cfg),
+        years=cfg.years_of_history,
+        disabled=disabled,
+    )
+    dossier = build_dossier(report, inputs)
+    return dossier, await write_opinion(dossier, llm, model, cfg)
