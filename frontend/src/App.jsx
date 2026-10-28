@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getCompanies } from './api.js';
+import { DATA_MODE, getCompanies } from './api.js';
 import { sortByCriticality } from './severity.js';
 import AlertsSidebar from './components/AlertsSidebar.jsx';
 import ReviewPanel from './components/ReviewPanel.jsx';
@@ -32,7 +32,11 @@ export default function App() {
     <>
       <header className="topbar">
         <span className="brand">verifirm</span>
-        <span className="pill pill-mock">MOCK DATA</span>
+        {DATA_MODE === 'api' ? (
+          <span className="pill pill-outcome">Live API</span>
+        ) : (
+          <span className="pill pill-mock">MOCK DATA</span>
+        )}
       </header>
 
       <div className="shell">

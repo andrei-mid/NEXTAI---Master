@@ -1,4 +1,6 @@
 import BandBadge from './BandBadge.jsx';
+import OriginBadges from './OriginBadges.jsx';
+import { coverageLabel } from '../format.js';
 
 /** Left sidebar: one card per company (GET /companies item), already sorted by the caller. */
 export default function AlertsSidebar({ items, selectedCui, onSelect }) {
@@ -9,24 +11,32 @@ export default function AlertsSidebar({ items, selectedCui, onSelect }) {
       </h2>
       <ul className="alert-list">
         {items.map((item) => {
-          const severity = item.top_signal?.severity ?? 'info';
+          const severity = item.top_signal?.severity;
           return (
             <li key={item.cui}>
               <button
                 type="button"
-                className={`alert-item sev-border-${severity}${item.cui === selectedCui ? ' is-selected' : ''}`}
+                className={`alert-item sev-border-${severity ?? 'info'}${
+                  item.cui === selectedCui ? ' is-selected' : ''
+                }`}
                 aria-current={item.cui === selectedCui ? 'true' : undefined}
                 onClick={() => onSelect(item.cui)}
               >
                 <span className="alert-item-top">
-                  <span className={`pill sev-${severity}`}>{severity}</span>
+                  {severity && <span className={`pill sev-${severity}`}>{severity}</span>}
                   <BandBadge band={item.band} />
-                  {item.fictional && <span className="pill pill-fictiv">FICTIV</span>}
+                  <OriginBadges origin={item.origin} fictional={item.fictional} />
                 </span>
                 <span className="alert-item-name">{item.name}</span>
-                {item.top_signal && <span className="alert-item-claim">{item.top_signal.claim}</span>}
+                <span className="alert-item-claim">
+                  {item.top_signal
+                    ? item.top_signal.claim
+                    : item.band
+                      ? 'No signals reported.'
+                      : 'Not checked yet.'}
+                </span>
                 <span className="alert-item-meta">
-                  CUI {item.cui} · {item.coverage.sources_available}/{item.coverage.sources_total} sources
+                  CUI {item.cui} · {coverageLabel(item.coverage)}
                 </span>
               </button>
             </li>

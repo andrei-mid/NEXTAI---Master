@@ -9,7 +9,12 @@ export default function SourceLink({ source, evidenceDate }) {
     return (
       <div className="source-box source-missing" role="alert">
         <strong>No source link.</strong> Do not rely on this claim until a source is provided.
-        {source?.name && <span className="muted small"> (reported by: {source.name})</span>}
+        {source?.name && (
+          <span className="small">
+            {' '}
+            (reported by: {source.name}, data as of {formatUtc(source.retrieved_at)})
+          </span>
+        )}
       </div>
     );
   }
@@ -22,7 +27,7 @@ export default function SourceLink({ source, evidenceDate }) {
       </a>
       <span className="muted small">
         {evidenceDate && <>evidence {evidenceDate} · </>}
-        {source.retrieved_at ? `retrieved ${formatUtc(source.retrieved_at)}` : 'retrieval time unknown'}
+        data as of {formatUtc(source.retrieved_at)}
       </span>
     </div>
   );

@@ -31,15 +31,29 @@ export default function CompanyDetail({ item, sessionReviews }) {
   if (!data) return <p className="muted">Loading…</p>;
 
   const { company, signals } = data;
-  const history = [...getFlagHistory(item.cui, item.top_signal?.severity), ...sessionReviews];
+  // Invented history and bank figures are only ever shown next to fictional companies,
+  // never next to a real company (e.g. Dedeman).
+  const fictional = company.identity_sheet.fictional;
+  const mockHistory = fictional ? getFlagHistory(item.cui, item.top_signal?.severity) : [];
+  const history = [...mockHistory, ...sessionReviews];
 
   return (
     <div className="detail">
-      <IdentityCard company={company} />
-      <ComponentBars components={company.components} sources={company.sources} />
-      <ClaimsList claims={sortSignals(signals)} />
+      <IdentityCard company={company} signals={signals} origin={item.origin} />
+      <ComponentBars components={company.components} />
+      <ClaimsList claims={signals && sortSignals(signals)} lastChecked={company.last_checked} />
       <FlagHistory entries={history} />
-      <BankRelationship bank={getBankRelationship(item.cui)} />
+      {fictional ? (
+        <BankRelationship bank={getBankRelationship(item.cui)} />
+      ) : (
+        <section className="card">
+          <h3>Relationship with the bank</h3>
+          <p className="muted">
+            Not shown: this is a real company and the mockup only uses invented bank data for fictional
+            companies.
+          </p>
+        </section>
+      )}
     </div>
   );
 }

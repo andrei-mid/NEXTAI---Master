@@ -22,3 +22,16 @@ Open http://localhost:5173. On Windows PowerShell, if `npm` is blocked by the ex
 
 - `src/App.jsx`: the page
 - `src/styles.css`: colours (top of the file) and styles
+
+## Data: mock or real API
+
+`src/api.js` is the only file that loads data. Shapes follow the API's Pydantic models
+(`verifirm/schema/api.py`, JSON Schemas in `docs/schema/`).
+
+- **Mock (default):** no `VITE_API_URL`. Shows the team's fixtures (`fixtures/companies/*/api/*.json`,
+  read-only) plus invented UI companies from `src/mock/`.
+- **Real API:** copy `.env.example` to `.env.local` (sets `VITE_API_URL=http://localhost:8000`),
+  start the API with `make run-api`, then restart `npm run dev`. The top bar shows "Live API".
+
+Bank relationship and flag history are not in the API contract yet: they are always mock and only
+shown for fictional companies.

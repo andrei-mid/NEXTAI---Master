@@ -17,6 +17,6 @@ export function sortByCriticality(items) {
   return [...items].sort(
     (a, b) =>
       severityRank(a.top_signal?.severity) - severityRank(b.top_signal?.severity) ||
-      b.last_checked.localeCompare(a.last_checked),
+      (b.last_checked ?? '').localeCompare(a.last_checked ?? ''),
   );
 }

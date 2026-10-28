@@ -1,6 +1,7 @@
-// Builds mock API responses from BASE_COMPANIES, in the exact shapes of
-// "Contract de date API → Frontend": GET /companies, GET /companies/{cui},
-// GET /companies/{cui}/signals. Everything is invented (FICTIV / MOCK).
+// Builds mock API responses from BASE_COMPANIES, in the exact shapes of the API's Pydantic
+// models (verifirm/schema/api.py, signals.py, identity.py, scoring.py):
+// GET /companies, GET /companies/{cui}, GET /companies/{cui}/signals.
+// Everything is invented (FICTIV / MOCK).
 
 import { BASE_COMPANIES } from './companies.js';
 import { seeded } from './seeded.js';
@@ -9,16 +10,6 @@ const RETRIEVED_AT = '2026-10-28T08:00:00Z';
 
 const COMPONENTS = ['identity', 'financials', 'tax', 'litigation', 'network', 'sanctions', 'media', 'presence'];
 const WEIGHTS = { identity: 15, financials: 20, tax: 15, litigation: 15, network: 15, sanctions: 10, media: 5, presence: 5 };
-const SOURCE_NAMES = {
-  identity: ['ONRC open data', 'ANAF VAT registry v9'],
-  financials: ['ANAF financial statements'],
-  tax: ['ANAF VAT registry v9', 'Tax arrears list (MOCK)'],
-  litigation: ['Portal Just', 'ICCJ', 'BPI (MOCK)'],
-  network: ['ONRC open data', 'Shareholders (MOCK)'],
-  sanctions: ['EU FSF', 'UN', 'OFAC'],
-  media: ['Web search'],
-  presence: ['Web', 'SEAP', 'Kohesio'],
-};
 
 const EXTRA_SIGNALS = [
   {
@@ -78,29 +69,35 @@ const UNSOURCED_DEMO_CUI = '99001061';
 
 const PEOPLE = ['Dorina Inventescu', 'Marius Imaginaru', 'Elena Fictiveanu', 'Radu Exemplaru', 'Sorina Nascocita'];
 
-function makeSignal(cui, index, t) {
-  const official = t.source.type === 'official';
+/** SourceRef */
+function sourceRef(s, cui) {
   return {
-    signal_id: `sig_${cui}_${t.component.slice(0, 3)}_${String(index + 1).padStart(3, '0')}`,
+    name: s.name,
+    type: s.type,
+    url: s.url ? s.url.replace('{cui}', cui) : null,
+    retrieved_at: RETRIEVED_AT,
+    raw_ref: null,
+    content_hash: null,
+  };
+}
+
+/** Signal */
+function makeSignal(cui, index, t) {
+  const validated = t.validated ?? true;
+  return {
+    signal_id: `${t.rule_id}:mock${cui}${index}`,
     cui,
     agent: t.component,
     component: t.component,
     rule_id: t.rule_id,
     claim: t.claim,
-    source: {
-      name: t.source.name,
-      type: t.source.type,
-      url: t.source.url ? t.source.url.replace('{cui}', cui) : null,
-      retrieved_at: t.source.url ? RETRIEVED_AT : null,
-      raw_ref: null,
-      content_hash: null,
-    },
+    source: sourceRef(t.source, cui),
     evidence_date: t.evidence_date ?? null,
-    confidence: official ? 0.95 : 0.7,
+    confidence: t.source.type === 'official' ? 0.95 : 0.7,
     severity: t.severity,
-    validated: t.validated ?? true,
-    auto_stop_candidate: t.severity === 'critical' && (t.validated ?? true),
-    entity_match: { method: 'cui', score: 1, ambiguous: false },
+    validated,
+    auto_stop_candidate: t.severity === 'critical' && validated,
+    entity_match: { method: 'cui_exact', score: 1, ambiguous: false },
     data: {},
   };
 }
@@ -128,73 +125,106 @@ function buildSignals(base) {
   return templates.map((t, i) => makeSignal(base.cui, i, t));
 }
 
+/** Coverage */
+function buildCoverage(base) {
+  const available = COMPONENTS.filter((c) => !base.unavailable.includes(c));
+  return {
+    weight_pct: available.reduce((sum, c) => sum + WEIGHTS[c], 0),
+    available: available.length,
+    total: COMPONENTS.length,
+    missing: [...base.unavailable],
+  };
+}
+
+/** CompanyDetail */
 function buildDetail(base, signals) {
   const r = seeded(Number(base.cui) + 29);
   const pick = (list) => list[Math.floor(r() * list.length)];
+  const coverage = buildCoverage(base);
 
   const components = COMPONENTS.map((component) => {
     const available = !base.unavailable.includes(component);
-    const n = signals.filter((s) => s.component === component).length;
+    const ids = signals.filter((s) => s.component === component).map((s) => s.signal_id);
     return {
       component,
-      score: !available ? null : n === 0 ? 100 : Math.round(15 + r() * 70),
-      weight: WEIGHTS[component],
+      status: available ? 'ok' : 'unavailable',
       available,
-      n_signals: n,
+      score: !available ? null : ids.length === 0 ? 100 : Math.round(15 + r() * 70),
+      weight: WEIGHTS[component],
+      effective_weight: available ? Math.round((WEIGHTS[component] / coverage.weight_pct) * 1000) / 1000 : 0,
+      signal_ids: ids,
     };
   });
 
-  const sources = COMPONENTS.map((component) => {
-    const available = !base.unavailable.includes(component);
-    return {
-      agent: component,
-      component,
-      status: available ? 'ok' : 'unavailable',
-      sources_checked: available ? SOURCE_NAMES[component] : [],
-      sources_failed: available ? [] : SOURCE_NAMES[component],
-      duration_ms: Math.round(800 + r() * 6000),
-      notes: available ? null : 'The source did not respond (MOCK).',
-    };
-  });
+  const onrc = sourceRef({ name: 'ONRC open data', type: 'official', url: 'https://onrc.example/firma/{cui}' }, base.cui);
+  const anaf = sourceRef({ name: 'ANAF VAT registry v9', type: 'official', url: 'https://anaf.example/registru-tva/{cui}' }, base.cui);
+  const shareholdersMock = sourceRef({ name: 'Shareholders (MOCK)', type: 'mock', url: null }, base.cui);
 
   const adminSince = `${Number(base.founded_at.slice(0, 4)) + 3}-01-15`;
   const shareholder = BASE_COMPANIES.find((c) => c.cui !== base.cui && c.band === 'green');
+  const office = {
+    raw: `Str. Exemplului nr. ${Number(base.cui.slice(-2))}, Sector 9, București`,
+    county: 'București',
+    locality: null,
+    street: null,
+    number: null,
+    postal_code: null,
+    valid_from: base.founded_at,
+    valid_to: null,
+  };
+  const person = (name, from, to) => ({
+    name,
+    role: 'administrator',
+    is_company: false,
+    cui: null,
+    share_pct: null,
+    valid_from: from,
+    valid_to: to,
+    source: onrc,
+  });
+
+  const sources = [anaf, onrc, ...signals.map((s) => s.source)].filter(
+    (s, i, all) => all.findIndex((x) => x.name === s.name) === i,
+  );
 
   return {
-    cui: base.cui,
-    fictional: true,
     identity_sheet: {
-      name: base.name,
-      name_history: [],
-      reg_number: `J99/${base.cui.slice(-4)}/${base.founded_at.slice(0, 4)}`,
+      cui: base.cui,
+      fictional: true,
+      trade_register_no: `J99/${base.cui.slice(-4)}/${base.founded_at.slice(0, 4)}`,
+      current_name: base.name,
+      names: [{ name: base.name, valid_from: base.founded_at, valid_to: null }],
       legal_form: 'SRL',
       status: base.status,
-      founded_at: base.founded_at,
-      caen: { code: base.caen, version: 'rev2' },
-      registered_office: {
-        text: `Str. Exemplului nr. ${Number(base.cui.slice(-2))}, Sector 9, București`,
-        companies_at_same_address: Math.round(1 + r() * 60),
-      },
-      administrators: [
-        { name: pick(PEOPLE), role: 'administrator', since: adminSince, until: null },
-        { name: pick(PEOPLE), role: 'administrator', since: base.founded_at, until: adminSince },
+      registration_date: base.founded_at,
+      registered_office: office,
+      office_history: [office],
+      caen_code: base.caen,
+      caen_revision: 'rev2',
+      authorized_caen_codes: [base.caen],
+      administrators: [person(pick(PEOPLE), adminSince, null), person(pick(PEOPLE), base.founded_at, adminSince)],
+      shareholders: [
+        {
+          name: shareholder.name,
+          role: 'shareholder',
+          is_company: true,
+          cui: shareholder.cui,
+          share_pct: 100,
+          valid_from: base.founded_at,
+          valid_to: null,
+          source: shareholdersMock,
+        },
       ],
-      shareholders: [{ name: shareholder.name, cui: shareholder.cui, share_pct: 100, source_type: 'mock' }],
+      vat_registered: base.top.rule_id !== 'TAX-VAT-CANCELLED-01',
+      anaf_inactive: base.status === 'inactive_anaf',
+      sources: [anaf, onrc],
     },
-    score: {
-      run_id: `run_${base.cui}`,
-      score: base.score,
-      band: base.band,
-      auto_stop_reasons: base.auto_stop_reasons,
-      weights_version: 'proposal-v1',
-    },
-    coverage: {
-      coverage_pct: base.coverage_pct,
-      sources_available: COMPONENTS.length - base.unavailable.length,
-      sources_total: COMPONENTS.length,
-    },
+    score: base.score,
+    band: base.band,
     components,
+    coverage,
     sources,
+    last_checked: base.last_checked,
   };
 }
 
@@ -205,7 +235,6 @@ const items = [];
 for (const base of BASE_COMPANIES) {
   const signals = buildSignals(base);
   const detail = buildDetail(base, signals);
-  const top = signals[0];
   signalsByCui[base.cui] = signals;
   companyDetails[base.cui] = detail;
   items.push({
@@ -215,9 +244,10 @@ for (const base of BASE_COMPANIES) {
     score: base.score,
     coverage: detail.coverage,
     last_checked: base.last_checked,
-    top_signal: { signal_id: top.signal_id, component: top.component, severity: top.severity, claim: top.claim },
+    top_signal: { rule_id: base.top.rule_id, claim: base.top.claim, severity: base.top.severity },
     fictional: true,
   });
 }
 
+/** CompanyList */
 export const companiesResponse = { items, page: 1, page_size: 50, total: items.length };

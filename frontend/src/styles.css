@@ -223,6 +223,8 @@ h2 {
 
 .pill-proposal { color: var(--muted); background: transparent; border: 1px dashed var(--muted); }
 .pill-fictiv { color: #d7b8ff; background: #33244a; }
+.pill-backend { color: #7fd7e0; background: #173a3e; }
+.pill-real { color: #6fdc9b; background: #1c3a2a; border: 1px solid #6fdc9b; }
 .pill-mock { color: var(--on-primary); background: var(--primary); }
 .pill-unvalidated { color: var(--sev-info); background: transparent; border: 1px dashed var(--sev-info); }
 
