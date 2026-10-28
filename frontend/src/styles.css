@@ -1687,3 +1687,68 @@ th {
 .btn-danger:hover {
   background: var(--danger-hover);
 }
+
+/* AI analyst opinion (components/AnalystOpinion.jsx): collapsed card, disclaimer always shown. */
+.analyst-opinion > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.analyst-opinion > summary::-webkit-details-marker {
+  display: none;
+}
+.analyst-opinion > summary::after {
+  content: '▸';
+  margin-left: auto;
+  color: var(--muted);
+}
+.analyst-opinion[open] > summary::after {
+  content: '▾';
+}
+.analyst-opinion > summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.analyst-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.analyst-scores strong {
+  font-size: 1.1rem;
+}
+.analyst-disclaimer {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.analyst-body {
+  margin-top: 12px;
+}
+.analyst-evidence {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.analyst-evidence caption {
+  text-align: left;
+  padding-bottom: 4px;
+}
+.analyst-evidence td {
+  padding: 4px 8px;
+  border-top: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.analyst-evidence code {
+  color: var(--muted);
+}
+.analyst-rejected {
+  margin: 12px 0;
+}
+.analyst-rejected summary {
+  cursor: pointer;
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DATA_MODE, getCompany, getHistory, getSignals } from '../api.js';
+import { DATA_MODE, getAnalystOpinion, getCompany, getHistory, getSignals } from '../api.js';
 import { getBankRelationship, getFlagHistory } from '../mock/frontendExtras.js';
 import { sortSignals } from '../severity.js';
 import IdentityCard from './IdentityCard.jsx';
@@ -8,28 +8,34 @@ import ClaimsList from './ClaimsList.jsx';
 import FlagHistory from './FlagHistory.jsx';
 import BankRelationship from './BankRelationship.jsx';
 import CheckHistory from './CheckHistory.jsx';
+import AnalystOpinion from './AnalystOpinion.jsx';
 
 /**
  * Centre of the page for one company: GET /companies/{cui} and /signals first, then /history
- * on its own, so a slow history never holds back the rest of the page.
+ * and /analyst-opinion on their own, so a slow one never holds back the rest of the page.
  */
 export default function CompanyDetail({ item, sessionReviews, messages, analystId }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   // undefined = still loading, null = none or failed
   const [checkHistory, setCheckHistory] = useState(undefined);
+  const [opinion, setOpinion] = useState(undefined);
 
   useEffect(() => {
     let active = true;
     setData(null);
     setError(null);
     setCheckHistory(undefined);
+    setOpinion(undefined);
     Promise.all([getCompany(item.cui), getSignals(item.cui)])
       .then(([company, signals]) => active && setData({ company, signals }))
       .catch((e) => active && setError(e));
     getHistory(item.cui)
       .catch(() => null)
       .then((h) => active && setCheckHistory(h));
+    getAnalystOpinion(item.cui)
+      .catch(() => null)
+      .then((o) => active && setOpinion(o));
     return () => {
       active = false;
     };
@@ -58,6 +64,7 @@ export default function CompanyDetail({ item, sessionReviews, messages, analystI
     <div className="detail">
       <IdentityCard company={company} signals={signals} origin={item.origin} />
       <ComponentBars components={company.components} />
+      <AnalystOpinion opinion={opinion} invented={item.origin === 'ui-mock'} />
       <ClaimsList
         claims={signals && sortSignals(signals)}
         lastChecked={company.last_checked}

@@ -41,12 +41,13 @@ const companies = {};
 
 for (const item of list.items) {
   process.stdout.write(`  ${item.cui} ${item.name} ... `);
-  const [company, signals, history] = await Promise.all([
+  const [company, signals, history, analyst_opinion] = await Promise.all([
     get(`/companies/${item.cui}`),
     get(`/companies/${item.cui}/signals`),
     get(`/companies/${item.cui}/history`),
+    get(`/companies/${item.cui}/analyst-opinion`),
   ]);
-  companies[item.cui] = { company, signals, history };
+  companies[item.cui] = { company, signals, history, analyst_opinion };
   console.log('ok');
 }
 

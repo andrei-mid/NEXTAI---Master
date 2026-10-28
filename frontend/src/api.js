@@ -11,6 +11,7 @@
 
 import { companiesResponse as uiMock, companyDetails, signalsByCui } from './mock/build.js';
 import { fixtureCompanies } from './mock/realFixtures.js';
+import { exampleOpinions } from './mock/analystOpinions.js';
 
 // Optional file: the glob is simply empty when no snapshot has been taken.
 const SNAPSHOT = Object.values(
@@ -98,6 +99,23 @@ export async function getHistory(cui) {
   if (!API_URL) return null;
   try {
     return await http(`/companies/${cui}/history`);
+  } catch (e) {
+    if (e instanceof NotFoundError) return null;
+    throw e;
+  }
+}
+
+/**
+ * GET /companies/{cui}/analyst-opinion -> the AI analyst's educated opinion (shown next to the
+ * official score, never instead of it), or null when no run produced one yet (404).
+ * Mock mode: an example opinion for some demo companies (mock/analystOpinions.js).
+ */
+export async function getAnalystOpinion(cui) {
+  if (isUiMock(cui)) return null;
+  if (DATA_MODE === 'snapshot') return SNAPSHOT.companies[cui]?.analyst_opinion ?? null;
+  if (!API_URL) return exampleOpinions[cui] ?? null;
+  try {
+    return await http(`/companies/${cui}/analyst-opinion`);
   } catch (e) {
     if (e instanceof NotFoundError) return null;
     throw e;
