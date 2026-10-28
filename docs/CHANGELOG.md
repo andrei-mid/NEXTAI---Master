@@ -14,6 +14,22 @@
 
 ---
 
+## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
+
+**What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.
+
+**What you must do:** role 5: nothing, but keep it concurrent if you change the list. Role 1: going under 1 s needs batch reads in the repository (one query for all companies on a page) and no `pool_pre_ping` round trip before each query. Optional.
+
+---
+
+## 2026-10-29: TAX-EFACTURA-REG-01 is off by default (role 3) · found on real data
+
+**What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
+
+**What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
+
+---
+
 ## 2026-10-28: AI analyst opinion: dossier + LLM opinion + citation checks (role 1, steps 0-3) · CONTRACT ADDITION
 
 **What:** an LLM reads a company dossier built by code and returns its educated opinion: flags with evidence, an `opinion_score` 0-100 and an explanation. DECIDED in `docs/DECISIONS.md` ("AI analyst opinion"). Code: `verifirm/consolidation/analyst/` (README there).
@@ -28,22 +44,6 @@
 - **Role 5:** the pipeline step (after scoring, like the memo) and `GET /companies/{cui}/analyst-opinion`. `write_opinion` raises on invalid output, so catch it like the memo step.
 - **Role 2:** review the two files in your folders.
 - **Everyone running it:** set `LLM_MODEL_ANALYST` in `.env` to a large model.
-
----
-
-## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
-
-**What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.
-
-**What you must do:** role 5: nothing, but keep it concurrent if you change the list. Role 1: going under 1 s needs batch reads in the repository (one query for all companies on a page) and no `pool_pre_ping` round trip before each query. Optional.
-
----
-
-## 2026-10-29: TAX-EFACTURA-REG-01 is off by default (role 3) · found on real data
-
-**What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
-
-**What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
 
 ---
 
