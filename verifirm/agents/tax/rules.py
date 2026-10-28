@@ -74,6 +74,7 @@ class TaxConfig(BaseModel):
     efactura_gap_tolerance_pct: float = Field(ge=0)
     efactura_gap_confidence: float = Field(ge=0, le=1)
     stale_confidence: float = Field(ge=0, le=1)
+    efactura_registration_check: bool = False  # TAX-EFACTURA-REG-01 (see config.yaml)
 
 
 def load_config(path: Path = CONFIG_PATH) -> TaxConfig:

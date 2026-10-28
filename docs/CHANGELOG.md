@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-10-29: TAX-EFACTURA-REG-01 is off by default (role 3) · found on real data
+
+**What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
+
+**What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
+
+---
+
 ## 2026-10-28: Real data the safe way: the ANAF fetch tool (role 3) · ACTION NEEDED for a shared server
 
 **What:** `apps/worker/jobs/sweep_anaf_v9.py` is now **the ONE place a human triggers ANAF requests**: dry run by default, `--send` sends exactly ONE request, at least 1.1 s between requests even across runs (lock file), no retries, real CUIs only. `v9`: one request for all given companies (today + 4 quarter-ends each, only what's missing, max 100 entries). `bilant`: one request per run (newest missing year of the 5 the financials agent reads). `status`: what's in the mirror, no request. The scheduled `run()` is **not automated on purpose**. Commands: `verifirm/adapters/anaf_v9.md` §7. `anaf_v9` keeps 4 quarter-ends now (5 data points per company), not 12 month-ends.

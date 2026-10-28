@@ -16,3 +16,9 @@ efactura_gap_confidence: 0.95
 
 # Confidence when the data is a stale mirror copy (older than mirror_max_age_s).
 stale_confidence: 0.8
+
+# TAX-EFACTURA-REG-01 is OFF by default. ANAF v9's `statusRO_e_Factura` is the old RO e-Factura
+# Register (opt-in, before e-Factura became mandatory for all B2B invoices in 2024). It is not
+# kept current for everyone: on real data (2026-10-28) it flagged Dacia, Petrom, eMAG and Altex
+# as "not enrolled", which is impossible. A rule that misleads the analyst stays off.
+efactura_registration_check: false

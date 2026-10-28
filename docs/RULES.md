@@ -46,7 +46,7 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 | `TAX-ARREARS-01` | high |  | Company is on ANAF's tax-arrears list. Not being on it is clean for that list only (ANAF lists debts above thresholds); the note names the quarter checked | mock_restante |
 | `TAX-VAT-CANCELLED-01` | medium |  | VAT registration cancelled in the last 24 months (even if re-registered) | anaf_v9 |
 | `TAX-EFACTURA-GAP-01` | medium (D300 below e-Factura) · low (D300 above: can be legitimate, e.g. exports, B2C) |  | D300 declared sales differ from e-Factura issued totals by > 10% over the same period (D300 must cover every month) | mock_d300 vs mock_efactura |
-| `TAX-EFACTURA-REG-01` | low |  | Company not enrolled in RO e-Factura although required | anaf_efactura_registry |
+| `TAX-EFACTURA-REG-01` | low |  | Company not enrolled in RO e-Factura although required. **OFF by default** (`tax/config.yaml`): v9's `statusRO_e_Factura` is the old opt-in register, not current use (real data flagged Dacia, Petrom, eMAG, Altex) | anaf_efactura_registry |
 
 ### litigation
 

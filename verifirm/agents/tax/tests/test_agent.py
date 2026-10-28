@@ -113,7 +113,7 @@ def by_rule(result: AgentResult) -> dict[str, Any]:
         ),
         # No arrears / D300 / e-Factura mock data for the affiliates: partial, never clean.
         ("99000041", set(), AgentStatus.PARTIAL),
-        (ORVANTO, {"TAX-EFACTURA-REG-01"}, AgentStatus.PARTIAL),
+        (ORVANTO, set(), AgentStatus.PARTIAL),  # e-Factura register rule is off by default
         (DEDEMAN, set(), AgentStatus.UNAVAILABLE),
     ],
 )
@@ -213,7 +213,8 @@ class _NotImplemented:
         return call
 
 
-@pytest.mark.parametrize("source", sorted(ADAPTERS))
+# anaf_efactura_registry is not read while TAX-EFACTURA-REG-01 is off (see the tests below).
+@pytest.mark.parametrize("source", sorted(set(ADAPTERS) - {"anaf_efactura_registry"}))
 async def test_any_source_down_is_partial(tmp_path: Path, source: str) -> None:
     result = await run(ctx(BRUNALDO, tmp_path, overrides={source: _Down()}))
     assert result.status is AgentStatus.PARTIAL
@@ -316,3 +317,15 @@ async def test_unreadable_vat_history_is_never_clean(
     result = await run(ctx(AURORA, tmp_path, overrides={"anaf_v9": _V9(record)}))
     assert "anaf_v9" in result.sources_failed
     assert result.status is AgentStatus.PARTIAL
+
+
+async def test_efactura_register_rule_is_off_by_default(tmp_path: Path) -> None:
+    result = await run(ctx(ORVANTO, tmp_path))
+    assert "TAX-EFACTURA-REG-01" not in by_rule(result)
+    assert "anaf_efactura_registry" not in result.sources_failed  # skipped on purpose, not failed
+
+
+async def test_efactura_register_rule_can_be_switched_on(tmp_path: Path) -> None:
+    on = load_config().model_copy(update={"efactura_registration_check": True})
+    result = await TaxAgent(on).run(ctx(ORVANTO, tmp_path))
+    assert by_rule(result)["TAX-EFACTURA-REG-01"].severity is Severity.LOW
