@@ -23,6 +23,8 @@ from verifirm.schema.runs import AgentProgressEvent, RunRequest, RunState, RunSt
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
+_TERMINAL = {RunState.COMPLETED, RunState.FAILED, RunState.REJECTED}
+
 
 async def enqueue_run(
     infra: Infra, *, cui: str, trigger: RunTrigger, document_keys: list[str] | None = None
@@ -58,6 +60,13 @@ async def _live_events(infra: Infra, run_id: str) -> AsyncIterator[str]:
     while True:
         msg = await infra.queue.dequeue(run_events_topic(run_id), wait_s=15)
         if msg is None:
+            # Nothing queued: if the run already ended (events consumed earlier, or it was
+            # rejected before publishing), close the stream instead of idling forever.
+            run = await infra.repository.get_run(run_id)
+            if run is not None and run.state in _TERMINAL:
+                final = AgentProgressEvent(run_id=run_id, agent="pipeline", done=True)
+                yield format_event(final, event_id=str(i))
+                return
             yield ": keep-alive\n\n"
             continue
         await infra.queue.ack(msg)
