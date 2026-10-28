@@ -8,6 +8,9 @@
 //    VITE_DATA_SOURCE=live asks for the live server explicitly.
 //  - "mock": neither. The team's fixture files (read-only).
 // Our invented UI companies (FICTIV) are added in every mode, always read locally.
+// In "api" and "snapshot" modes the team's FICTIONAL fixture companies (Aurora, Zephyria,
+// Brunaldo...) are added too, read locally (origin "fixture"): the live server only holds real
+// companies, and these are the demo's complete fictional stories, AI opinion included.
 
 import { companiesResponse as uiMock, companyDetails, signalsByCui } from './mock/build.js';
 import { fixtureCompanies } from './mock/realFixtures.js';
@@ -40,12 +43,22 @@ async function http(path) {
 
 /**
  * GET /companies -> { items, page, page_size, total }.
- * Each item also gets `origin` (frontend-only, not from the API): "backend" or "ui-mock".
+ * Each item also gets `origin` (frontend-only, not from the API): "backend", "fixture" or
+ * "ui-mock".
  */
 const uiMockItems = uiMock.items.map((i) => ({ ...i, origin: 'ui-mock' }));
 
 // Our invented companies are answered locally in both modes.
 const isUiMock = (cui) => cui in companyDetails;
+
+// Fictional fixture companies shown next to the live / snapshot data, answered locally.
+const localFixtures =
+  DATA_MODE === 'mock'
+    ? {}
+    : Object.fromEntries(
+        Object.entries(fixtureCompanies).filter(([, f]) => f.list_item?.fictional && f.company),
+      );
+const isLocalFixture = (cui) => cui in localFixtures;
 
 export async function getCompanies() {
   let backendItems;
@@ -59,13 +72,22 @@ export async function getCompanies() {
       .filter((f) => f.list_item)
       .map((f) => f.list_item);
   }
-  const items = [...backendItems.map((i) => ({ ...i, origin: 'backend' })), ...uiMockItems];
+  const served = new Set(backendItems.map((i) => i.cui));
+  const fixtureItems = Object.values(localFixtures)
+    .filter((f) => !served.has(f.list_item.cui))
+    .map((f) => ({ ...f.list_item, origin: 'fixture' }));
+  const items = [
+    ...backendItems.map((i) => ({ ...i, origin: 'backend' })),
+    ...fixtureItems,
+    ...uiMockItems,
+  ];
   return { items, page: 1, page_size: items.length, total: items.length };
 }
 
 /** GET /companies/{cui} -> { identity_sheet, score, band, components, coverage, sources, last_checked } */
 export async function getCompany(cui) {
   if (isUiMock(cui)) return companyDetails[cui];
+  if (isLocalFixture(cui)) return localFixtures[cui].company;
   if (API_URL) return http(`/companies/${cui}`);
 
   const company =
@@ -77,6 +99,7 @@ export async function getCompany(cui) {
 /** GET /companies/{cui}/signals -> Signal[], or null when there is no data yet (404). */
 export async function getSignals(cui) {
   if (isUiMock(cui)) return signalsByCui[cui] ?? null;
+  if (isLocalFixture(cui)) return localFixtures[cui].signals ?? null;
   if (API_URL) {
     try {
       return await http(`/companies/${cui}/signals`);
@@ -94,7 +117,7 @@ export async function getSignals(cui) {
  * all oldest first. null when there is none (404) or in offline mock mode (no history there).
  */
 export async function getHistory(cui) {
-  if (isUiMock(cui)) return null;
+  if (isUiMock(cui) || isLocalFixture(cui)) return null;
   if (DATA_MODE === 'snapshot') return SNAPSHOT.companies[cui]?.history ?? null;
   if (!API_URL) return null;
   try {
@@ -108,10 +131,11 @@ export async function getHistory(cui) {
 /**
  * GET /companies/{cui}/analyst-opinion -> the AI analyst's educated opinion (shown next to the
  * official score, never instead of it), or null when no run produced one yet (404).
- * Mock mode: an example opinion for some demo companies (mock/analystOpinions.js).
+ * Mock mode and the local fictional fixtures: an example opinion (mock/analystOpinions.js).
  */
 export async function getAnalystOpinion(cui) {
   if (isUiMock(cui)) return null;
+  if (isLocalFixture(cui)) return exampleOpinions[cui] ?? null;
   if (DATA_MODE === 'snapshot') return SNAPSHOT.companies[cui]?.analyst_opinion ?? null;
   if (!API_URL) return exampleOpinions[cui] ?? null;
   try {
