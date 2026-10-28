@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-10-29: Presence agent implemented (role 4's files, built by role 3 with the human's approval)
+
+**What:** `verifirm/agents/presence/` is done: 3 rules, `config.yaml`, tests with the real adapters in FIXTURE_MODE, and a full-pipeline check (Zephyria gets PRE-NO-FOOTPRINT-01, Aurora nothing). Adapters: `seap.contracts_for`, `kohesio.projects_for` and the new `web_search.footprint` (website + job postings) read `presence.json` in FIXTURE_MODE through `adapters/presence_fixture.py`. **Live they report unavailable**, never empty. PRE-NO-FOOTPRINT-01 needs all four parts checked. With no footprint source at all, the agent is `unavailable` (turnover alone is not a presence check).
+
+**What you must do:**
+- **Role 4:** presence is done. `TavilyWebSearch.search()` (media) is still yours. For live presence data: run the website / job queries in `web_search.sync()`, plus ingest jobs for SEAP and Kohesio.
+- **Role 6:** `fixtures/companies/99000025_*/api/signals.json` has a stale `content_hash` for the presence signal (presence.json changed after it was generated). Regenerate with `make fixtures` when convenient.
+
+---
+
 ## 2026-10-28: AI analyst opinion: dossier + LLM opinion + citation checks (role 1, steps 0-3) · CONTRACT ADDITION
 
 **What:** an LLM reads a company dossier built by code and returns its educated opinion: flags with evidence, an `opinion_score` 0-100 and an explanation. DECIDED in `docs/DECISIONS.md` ("AI analyst opinion"). Code: `verifirm/consolidation/analyst/` (README there).

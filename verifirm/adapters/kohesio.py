@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-4-external-agents. EU cohesion-funds beneficiaries (Kohesio, European Commission).
+"""Owner: @role-4-external-agents. EU cohesion-funds beneficiaries (Kohesio, European Commission).
 
 Facts / to confirm:
 - https://kohesio.ec.europa.eu publishes projects and beneficiaries (API + bulk exports).
@@ -14,7 +14,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import BaseAdapter, Sourced, SourceUnavailable
+from verifirm.adapters.presence_fixture import read_parts
 from verifirm.core.registry import register_adapter
 from verifirm.schema.signals import SourceType
 
@@ -28,5 +29,12 @@ class KohesioAdapter(BaseAdapter):
     async def projects_for(
         self, company_name: str, cui: str | None
     ) -> Sourced[list[dict[str, Any]]]:
-        """Projects where the company is a beneficiary: {title, programme, eu_contribution_eur, start, url}."""
-        raise NotImplementedError
+        """Projects where the company is a beneficiary: {title, programme, eu_contribution_eur, start, url}.
+        Empty list = checked, none found. FIXTURE_MODE: presence.json -> "kohesio" (by CUI). Live:
+        unavailable until the Kohesio ingest job exists (never "no projects" by default)."""
+        if not self.settings.fixture_mode:
+            raise SourceUnavailable(self.name, "no local Kohesio data yet (ingest job to add)")
+        if not cui:
+            raise SourceUnavailable(self.name, "fixture data is keyed by CUI")
+        result = await read_parts(self, cui, {"kohesio": (list,)})
+        return Sourced(data=result.data["kohesio"], source=result.source, stale=result.stale)
