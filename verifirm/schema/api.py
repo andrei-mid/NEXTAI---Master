@@ -6,7 +6,7 @@ The frontend builds against these; JSON Schemas are exported to docs/schema/.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from verifirm.schema.identity import IdentitySheet
 from verifirm.schema.memo import ClientQuestion, VerifierReport
 from verifirm.schema.scoring import Band, ComponentScore, Coverage
-from verifirm.schema.signals import Severity, SourceRef
+from verifirm.schema.signals import Severity, Signal, SourceRef
 
 
 class Health(BaseModel):
@@ -116,3 +116,31 @@ class DecisionRecord(BaseModel):
     run_id: str | None  # the run whose memo/score the analyst looked at
     band_at_decision: Band | None
     recorded_at: datetime
+
+
+class ScorePoint(BaseModel):
+    """One check of the company on its timeline (known-at axis: when the bank knew it)."""
+
+    run_id: str
+    computed_at: datetime
+    band: Band
+    score: float | None
+    coverage: Coverage
+
+
+class CompanyHistory(BaseModel):
+    """GET /companies/{cui}/history?from=&to=: everything about one company in a period.
+
+    Two time axes, never mixed (docs/DECISIONS.md, "Time-travel reads"):
+    - `scores` and `decisions`: what the bank knew / decided in the period (computed_at,
+      recorded_at). This is the replay.
+    - `events`: what happened to the company in the period (Signal.evidence_date), as known
+      by its newest check. Signals without an evidence_date are not events.
+    """
+
+    cui: str
+    date_from: date | None  # inclusive, None = open
+    date_to: date | None  # inclusive, None = open
+    scores: list[ScorePoint]  # oldest first
+    events: list[Signal]  # oldest first
+    decisions: list[DecisionRecord]  # oldest first

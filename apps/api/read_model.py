@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from datetime import UTC, date, datetime, time
 
 from fastapi import HTTPException
 
 from verifirm.core.ports.repository import Repository
 from verifirm.schema.api import (
     CompanyDetail,
+    CompanyHistory,
     CompanyList,
     CompanyListItem,
     Graph,
@@ -21,10 +23,11 @@ from verifirm.schema.api import (
     GraphNode,
     MemoResponse,
     NodeType,
+    ScorePoint,
     TopSignal,
 )
 from verifirm.schema.identity import IdentitySheet, Person, PersonRole
-from verifirm.schema.scoring import Band
+from verifirm.schema.scoring import Band, Score
 from verifirm.schema.signals import SEVERITY_ORDER, Signal, SourceRef
 
 
@@ -53,6 +56,25 @@ def _sources(identity: IdentitySheet, signals: list[Signal]) -> list[SourceRef]:
     return out
 
 
+def start_of(day: date) -> datetime:
+    return datetime.combine(day, time.min, UTC)
+
+
+def end_of(day: date) -> datetime:
+    """`as_of=2026-09-15` means everything known by the end of that day (UTC)."""
+    return datetime.combine(day, time.max, UTC)
+
+
+def score_point(score: Score) -> ScorePoint:
+    return ScorePoint(
+        run_id=score.run_id,
+        computed_at=score.computed_at,
+        band=score.band,
+        score=score.trust_score,
+        coverage=score.coverage,
+    )
+
+
 def _edge_role(person: Person) -> str | None:
     if person.role in (PersonRole.ADMINISTRATOR, PersonRole.LEGAL_REPRESENTATIVE):
         return "administrator" if person.valid_to is None else "former_administrator"
@@ -71,15 +93,38 @@ class RepoReadModel:
             raise HTTPException(status_code=404, detail=f"unknown company {cui}")
         return identity
 
+    async def _score(self, cui: str, as_of: date | None) -> Score | None:
+        if as_of is None:
+            return await self.repo.get_latest_score(cui)
+        return await self.repo.get_score_as_of(cui, end_of(as_of))
+
+    async def _signals(self, cui: str, as_of: date | None) -> list[Signal]:
+        if as_of is None:
+            return await self.repo.list_signals(cui)
+        return await self.repo.list_signals_as_of(cui, end_of(as_of))
+
     async def list_companies(
-        self, *, band: Band | None, q: str | None, page: int, page_size: int
+        self,
+        *,
+        band: Band | None,
+        q: str | None,
+        page: int,
+        page_size: int,
+        as_of: date | None = None,
     ) -> CompanyList:
-        cuis, total = await self.repo.list_portfolio(band=band, q=q, page=page, page_size=page_size)
+        if as_of is None:
+            cuis, total = await self.repo.list_portfolio(
+                band=band, q=q, page=page, page_size=page_size
+            )
+        else:
+            cuis, total = await self.repo.list_portfolio_as_of(
+                as_of=end_of(as_of), band=band, q=q, page=page, page_size=page_size
+            )
         items: list[CompanyListItem] = []
         for cui in cuis:
             identity = await self.repo.get_identity_sheet(cui)
-            score = await self.repo.get_latest_score(cui)
-            signals = await self.repo.list_signals(cui) if score else []
+            score = await self._score(cui, as_of)
+            signals = await self._signals(cui, as_of) if score else []
             items.append(
                 CompanyListItem(
                     cui=cui,
@@ -94,10 +139,14 @@ class RepoReadModel:
             )
         return CompanyList(items=items, page=page, page_size=page_size, total=total)
 
-    async def detail(self, cui: str) -> CompanyDetail:
+    async def detail(self, cui: str, as_of: date | None = None) -> CompanyDetail:
+        """`as_of`: the score and signals the bank had at the end of that day. The identity
+        sheet is the current one (sheets are not versioned by date)."""
         identity = await self._identity(cui)
-        score = await self.repo.get_latest_score(cui)
-        signals = await self.repo.list_signals(cui) if score else []
+        score = await self._score(cui, as_of)
+        if as_of is not None and score is None:
+            raise HTTPException(status_code=404, detail=f"company {cui} not checked by {as_of}")
+        signals = await self._signals(cui, as_of) if score else []
         return CompanyDetail(
             identity_sheet=identity,
             score=score.trust_score if score else None,
@@ -108,9 +157,24 @@ class RepoReadModel:
             last_checked=score.computed_at if score else None,
         )
 
-    async def signals(self, cui: str) -> list[Signal]:
+    async def signals(self, cui: str, as_of: date | None = None) -> list[Signal]:
         await self._identity(cui)
-        return await self.repo.list_signals(cui)
+        return await self._signals(cui, as_of)
+
+    async def history(
+        self, cui: str, date_from: date | None, date_to: date | None
+    ) -> CompanyHistory:
+        await self._identity(cui)
+        since = start_of(date_from) if date_from else None
+        until = end_of(date_to) if date_to else None
+        return CompanyHistory(
+            cui=cui,
+            date_from=date_from,
+            date_to=date_to,
+            scores=[score_point(s) for s in await self.repo.list_score_history(cui, since, until)],
+            events=await self.repo.list_events(cui, date_from, date_to),
+            decisions=await self.repo.list_decisions_between(cui, since, until),
+        )
 
     async def memo(self, cui: str) -> MemoResponse:
         memo = await self.repo.get_latest_memo(cui)

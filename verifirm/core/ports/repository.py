@@ -3,11 +3,18 @@
 Writes are idempotent: saving the same AgentResult twice for one run never duplicates
 signals (they are keyed by signal_id).
 Local: in-memory. Real: Postgres via SQLAlchemy (verifirm/persistence, D5).
+
+Time-travel reads (docs/DECISIONS.md, "Time-travel reads") use two time axes, never mixed:
+- known-at: `as_of` / `since` / `until` (datetimes) on Score.computed_at and
+  DecisionRecord.recorded_at: what the bank knew at that moment (replay).
+- happened-at: `list_events` on Signal.evidence_date (dates): when the fact occurred.
+All bounds are inclusive. None = open.
 """
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from datetime import date, datetime
 
 from verifirm.schema.api import DecisionRecord
 from verifirm.schema.financials import SubmittedFinancials
@@ -73,3 +80,37 @@ class Repository(ABC):
 
     @abstractmethod
     async def list_decisions(self, cui: str) -> list[DecisionRecord]: ...
+
+    # --- time-travel reads
+    @abstractmethod
+    async def get_score_as_of(self, cui: str, as_of: datetime) -> Score | None:
+        """The newest score computed at or before `as_of`."""
+
+    @abstractmethod
+    async def list_score_history(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[Score]:
+        """Every score computed in [since, until], oldest first."""
+
+    @abstractmethod
+    async def list_signals_as_of(self, cui: str, as_of: datetime) -> list[Signal]:
+        """Signals of the newest run scored at or before `as_of`."""
+
+    @abstractmethod
+    async def list_events(
+        self, cui: str, since: date | None = None, until: date | None = None
+    ) -> list[Signal]:
+        """Signals of the newest scored run whose evidence_date is in [since, until], oldest
+        first. Signals without an evidence_date are left out."""
+
+    @abstractmethod
+    async def list_portfolio_as_of(
+        self, *, as_of: datetime, band: Band | None, q: str | None, page: int, page_size: int
+    ) -> tuple[list[str], int]:
+        """The portfolio at `as_of`: companies scored by then, `band` = their band at that time."""
+
+    @abstractmethod
+    async def list_decisions_between(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[DecisionRecord]:
+        """Analyst decisions recorded in [since, until], oldest first."""

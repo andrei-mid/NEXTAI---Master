@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from verifirm.core.config import get_settings
 from verifirm.schema.api import (
     CompanyDetail,
+    CompanyHistory,
     CompanyList,
     DecisionRecord,
     Graph,
@@ -86,3 +87,43 @@ def test_decision_is_recorded(client: TestClient) -> None:
     )
     assert resp.status_code == 201
     assert DecisionRecord.model_validate(resp.json()).decision.value == "escalate"
+
+
+def test_history_in_fixture_mode(client: TestClient) -> None:
+    body = client.get(
+        "/companies/99000025/history", params={"from": "2025-01-01", "to": "2025-12-31"}
+    ).json()
+    history = CompanyHistory.model_validate(body)
+    assert history.date_from is not None and history.date_to is not None
+    assert history.events and all(
+        e.evidence_date and history.date_from <= e.evidence_date <= history.date_to
+        for e in history.events
+    )
+    assert [e.evidence_date for e in history.events] == sorted(
+        e.evidence_date for e in history.events if e.evidence_date
+    )
+    assert history.scores == []  # the fixture check is in October 2026, outside the period
+    everything = CompanyHistory.model_validate(client.get("/companies/99000025/history").json())
+    assert len(everything.scores) == 1 and len(everything.events) >= len(history.events)
+
+
+def test_history_rejects_an_inverted_period(client: TestClient) -> None:
+    response = client.get(
+        "/companies/99000025/history", params={"from": "2026-02-01", "to": "2026-01-01"}
+    )
+    assert response.status_code == 422
+
+
+def test_as_of_before_any_check(client: TestClient) -> None:
+    empty = CompanyList.model_validate(
+        client.get("/companies", params={"as_of": "2026-01-01"}).json()
+    )
+    assert empty.total == 0
+    assert client.get("/companies/99000025", params={"as_of": "2026-01-01"}).status_code == 404
+    assert (
+        client.get("/companies/99000025/signals", params={"as_of": "2026-01-01"}).status_code == 404
+    )
+    now = CompanyList.model_validate(
+        client.get("/companies", params={"as_of": "2026-10-28"}).json()
+    )
+    assert now.total > 0

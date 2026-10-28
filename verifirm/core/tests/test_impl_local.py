@@ -54,3 +54,58 @@ async def test_rate_limiter_is_global_across_tasks() -> None:
 async def test_fixture_web_search_reads_media_fixtures() -> None:
     results = await FixtureWebSearch(FIXTURES).search("ZEPHYRIA LOGISTIC NOVA")
     assert results and all(r.url.startswith("https://") and ".example/" in r.url for r in results)
+
+
+async def test_memory_repository_time_travel_matches_postgres_semantics() -> None:
+    from datetime import UTC, date, datetime
+
+    from verifirm.core.impl_local.repository import MemoryRepository
+    from verifirm.schema.api import DecisionKind, DecisionRecord
+    from verifirm.schema.scoring import Band, Coverage, Score
+
+    def at(month: int) -> datetime:
+        return datetime(2026, month, 15, tzinfo=UTC)
+
+    def score(cui: str, run_id: str, band: Band, month: int) -> Score:
+        return Score(
+            cui=cui,
+            run_id=run_id,
+            band=band,
+            components=[],
+            coverage=Coverage(weight_pct=0, available=0, total=8),
+            config_version="t",
+            computed_at=at(month),
+        )
+
+    repo = MemoryRepository()
+    await repo.save_score(score("99000017", "r2", Band.RED, 9))  # saved out of order
+    await repo.save_score(score("99000017", "r1", Band.GREEN, 1))
+    await repo.save_score(score("99000025", "r3", Band.YELLOW, 6))
+
+    assert [s.run_id for s in await repo.list_score_history("99000017")] == ["r1", "r2"]
+    assert (await repo.get_score_as_of("99000017", at(3))).band == Band.GREEN  # type: ignore[union-attr]
+    assert await repo.get_score_as_of("99000017", at(1).replace(day=1)) is None
+    assert await repo.list_portfolio_as_of(
+        as_of=at(3), band=None, q=None, page=1, page_size=10
+    ) == (["99000017"], 1)
+    assert await repo.list_portfolio_as_of(
+        as_of=at(10), band=Band.YELLOW, q=None, page=1, page_size=10
+    ) == (["99000025"], 1)
+
+    def decision(did: str, month: int) -> DecisionRecord:
+        return DecisionRecord(
+            decision_id=did,
+            cui="99000017",
+            decision=DecisionKind.ESCALATE,
+            comment="c",
+            analyst="a",
+            run_id=None,
+            band_at_decision=None,
+            recorded_at=at(month),
+        )
+
+    await repo.record_decision(decision("d2", 6))
+    await repo.record_decision(decision("d1", 2))
+    between = await repo.list_decisions_between("99000017", since=at(1), until=at(12))
+    assert [d.decision_id for d in between] == ["d1", "d2"]
+    assert await repo.list_events("99000017", since=date(2026, 1, 1)) == []  # no signals stored
