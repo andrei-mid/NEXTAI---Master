@@ -102,7 +102,9 @@ def _check(
     for stem in FORBIDDEN_STEMS:
         if stem in lowered and not evidence.mentions(stem):
             return f"wording '{stem}...' is not in any cited signal (the analyst decides)"
-    if any(not s.validated for s in cited) and not ("unvalidated" in lowered or "nevalidat" in lowered):
+    if any(not s.validated for s in cited) and not (
+        "unvalidated" in lowered or "nevalidat" in lowered
+    ):
         return "cites an unvalidated (media) signal without saying so"
     missing = unsupported(text, evidence)
     if missing:

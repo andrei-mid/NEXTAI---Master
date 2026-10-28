@@ -69,7 +69,10 @@ class OpenAIClient(HttpLLMClient):
     ) -> dict[str, Any]:
         payload: dict[str, Any] = {
             "model": self.model_name(model),
-            "messages": [{"role": "system", "content": system}, *[m.model_dump() for m in messages]],
+            "messages": [
+                {"role": "system", "content": system},
+                *[m.model_dump() for m in messages],
+            ],
             self.token_param: max_tokens,
         }
         if self.send_temperature:

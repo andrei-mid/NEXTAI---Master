@@ -34,7 +34,9 @@ CUI = "99000033"
 
 
 def source(name: str = "ANAF", type_: SourceType = SourceType.OFFICIAL) -> SourceRef:
-    return SourceRef(name=name, type=type_, url=f"https://{name.lower()}.example/x", retrieved_at=NOW)
+    return SourceRef(
+        name=name, type=type_, url=f"https://{name.lower()}.example/x", retrieved_at=NOW
+    )
 
 
 @pytest.fixture
@@ -102,9 +104,7 @@ def identity() -> IdentitySheet:
         status=CompanyStatus.ACTIVE,
         registration_date=date(2012, 6, 11),
         registered_office=Address(raw="Bd. Inventat 42, Judetul Fictiv", county="Județul Fictiv"),
-        administrators=[
-            Person(name="SORIN IMAGINESCU", role=PersonRole.ADMINISTRATOR, source=src)
-        ],
+        administrators=[Person(name="SORIN IMAGINESCU", role=PersonRole.ADMINISTRATOR, source=src)],
         shareholders=[
             Person(
                 name="CALBRONA HOLDING FICTIV SRL",
@@ -129,7 +129,11 @@ def make_report(identity: IdentitySheet) -> Callable[[list[Signal]], Consolidate
             band=Band.RED,
             components=[
                 ComponentScore(
-                    component=Component.TAX, status=AgentStatus.OK, available=True, score=40, weight=0.2
+                    component=Component.TAX,
+                    status=AgentStatus.OK,
+                    available=True,
+                    score=40,
+                    weight=0.2,
                 )
             ],
             coverage=Coverage(weight_pct=100.0, available=8, total=8),

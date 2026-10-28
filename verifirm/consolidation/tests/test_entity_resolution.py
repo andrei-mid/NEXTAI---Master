@@ -1,4 +1,4 @@
-﻿from verifirm.consolidation.entity_resolution import resolve
+from verifirm.consolidation.entity_resolution import resolve
 from verifirm.schema.signals import AgentStatus, SourceType
 
 
@@ -36,8 +36,12 @@ def test_name_county_match_mismatch_and_missing(identity, make_signal, make_resu
 
 
 def test_name_fuzzy_three_outcomes(identity, make_signal, make_result) -> None:  # type: ignore[no-untyped-def]
-    close = make_signal("A:1", method="name_fuzzy", data={"matched_name": "Brunaldo Trade Impex S.R.L."})
-    middling = make_signal("A:2", method="name_fuzzy", data={"matched_name": "BRUNALDO TRADING IMPORT"})
+    close = make_signal(
+        "A:1", method="name_fuzzy", data={"matched_name": "Brunaldo Trade Impex S.R.L."}
+    )
+    middling = make_signal(
+        "A:2", method="name_fuzzy", data={"matched_name": "BRUNALDO TRADING IMPORT"}
+    )
     far = make_signal("A:3", method="name_fuzzy", data={"matched_name": "ORVANTO DISTRIBUTIE"})
     (res,) = resolve(identity, [make_result([close, middling, far])])
     by_id = {s.signal_id: s for s in res.signals}
@@ -79,9 +83,13 @@ def test_same_fact_two_sources_keeps_official_and_mentions_the_other(  # type: i
     identity, make_signal, make_result
 ) -> None:
     official = make_signal("A:2", confidence=0.5)
-    mock_src = official.source.model_copy(update={"name": "Arrears (MOCK)", "type": SourceType.MOCK})
+    mock_src = official.source.model_copy(
+        update={"name": "Arrears (MOCK)", "type": SourceType.MOCK}
+    )
     mock = make_signal("A:1", src=mock_src, confidence=0.99)
-    out = resolve(identity, [make_result([mock], agent="tax"), make_result([official], agent="net")])
+    out = resolve(
+        identity, [make_result([mock], agent="tax"), make_result([official], agent="net")]
+    )
     kept = [s for r in out for s in r.signals]
     assert [s.signal_id for s in kept] == ["A:2"]
     assert kept[0].data["also_seen_in"] == ["Arrears (MOCK)"]
@@ -92,4 +100,3 @@ def test_different_facts_are_not_merged(identity, make_signal, make_result) -> N
     b = make_signal("A:2", data={"x": 2}, src=a.source.model_copy(update={"name": "Other"}))
     out = resolve(identity, [make_result([a, b])])
     assert len(out[0].signals) == 2
-

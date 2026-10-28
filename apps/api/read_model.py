@@ -74,9 +74,7 @@ class RepoReadModel:
     async def list_companies(
         self, *, band: Band | None, q: str | None, page: int, page_size: int
     ) -> CompanyList:
-        cuis, total = await self.repo.list_portfolio(
-            band=band, q=q, page=page, page_size=page_size
-        )
+        cuis, total = await self.repo.list_portfolio(band=band, q=q, page=page, page_size=page_size)
         items: list[CompanyListItem] = []
         for cui in cuis:
             identity = await self.repo.get_identity_sheet(cui)

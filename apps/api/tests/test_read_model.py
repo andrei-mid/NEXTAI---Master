@@ -1,4 +1,4 @@
-﻿from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime
 
 import pytest
 from fastapi import HTTPException
@@ -28,7 +28,9 @@ CUI = "99000033"
 
 
 def src(name: str = "ANAF") -> SourceRef:
-    return SourceRef(name=name, type=SourceType.OFFICIAL, url="https://anaf.example/x", retrieved_at=NOW)
+    return SourceRef(
+        name=name, type=SourceType.OFFICIAL, url="https://anaf.example/x", retrieved_at=NOW
+    )
 
 
 def sig(sid: str, severity: Severity, *, validated: bool = True, confidence: float = 0.9) -> Signal:
@@ -138,7 +140,9 @@ async def test_company_never_checked_has_null_band() -> None:
     await repo.save_identity_sheet("r", identity())
     detail = await RepoReadModel(repo).detail(CUI)
     assert detail.band is None and detail.score is None and detail.coverage is None
-    (item,) = (await RepoReadModel(repo).list_companies(band=None, q=None, page=1, page_size=5)).items
+    (item,) = (
+        await RepoReadModel(repo).list_companies(band=None, q=None, page=1, page_size=5)
+    ).items
     assert item.band is None and item.top_signal is None
 
 
@@ -162,7 +166,12 @@ async def test_memo_response_comes_from_the_stored_memo() -> None:
 async def test_graph_has_company_people_and_roles() -> None:
     graph = await (await seeded()).graph(CUI, depth=2)
     ids = {n.id for n in graph.nodes}
-    assert ids == {f"company:{CUI}", "person:sorin-imaginescu", "person:ana-veche", "company:99000090"}
+    assert ids == {
+        f"company:{CUI}",
+        "person:sorin-imaginescu",
+        "person:ana-veche",
+        "company:99000090",
+    }
     roles = {(e.source, e.role) for e in graph.edges}
     assert roles == {
         ("person:sorin-imaginescu", "administrator"),

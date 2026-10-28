@@ -66,7 +66,9 @@ async def test_complete_json_sends_strict_json_schema() -> None:
 
 async def test_refusal_is_an_error_not_an_answer() -> None:
     body = {"choices": [{"message": {"content": None, "refusal": "no"}}]}
-    http = httpx.AsyncClient(transport=httpx.MockTransport(lambda r: httpx.Response(200, json=body)))
+    http = httpx.AsyncClient(
+        transport=httpx.MockTransport(lambda r: httpx.Response(200, json=body))
+    )
     with pytest.raises(ValueError, match="refused"):
         await OpenAIClient(settings(), http).complete_json(system="s", messages=USER, schema=Out)
 

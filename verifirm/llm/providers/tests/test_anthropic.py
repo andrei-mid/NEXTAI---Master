@@ -95,7 +95,9 @@ async def test_hard_failure_is_unavailable_not_empty() -> None:
 
 
 async def test_complete_text_joins_text_blocks() -> None:
-    reply = httpx.Response(200, json={"content": [{"type": "text", "text": "a"}, {"type": "text", "text": "b"}]})
+    reply = httpx.Response(
+        200, json={"content": [{"type": "text", "text": "a"}, {"type": "text", "text": "b"}]}
+    )
     assert await client(lambda r: reply).complete_text(system="s", messages=USER) == "ab"
 
 

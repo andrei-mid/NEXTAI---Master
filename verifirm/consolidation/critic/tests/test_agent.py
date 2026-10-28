@@ -1,4 +1,4 @@
-﻿from datetime import UTC, datetime
+from datetime import UTC, datetime
 
 from verifirm.consolidation.critic.agent import verify_memo
 from verifirm.core.impl_local.llm import FakeLLMClient
@@ -7,7 +7,9 @@ from verifirm.schema.memo import Memo, MemoSection, SectionKind
 SIG = "TAX-ARREARS-01:aaaa"
 
 
-def memo(*sentences: tuple[str, list[str]], kind: SectionKind = SectionKind.RED_SIGNALS, questions=()) -> Memo:  # type: ignore[no-untyped-def]
+def memo(
+    *sentences: tuple[str, list[str]], kind: SectionKind = SectionKind.RED_SIGNALS, questions=()
+) -> Memo:  # type: ignore[no-untyped-def]
     return Memo(
         cui="99000033",
         run_id="run_1",
@@ -50,7 +52,9 @@ async def test_invented_number_is_removed(make_signal, make_report) -> None:  # 
 async def test_number_must_come_from_the_cited_signal_not_another(make_signal, make_report) -> None:  # type: ignore[no-untyped-def]
     a = make_signal(SIG)
     b = make_signal("LIT-X-01:bbbb", claim="Claim of 1,800,000 RON.", data={"amount": 1800000})
-    out = await verify_memo(memo(("Claim of 1,800,000 RON.", [SIG])), make_report([a, b]), None, "m")
+    out = await verify_memo(
+        memo(("Claim of 1,800,000 RON.", [SIG])), make_report([a, b]), None, "m"
+    )
     assert out.verifier_report is not None and not out.verifier_report.passed
 
 
@@ -77,15 +81,21 @@ async def test_summary_may_quote_score_and_counts_without_citing(make_signal, ma
 
 
 async def test_media_claim_must_say_unvalidated(make_signal, make_report) -> None:  # type: ignore[no-untyped-def]
-    media = make_signal("MED-NEGATIVE-01:m", claim="Press says suppliers unpaid.", data={}, validated=False)
+    media = make_signal(
+        "MED-NEGATIVE-01:m", claim="Press says suppliers unpaid.", data={}, validated=False
+    )
     report = make_report([media])
     plain = "Press says suppliers are unpaid."
     labelled = "An unvalidated article says suppliers are unpaid."
-    out = await verify_memo(memo((plain, [media.signal_id]), (labelled, [media.signal_id])), report, None, "m")
+    out = await verify_memo(
+        memo((plain, [media.signal_id]), (labelled, [media.signal_id])), report, None, "m"
+    )
     assert list(reasons(out)) == [plain]
 
 
-async def test_decision_and_fraud_wording_is_removed_unless_in_a_signal(make_signal, make_report) -> None:  # type: ignore[no-untyped-def]
+async def test_decision_and_fraud_wording_is_removed_unless_in_a_signal(
+    make_signal, make_report
+) -> None:  # type: ignore[no-untyped-def]
     court = make_signal("LIT-X-01:c", claim="The court rejected the appeal.", data={})
     report = make_report([court, make_signal(SIG)])
     ok = "The court rejected the appeal."
@@ -139,8 +149,12 @@ async def test_llm_pass_rejects_unsupported_and_missing_verdicts(make_signal, ma
 
 async def test_llm_pass_only_sees_what_pass_one_kept(make_signal, make_report) -> None:  # type: ignore[no-untyped-def]
     report = make_report([make_signal(SIG)])
-    llm = FakeLLMClient(json_responses={"CriticVerdicts": {"verdicts": [{"index": 1, "supported": True}]}})
-    out = await verify_memo(memo(("Owes 7777 RON.", [SIG]), ("Owes 412,560 RON.", [SIG])), report, llm, "m")
+    llm = FakeLLMClient(
+        json_responses={"CriticVerdicts": {"verdicts": [{"index": 1, "supported": True}]}}
+    )
+    out = await verify_memo(
+        memo(("Owes 7777 RON.", [SIG]), ("Owes 412,560 RON.", [SIG])), report, llm, "m"
+    )
     assert "Owes 412,560 RON." in out.markdown
     assert "<untrusted_data" in llm.calls[0]["messages"][0].content
 
@@ -151,4 +165,3 @@ async def test_llm_failure_is_never_a_silent_pass(make_signal, make_report) -> N
     assert out.verifier_report is not None and not out.verifier_report.passed
     assert "unavailable" in out.verifier_report.rejected[0].reason
     assert "412,560" in out.markdown  # deterministic checks passed, so the text stays
-

@@ -1,4 +1,4 @@
-﻿"""Entity resolution over all agents' signals.
+"""Entity resolution over all agents' signals.
 
 1. Dedupe: the same signal_id keeps one copy. The same fact from two sources (same rule_id and
    same `data`) keeps the official one and names the other source in data["also_seen_in"].
@@ -122,7 +122,10 @@ def _mark_ambiguous(signal: Signal, cfg: ResolutionConfig) -> Signal:
         method=signal.entity_match.method, score=signal.entity_match.score, ambiguous=True
     )
     return signal.model_copy(
-        update={"entity_match": match, "confidence": round(signal.confidence * cfg.ambiguous_factor, 4)}
+        update={
+            "entity_match": match,
+            "confidence": round(signal.confidence * cfg.ambiguous_factor, 4),
+        }
     )
 
 
@@ -197,5 +200,7 @@ def resolve(
             )
         if dupes.get(i):
             notes.append(f"entity resolution merged {dupes[i]} duplicate signal(s)")
-        out.append(result.model_copy(update={"signals": signals, "notes": "; ".join(notes) or None}))
+        out.append(
+            result.model_copy(update={"signals": signals, "notes": "; ".join(notes) or None})
+        )
     return out

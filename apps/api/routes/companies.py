@@ -54,14 +54,20 @@ async def list_companies(
 
 
 @router.get("/{cui}", response_model=CompanyDetail)
-async def get_company(cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)) -> CompanyDetail:
+async def get_company(
+    cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)
+) -> CompanyDetail:
     if not infra.settings.fixture_mode:
         return await RepoReadModel(infra.repository).detail(cui)
-    return CompanyDetail.model_validate(_store(infra.settings.fixtures_dir).read(cui, "company.json"))
+    return CompanyDetail.model_validate(
+        _store(infra.settings.fixtures_dir).read(cui, "company.json")
+    )
 
 
 @router.get("/{cui}/signals", response_model=list[Signal])
-async def get_signals(cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)) -> list[Signal]:
+async def get_signals(
+    cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)
+) -> list[Signal]:
     if not infra.settings.fixture_mode:
         return await RepoReadModel(infra.repository).signals(cui)
     raw = _store(infra.settings.fixtures_dir).read(cui, "signals.json")
@@ -69,7 +75,9 @@ async def get_signals(cui: str = Depends(valid_cui), infra: Infra = Depends(get_
 
 
 @router.get("/{cui}/memo", response_model=MemoResponse)
-async def get_memo(cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)) -> MemoResponse:
+async def get_memo(
+    cui: str = Depends(valid_cui), infra: Infra = Depends(get_infra)
+) -> MemoResponse:
     if not infra.settings.fixture_mode:
         return await RepoReadModel(infra.repository).memo(cui)
     return MemoResponse.model_validate(_store(infra.settings.fixtures_dir).read(cui, "memo.json"))

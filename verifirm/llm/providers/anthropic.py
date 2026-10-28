@@ -88,7 +88,9 @@ class AnthropicClient(HttpLLMClient):
         payload = self._payload(system, messages, model, max_tokens, temperature)
         body = await self.post(self.url, self._headers(), payload)
         self._log(body, str(payload["model"]))
-        return "".join(b.get("text", "") for b in body.get("content", []) if b.get("type") == "text")
+        return "".join(
+            b.get("text", "") for b in body.get("content", []) if b.get("type") == "text"
+        )
 
     def _log(self, body: dict[str, object], model: str) -> None:
         usage = body.get("usage")

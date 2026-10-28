@@ -50,7 +50,9 @@ class HttpLLMClient(LLMClient):
             self._http = httpx.AsyncClient(timeout=timeout)
         return self._http
 
-    async def post(self, url: str, headers: dict[str, str], payload: dict[str, Any]) -> dict[str, Any]:
+    async def post(
+        self, url: str, headers: dict[str, str], payload: dict[str, Any]
+    ) -> dict[str, Any]:
         """POST JSON, retry transport errors / 429 / 5xx with backoff, return the parsed body."""
         attempts = max(1, self.settings.http_max_retries + 1)
         last_error = "unknown error"
