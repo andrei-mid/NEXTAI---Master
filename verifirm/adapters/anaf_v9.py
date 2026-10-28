@@ -23,13 +23,21 @@ Local-first (docs/LOCAL_DATA.md). Mirror entries, each shaped like a v9 response
                (Not keyed by date only: a run before the daily sweep would find nothing.)
 - `CUI:date`   a dated snapshot: what ANAF answered for that date. A past date never changes,
                so it is downloaded ONCE, ever (like a filed balance sheet).
-- `sync(cui)`: today + the last day of each of the previous `history_months` months, only
-  the entries not in the mirror yet, in as few requests as possible (100 entries each).
-  First sync of a company: 1 request with 13 entries. Later: at most today's entry.
-- `lookup_batch(cuis)` with network (sweep job): 100 entries per request, stores the latest
-  record and today's snapshot per CUI. History builds up daily on its own.
+- `sync(cui)`: ONE request with today + the last day of each of the previous `history_months`
+  months, only the entries not in the mirror yet. First sync of a company: 13 entries. Later:
+  at most today's entry (plus a new month-end once a month).
+- `lookup_batch(cuis)` with network (sweep job): ONE request for at most 100 CUIs, stores the
+  latest record and today's snapshot per CUI. History builds up on its own.
 - READ methods (`lookup`, `history`, `lookup_batch` without network) never call ANAF.
-- No retry on HTTP 429: ANAF asking us to slow down is never answered with more requests.
+
+SAFETY (ANAF: max 100 CUIs per request, max 1 request/second, overloading is punished):
+- ONE CALL = AT MOST ONE REQUEST. No method sends requests in a loop: no chunking, no retries.
+  More than MAX_BATCH entries is refused BEFORE anything is sent (ValueError). A caller that
+  needs more (the sweep job) makes separate, scheduled calls.
+- MAX_BATCH counts ENTRIES (cui+date), so both readings of "100 de CUI-uri" hold.
+- Every request first waits for the global RateLimiter (`anaf_webservicesp`, shared with /bilant).
+- No retry of any kind (429, 5xx, timeout): the failure is reported, the old mirror copy is
+  served stale, and the next scheduled sync tries again.
 """
 
 from __future__ import annotations
@@ -166,13 +174,14 @@ class AnafV9Adapter(BaseAdapter):
     rate_limit = RateLimit.per_second(1)
     rate_limit_key = "anaf_webservicesp"  # same host as /bilant, so they share one limit
     mirror_max_age_s = 86_400  # inactive / VAT status can change any day
-    retry_statuses = frozenset({500, 502, 503, 504})  # never retry a 429 (see docstring)
+    retry_statuses = frozenset[int]()  # never retry anything (see SAFETY)
     history_months = 12  # month-end snapshots kept per company (13 entries with today)
 
     # ------------------------------------------------------------------ sync (network)
     async def sync(self, cui: str) -> SyncReport:
-        """Download what's missing for one company: today's record if the latest entry is not
-        fresh, plus every month-end snapshot not in the mirror yet. As few requests as possible."""
+        """ONE request for what's missing for one company: today's record if the latest entry is
+        not fresh, plus the month-end snapshots not in the mirror yet (newest first). Capped at
+        MAX_BATCH entries; anything beyond waits for the next sync, never a second request."""
         report = SyncReport(adapter=self.name, cui=cui)
         today = self.deps.clock.today()
         latest = await self.from_mirror(cui)
@@ -184,14 +193,15 @@ class AnafV9Adapter(BaseAdapter):
             if snapshot is None or not _record_of(snapshot, cui)[0]:
                 wanted.append(day)
         report.reused = 1 + self.history_months - len(wanted)
+        wanted = wanted[:MAX_BATCH]  # the rest goes in the next sync's single request
         if not wanted:
             return report
         try:
-            records, calls = await self._download([(cui, day) for day in wanted])
+            records = await self._download([(cui, day) for day in wanted])
         except SourceUnavailable:
             report.failed.append(cui)
             return report
-        report.downloaded = calls
+        report.downloaded = 1
         report.failed = [_dated(cui, day) for day in wanted if (cui, day) not in records]
         return report
 
@@ -238,8 +248,9 @@ class AnafV9Adapter(BaseAdapter):
     ) -> Sourced[dict[str, dict[str, Any] | None]]:
         """{cui: record or None}. CUIs that can't be read are left out (unknown, never clean).
 
-        - Network adapter (sweep job): 100 entries per request, one request at a time,
-          then the latest entry and the dated snapshot per CUI.
+        - Network adapter (sweep job): ONE request for at most MAX_BATCH CUIs (more raises
+          ValueError before anything is sent), then the latest entry and the dated snapshot per
+          CUI. The caller schedules the next batch; this method never loops over requests.
         - Otherwise (agents, fixture mode): one mirror / fixture read per CUI, no network.
         """
         unique = list(dict.fromkeys(str(c) for c in cuis))
@@ -256,7 +267,7 @@ class AnafV9Adapter(BaseAdapter):
                 raise SourceUnavailable(self.name, "none of the CUIs is in the local mirror")
             return Sourced(data=out, source=source)
 
-        records, _ = await self._download([(cui, on_date) for cui in unique])
+        records = await self._download([(cui, on_date) for cui in unique])
         if not records:
             raise SourceUnavailable(self.name, "ANAF returned none of the requested CUIs")
         stored = await self.from_mirror(_dated(next(iter(records))[0], on_date))
@@ -276,31 +287,41 @@ class AnafV9Adapter(BaseAdapter):
 
         return request
 
-    async def _download(
-        self, entries: list[Entry]
-    ) -> tuple[dict[Entry, dict[str, Any] | None], int]:
-        """POST `entries` in chunks of MAX_BATCH, ONE rate-limited request at a time. Stores each
-        answer as a dated snapshot, and as the latest record when the date is today.
-        Returns (answers, number of requests made)."""
-        today = self.deps.clock.today()
-        answers: dict[Entry, dict[str, Any] | None] = {}
-        calls = 0
+    async def _download(self, entries: list[Entry]) -> dict[Entry, dict[str, Any] | None]:
+        """EXACTLY ONE rate-limited POST for at most MAX_BATCH entries (more: ValueError, nothing
+        sent). Stores each answer as a dated snapshot, and as the latest record when the date is
+        today. Answers ANAF didn't give are left out (unknown, never clean)."""
         unique = list(dict.fromkeys(entries))
-        for start in range(0, len(unique), MAX_BATCH):
-            chunk = unique[start : start + MAX_BATCH]
-            raw = await self._call_with_retry(self._request(chunk))  # 1 req/s globally
-            calls += 1
-            try:
-                got = split_entries(json.loads(raw), chunk)
-            except ValueError as exc:
-                raise SourceUnavailable(self.name, f"invalid v9 response: {exc}") from exc
-            for (cui, day), record in got.items():
-                body = _single_body(cui, record)
-                await self.store_in_mirror(_dated(cui, day), body, URL)
-                if day == today:
-                    await self.store_in_mirror(cui, body, URL)
-            answers.update(got)
-        return answers, calls
+        if len(unique) > MAX_BATCH:
+            raise ValueError(
+                f"{len(unique)} entries: ANAF allows {MAX_BATCH} per request. Split them and "
+                "schedule the requests (never in a loop here)."
+            )
+        today = self.deps.clock.today()
+        raw = await self._call_with_retry(self._request(unique))  # single attempt, 1 req/s
+        try:
+            answers = split_entries(json.loads(raw), unique)
+        except ValueError as exc:
+            raise SourceUnavailable(self.name, f"invalid v9 response: {exc}") from exc
+        for (cui, day), record in answers.items():
+            body = _single_body(cui, record)
+            await self.store_in_mirror(_dated(cui, day), body, URL)
+            if day == today:
+                await self.store_in_mirror(cui, body, URL)
+        return answers
+
+    async def _call_with_retry(self, request: RequestFn) -> bytes:
+        """ANAF override of BaseAdapter's retry loop: ONE attempt, after the global rate limiter.
+        Any failure (HTTP error, 429, 5xx, timeout) is reported, never retried."""
+        if self.rate_limit is not None:
+            await self.deps.rate_limiter.acquire(self.rate_limit_key or self.name, self.rate_limit)
+        try:
+            response = await request(await self._client())
+        except httpx.TransportError as exc:
+            raise SourceUnavailable(self.name, f"{type(exc).__name__}: {exc}") from exc
+        if response.status_code >= 400:
+            raise SourceUnavailable(self.name, f"HTTP {response.status_code} (not retried)")
+        return response.content
 
     async def _load(self, cui: str, on_date: date) -> FetchResult:
         """The latest entry (fixture in FIXTURE_MODE). Without network: mirror only (fresh, or

@@ -14,6 +14,7 @@
 - `split_entries()` matches answers on `date_generale.cui` **and** `date_generale.data`, so two dates of one CUI never overwrite each other.
 - Fixed: a network `lookup` could make two requests (once through `fetch()`, once through the batch path). It's always one now (tested).
 - `tax/rules.check_vat_cancelled` accepts `perioade_TVA` as a single object too, as ANAF's documentation shows it.
+- **Safety (ANAF: max 100 CUIs per request, 1 request/second, overloading is punished): in `anaf_v9`, one call = at most one request.** No chunking loop, no retries (429, 5xx, timeout: reported, the old copy is served stale). More than 100 entries raises `ValueError` before anything is sent. `lookup_batch` takes at most 100 CUIs, so **role 2's `sweep_anaf_v9` must schedule batches**, never loop. PENDING in DECISIONS.md: the same rule for `anaf_bilant` (6 requests per sync, with retries) and the per-process rate limiter.
 
 **What you can do with it:** name, address, CAEN and legal form **as of each month-end**, from an official source. Role 3 will use it for `ID-OFFICE-CHANGE-01` (live ONRC has no office history). Role 5 / identity sheet: `history()` can fill `names` and `office_history`.
 

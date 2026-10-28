@@ -247,13 +247,15 @@ async def test_new_month_adds_one_month_end(tmp_path: Path) -> None:
     assert [e["data"] for e in anaf.requests[1]] == ["2026-11-03", "2026-10-31"]
 
 
-async def test_more_than_100_entries_are_split(tmp_path: Path) -> None:
+async def test_more_than_100_missing_entries_wait_for_the_next_sync(tmp_path: Path) -> None:
     anaf = _Anaf()
     syncer = _adapter(tmp_path, anaf=anaf, network=True)
-    syncer.history_months = 150  # 151 entries
-    report = await syncer.sync("99000025")
+    syncer.history_months = 150  # 151 entries wanted
+    first = await syncer.sync("99000025")
+    assert [len(r) for r in anaf.requests] == [MAX_BATCH]  # ONE request, never a second one
+    assert first.downloaded == 1
+    await syncer.sync("99000025")  # the next (scheduled) sync takes the rest
     assert [len(r) for r in anaf.requests] == [MAX_BATCH, 51]
-    assert report.downloaded == 2
 
 
 async def test_not_found_is_none_for_every_date(tmp_path: Path) -> None:
@@ -278,40 +280,85 @@ async def test_network_lookup_makes_exactly_one_request(tmp_path: Path) -> None:
 
 
 # ------------------------------------------------------------------ the sweep's batch
-async def test_batch_sends_at_most_100_entries_per_request(tmp_path: Path) -> None:
+async def test_batch_is_one_request_for_at_most_100_cuis(tmp_path: Path) -> None:
     anaf = _Anaf()
     limiter = _CountingLimiter()
     sweeper = _adapter(tmp_path, anaf=anaf, network=True, limiter=limiter)
-    cuis = [str(99000000 + i) for i in range(1, 251)]
+    cuis = [str(99000050 + i) for i in range(100)]
     result = await sweeper.lookup_batch(cuis + cuis[:10], TODAY)  # duplicates are dropped
 
-    assert [len(r) for r in anaf.requests] == [MAX_BATCH, MAX_BATCH, 50]
-    assert limiter.acquired == ["anaf_webservicesp"] * 3  # every request waits for the limiter
-    assert len(result.data) == 250
-    assert result.data["99000150"] is None  # notFound
+    assert [len(r) for r in anaf.requests] == [MAX_BATCH]
+    assert limiter.acquired == ["anaf_webservicesp"]  # the request waited for the limiter
+    assert len(result.data) == 100
+    assert result.data["99000149"] is None  # notFound
 
     reader = _adapter(tmp_path)  # latest entry and today's snapshot, per CUI
-    assert (await reader.lookup("99000042", TODAY)).data is not None
-    assert TODAY.isoformat() in (await reader.history("99000042", [TODAY])).data
-    assert len(anaf.requests) == 3
+    assert (await reader.lookup("99000060", TODAY)).data is not None
+    assert TODAY.isoformat() in (await reader.history("99000060", [TODAY])).data
+    assert len(anaf.requests) == 1
+
+
+async def test_more_than_100_cuis_is_refused_before_sending(tmp_path: Path) -> None:
+    anaf = _Anaf()
+    sweeper = _adapter(tmp_path, anaf=anaf, network=True)
+    cuis = [str(99000000 + i) for i in range(1, 102)]
+    with pytest.raises(ValueError, match="100 per request"):
+        await sweeper.lookup_batch(cuis, TODAY)
+    assert anaf.requests == []
 
 
 # -------------------------------------------------------------------- the ANAF rules
-async def test_429_is_never_retried(tmp_path: Path) -> None:
+async def test_429_is_never_retried_with_retries_configured(tmp_path: Path) -> None:
     anaf = _Anaf(status=429)
     report = await _adapter(tmp_path, anaf=anaf, network=True, retries=3).sync("99000025")
     assert report.failed == ["99000025"]
     assert len(anaf.requests) == 1
 
 
-async def test_server_error_is_retried_through_the_limiter(tmp_path: Path) -> None:
-    anaf = _Anaf(status=503)
+@pytest.mark.parametrize("status", [429, 500, 502, 503, 504])
+async def test_no_error_is_ever_retried(tmp_path: Path, status: int) -> None:
+    anaf = _Anaf(status=status)
     limiter = _CountingLimiter()
-    report = await _adapter(tmp_path, anaf=anaf, network=True, retries=2, limiter=limiter).sync(
+    report = await _adapter(tmp_path, anaf=anaf, network=True, retries=3, limiter=limiter).sync(
         "99000025"
     )
     assert report.failed == ["99000025"]
-    assert len(anaf.requests) == 3 and len(limiter.acquired) == 3
+    assert len(anaf.requests) == 1 and len(limiter.acquired) == 1
+
+
+async def test_timeout_is_not_retried(tmp_path: Path) -> None:
+    calls: list[httpx.Request] = []
+
+    def timeout(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        raise httpx.ReadTimeout("slow", request=request)
+
+    deps = _adapter(tmp_path, network=True).deps
+    deps.http = httpx.AsyncClient(transport=httpx.MockTransport(timeout))
+    report = await AnafV9Adapter(deps).sync("99000025")
+    assert report.failed == ["99000025"]
+    assert len(calls) == 1
+
+
+async def test_a_failed_live_call_serves_the_old_copy(tmp_path: Path) -> None:
+    await _adapter(tmp_path, anaf=_Anaf(), network=True).sync("99000025")
+    down = _Anaf(status=503)
+    later = _adapter(tmp_path, anaf=down, network=True, now=NOW + timedelta(days=2))
+    result = await later.lookup("99000025", TODAY + timedelta(days=2))
+    assert result.stale is True and result.data is not None
+    assert len(down.requests) == 1
+
+
+async def test_every_network_method_makes_at_most_one_request(tmp_path: Path) -> None:
+    """The rule in one place: ONE CALL = AT MOST ONE REQUEST to ANAF."""
+    for call in (
+        lambda a: a.sync("99000025"),
+        lambda a: a.lookup("99000033", TODAY),
+        lambda a: a.lookup_batch([str(99000000 + i) for i in range(1, 101)], TODAY),
+    ):
+        anaf = _Anaf()
+        await call(_adapter(tmp_path / str(id(call)), anaf=anaf, network=True))
+        assert len(anaf.requests) == 1
 
 
 async def test_malformed_response_stores_nothing(tmp_path: Path) -> None:
