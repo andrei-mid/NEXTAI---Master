@@ -2,6 +2,8 @@
 
 One file per external source, all on top of [`base.py`](base.py). **Local-first:** read [docs/LOCAL_DATA.md](../../docs/LOCAL_DATA.md) before writing or changing an adapter.
 
+**ANAF v9 (dated snapshots, one request per call, no retries):** see [`anaf_v9.md`](anaf_v9.md).
+
 **Reference implementation:** [`anaf_bilant.py`](anaf_bilant.py) (READ methods + `sync()` + immutable-data reuse + tests in `tests/test_anaf_bilant.py`).
 
 ## Every adapter has two halves
@@ -18,7 +20,7 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | Adapter | Kind | Status | How data gets to the server |
 |---|---|---|---|
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
-| `anaf_v9` | batch per company | **implemented** | READ `lookup` / `lookup_batch` (mirror only, key = CUI). `sync()`: 1 request per applicant. `lookup_batch` on a network adapter: 100 CUIs per request → `store_in_mirror` per CUI (for the `sweep_anaf_v9` job, still a stub). Never retries a 429. Role 2 and role 3 versions merged |
+| `anaf_v9` | batch per company + dated snapshots | **implemented** | Mirror: `CUI` = latest record, `CUI:date` = what ANAF answered for that date (past dates downloaded once, ever). **One call = at most one request** to ANAF: no chunking loop, no retries, more than 100 entries (cui+date) refused before sending. `sync()`: one request with today + the missing quarter-ends (4). Human-triggered fetch tool: `apps/worker/jobs/sweep_anaf_v9.py` (dry run by default). `lookup_batch` on a network adapter: one request for at most 100 CUIs (the `sweep_anaf_v9` job, still a stub, schedules the batches). READ: `lookup`, `history` |
 | `anaf_efactura_registry` | per company | **implemented** | derived from the v9 mirror entry (`statusRO_e_Factura`). No call, no sync of its own |
 | `onrc_bulk` | bulk | **fixture reads only** (`company`, `companies_at_address`, `companies_of_person`, streaming `iter_rows`). Live: reports unavailable until `ingest_onrc` (role 1) loads the tables and the bulk-lookup port (PENDING) lets the adapter read them. `download()` stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |

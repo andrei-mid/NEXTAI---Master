@@ -27,7 +27,7 @@ Does the company owe the state, and do its declarations add up? It covers three 
 | TAX-ARREARS-01 | high | on ANAF's arrears list | `mock_restante` (**MOCK**) |
 | TAX-VAT-CANCELLED-01 | medium | VAT cancelled within 24 months, even if re-registered | `anaf_v9` |
 | TAX-EFACTURA-GAP-01 | medium if D300 **below** e-Factura, low if above | D300 sales vs e-Factura issued > 10% over the same period | `mock_d300` + `mock_efactura` (**MOCK**) |
-| TAX-EFACTURA-REG-01 | low | not enrolled in RO e-Factura | `anaf_efactura_registry` (from v9) |
+| TAX-EFACTURA-REG-01 | low, **OFF by default** | not enrolled in RO e-Factura. The v9 flag is the old opt-in register (pre-2024 mandate): on real data it flagged Dacia, Petrom, eMAG and Altex. Switch: `efactura_registration_check` in `config.yaml` | `anaf_efactura_registry` (from v9) |
 
 Thresholds live in [`config.yaml`](config.yaml). Change values there, not in code.
 
@@ -58,7 +58,7 @@ Thresholds live in [`config.yaml`](config.yaml). Change values there, not in cod
 | **Brunaldo** | ARREARS (Q2 2026: 412,560 principal + 96,300 accessories) · VAT-CANCELLED (2025-02-01, re-registered 2025-09-15) · EFACTURA-GAP (12.46M vs 15.2M, 18% below) · DECLARED-GAP (net result +300k vs −2.6M) |
 | Aurora | none (control). The note says "not on the Q2 2026 arrears list" |
 | Kestrel, Pelinor, Vantiro, Mirelda, Calbrona | `partial`: no arrears / D300 / e-Factura mock data |
-| Orvanto | EFACTURA-REG (ANAF lists it as not enrolled; it is deregistered), `partial` |
+| Orvanto | none (the e-Factura register rule is off), `partial` |
 | Dedeman (real) | `unavailable`: no fixtures, never clean |
 
 ## How to check it works

@@ -309,11 +309,14 @@ class TaxAgent(BaseAgent):
                         severity=rules.efactura_gap_severity(ef_gap),
                     )
 
-        # --- 5. RO e-Factura enrollment (derived from v9, no extra call).
-        enrolled = await read(
-            "anaf_efactura_registry",
-            lambda a: cast(AnafEfacturaRegistryAdapter, a).is_registered(ctx.cui),
-        )
+        # --- 5. RO e-Factura enrollment (derived from v9, no extra call). OFF by default: the
+        # v9 flag is the old opt-in register, not current e-Factura use (config.yaml).
+        enrolled = None
+        if cfg.efactura_registration_check:
+            enrolled = await read(
+                "anaf_efactura_registry",
+                lambda a: cast(AnafEfacturaRegistryAdapter, a).is_registered(ctx.cui),
+            )
         if enrolled is not None:
             if enrolled.data is None:
                 fail("anaf_efactura_registry", "enrollment status not published")

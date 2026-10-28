@@ -4,6 +4,49 @@
 
 ---
 
+## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
+
+**What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.
+
+**What you must do:** role 5: nothing, but keep it concurrent if you change the list. Role 1: going under 1 s needs batch reads in the repository (one query for all companies on a page) and no `pool_pre_ping` round trip before each query. Optional.
+
+---
+
+## 2026-10-29: TAX-EFACTURA-REG-01 is off by default (role 3) · found on real data
+
+**What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
+
+**What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
+
+---
+
+## 2026-10-28: Real data the safe way: the ANAF fetch tool (role 3) · ACTION NEEDED for a shared server
+
+**What:** `apps/worker/jobs/sweep_anaf_v9.py` is now **the ONE place a human triggers ANAF requests**: dry run by default, `--send` sends exactly ONE request, at least 1.1 s between requests even across runs (lock file), no retries, real CUIs only. `v9`: one request for all given companies (today + 4 quarter-ends each, only what's missing, max 100 entries). `bilant`: one request per run (newest missing year of the 5 the financials agent reads). `status`: what's in the mirror, no request. The scheduled `run()` is **not automated on purpose**. Commands: `verifirm/adapters/anaf_v9.md` §7. `anaf_v9` keeps 4 quarter-ends now (5 data points per company), not 12 month-ends.
+
+**What you must do:**
+- **Whoever runs a shared server: set `SYNC_ON_APPLICATION=0`.** Otherwise every "recheck" click from the frontend runs a sync, which means ANAF requests nobody approved. Data then comes only from the fetch tool, and the pipeline reads the mirror.
+- **Don't use `make seed-real` with sync on** (it sends about 7 requests per company in a loop). Fetch with the tool, then `SYNC_ON_APPLICATION=0 uv run python -m apps.worker.seed <CUIs>` (0 requests).
+- **Role 2 / role 5:** real and fictional companies on one server need a per-CUI switch (PENDING in DECISIONS.md, "Dedeman live run while FIXTURE_MODE=1", option b).
+
+---
+
+## 2026-10-28: anaf_v9 keeps several dated snapshots per company (role 3)
+
+**What:** ANAF v9 answers "as of a date" (`data` in the request), and one request can ask the same CUI for several dates. `adapters/anaf_v9.py` now stores, per company:
+- `CUI`: the latest record (unchanged: `lookup` reads it).
+- `CUI:date`: what ANAF answered for that date. `sync()` asks for **today plus the previous 4 quarter-ends in ONE request** (5 entries; first version had 12 month-ends), only the ones missing. A past date never changes, so it is downloaded once, ever. After the first sync, a company costs at most one entry per request.
+- New READ method **`history(cui, dates=None) -> Sourced[{ISO date: record | None}]`**: mirror only, never the network. In FIXTURE_MODE it has today's fixture only.
+- ANAF's limit counts **entries (cui+date)**: max 100 per request. The batch code chunks by entries.
+- `split_entries()` matches answers on `date_generale.cui` **and** `date_generale.data`, so two dates of one CUI never overwrite each other.
+- Fixed: a network `lookup` could make two requests (once through `fetch()`, once through the batch path). It's always one now (tested).
+- `tax/rules.check_vat_cancelled` accepts `perioade_TVA` as a single object too, as ANAF's documentation shows it.
+- **Safety (ANAF: max 100 CUIs per request, 1 request/second, overloading is punished): in `anaf_v9`, one call = at most one request.** No chunking loop, no retries (429, 5xx, timeout: reported, the old copy is served stale). More than 100 entries raises `ValueError` before anything is sent. `lookup_batch` takes at most 100 CUIs, so **role 2's `sweep_anaf_v9` must schedule batches**, never loop. PENDING in DECISIONS.md: the same rule for `anaf_bilant` (6 requests per sync, with retries) and the per-process rate limiter.
+
+**What you can do with it:** name, address, CAEN and legal form **as of each quarter-end**, from an official source. Role 3 will use it for `ID-OFFICE-CHANGE-01` (live ONRC has no office history). Role 5 / identity sheet: `history()` can fill `names` and `office_history`.
+
+---
+
 ## 2026-10-28: Time travel: `?as_of=` and `GET /companies/{cui}/history?from=&to=` (role 1, for role 6) · CONTRACT CHANGE
 
 **What:** the frontend can show a company or the portfolio **as of a date** and **everything from date X to date Y**. DECIDED in `docs/DECISIONS.md` ("Time-travel reads"). Contract in `docs/SOLUTION.md` ("Time travel"). Done by role 1 across folders at the team's request:
