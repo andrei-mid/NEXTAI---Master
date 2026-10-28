@@ -1,7 +1,8 @@
 // Saves what the backend API returns into snapshot/data.json, so the site can show the same
 // data offline (no server, no tunnel). Run: npm run snapshot
 //
-// The URL comes from VITE_API_URL in .env.local (or the first argument).
+// The URL comes from VITE_API_URL in .env.local (or the first argument). A commented-out
+// "# VITE_API_URL=..." line counts too: that is how the site is switched to the snapshot.
 // snapshot/ is git-ignored: it can hold real-company figures, which are never committed.
 
 import fs from 'node:fs';
@@ -14,11 +15,10 @@ const outFile = path.join(root, 'snapshot', 'data.json');
 function apiUrlFromEnvFile() {
   const file = path.join(root, '.env.local');
   if (!fs.existsSync(file)) return undefined;
-  const line = fs
-    .readFileSync(file, 'utf8')
-    .split(/\r?\n/)
-    .find((l) => l.trim().startsWith('VITE_API_URL='));
-  return line?.split('=')[1]?.trim() || undefined;
+  const lines = fs.readFileSync(file, 'utf8').split(/\r?\n/);
+  const match = (re) => lines.map((l) => l.match(re)?.[1]?.trim()).find(Boolean);
+  // An active line wins over a commented-out one.
+  return match(/^\s*VITE_API_URL=(.+)$/) ?? match(/^\s*#\s*VITE_API_URL=(.+)$/);
 }
 
 const apiUrl = (process.argv[2] ?? apiUrlFromEnvFile())?.replace(/\/$/, '');
