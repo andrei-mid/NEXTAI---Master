@@ -1,5 +1,6 @@
 import BandBadge from './BandBadge.jsx';
 import OriginBadges from './OriginBadges.jsx';
+import SourceLink from './SourceLink.jsx';
 import { coverageLabel, formatUtc, statusLabel } from '../format.js';
 
 function PersonList({ people, showShare }) {
@@ -39,11 +40,19 @@ export default function IdentityCard({ company, signals, origin }) {
         <span className="score-value">{company.score ?? '—'}</span>
         <span className="muted">/ 100</span>
         <span className="coverage">{coverageLabel(company.coverage)}</span>
-        {company.coverage?.missing?.length > 0 && (
+        {company.coverage?.missing?.length > 0 && company.band !== 'grey' && (
           <span className="muted small">missing: {company.coverage.missing.join(', ')}</span>
         )}
       </div>
       <p className="muted small">Last checked: {formatUtc(company.last_checked)}</p>
+
+      {company.band === 'grey' && (
+        <div className="inconclusive-box" role="note">
+          <strong>Inconclusive.</strong> Only {coverageLabel(company.coverage)} were checked, so the
+          score is not a verdict. Not checked yet:{' '}
+          {company.coverage?.missing?.length ? company.coverage.missing.join(', ') : 'unknown'}.
+        </div>
+      )}
 
       {company.band === 'stop' && (
         <ul className="stop-reasons">
@@ -112,6 +121,19 @@ export default function IdentityCard({ company, signals, origin }) {
           </div>
         )}
       </dl>
+
+      {company.sources?.length > 0 && (
+        <>
+          <h4 className="subhead">Data sources</h4>
+          <ul className="source-list">
+            {company.sources.map((s) => (
+              <li key={s.name + s.retrieved_at}>
+                <SourceLink source={s} />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
       <div className="people">
         <div>

@@ -1,5 +1,6 @@
 import BandBadge from './BandBadge.jsx';
 import OriginBadges from './OriginBadges.jsx';
+import { coverageLabel } from '../format.js';
 
 /**
  * Left sidebar: one compact card per company (GET /companies item), already sorted by the
@@ -16,9 +17,11 @@ export default function AlertsSidebar({ items, selectedCui, onSelect }) {
           const severity = item.top_signal?.severity;
           const claim = item.top_signal
             ? item.top_signal.claim
-            : item.band
-              ? 'No signals reported.'
-              : 'Not checked yet.';
+            : item.band === 'grey'
+              ? `Inconclusive · ${coverageLabel(item.coverage)} checked`
+              : item.band
+                ? 'No signals reported.'
+                : 'Not checked yet.';
           return (
             <li key={item.cui}>
               <button

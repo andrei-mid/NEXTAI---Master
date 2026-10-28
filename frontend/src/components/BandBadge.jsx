@@ -1,12 +1,15 @@
 const KNOWN_BANDS = ['stop', 'red', 'yellow', 'green', 'grey'];
 
+// What the analyst reads. The API value stays "grey"; it means too few sources were checked.
+const LABELS = { grey: 'inconclusive' };
+
 /**
  * Band from the API, shown as-is. null = never checked; unknown values get a neutral style.
  * dot: a coloured dot instead of the word (STOP keeps its word); the band is in the tooltip
  * and for screen readers.
  */
 export default function BandBadge({ band, dot = false }) {
-  const label = band ?? 'not checked';
+  const label = band ? (LABELS[band] ?? band) : 'not checked';
   const cls = band && KNOWN_BANDS.includes(band) ? `band-${band}` : 'band-none';
   if (dot && band !== 'stop') {
     return <span className={`band-dot ${cls}`} title={label} role="img" aria-label={`Band: ${label}`} />;
