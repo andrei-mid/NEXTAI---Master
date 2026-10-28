@@ -1,110 +1,5 @@
 [
   {
-    "signal_id": "FIN-REVENUE-DECLINE-01:4f3fc1a2b6d13c5d",
-    "cui": "99000033",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-REVENUE-DECLINE-01",
-    "claim": "Turnover fell from 29,100,000 RON in 2023 to 15,200,000 RON in 2025 (-48%).",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
-      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "turnover": {
-        "2021": 32000000,
-        "2022": 34500000,
-        "2023": 29100000,
-        "2024": 21700000,
-        "2025": 15200000
-      },
-      "decline_pct": 47.8
-    }
-  },
-  {
-    "signal_id": "FIN-LOSS-TREND-01:b32c09e10196c931",
-    "cui": "99000033",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-LOSS-TREND-01",
-    "claim": "Net losses in 2023 (-400,000 RON), 2024 (-1,900,000 RON) and 2025 (-2,600,000 RON).",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
-      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "net_profit": {
-        "2023": -400000,
-        "2024": -1900000,
-        "2025": -2600000
-      }
-    }
-  },
-  {
-    "signal_id": "FIN-DEBT-RISE-01:a91b51af9b418049",
-    "cui": "99000033",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-DEBT-RISE-01",
-    "claim": "Debts rose from 9,800,000 RON in 2021 to 19,400,000 RON in 2025 while turnover fell.",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
-      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "debts": {
-        "2021": 9800000,
-        "2025": 19400000
-      },
-      "debt_to_turnover_2025": 1.28
-    }
-  },
-  {
     "signal_id": "TAX-ARREARS-01:239efc600595d3b9",
     "cui": "99000033",
     "agent": "tax",
@@ -394,6 +289,79 @@
       "fictional": true,
       "url": "https://ziar-inventat.example/brunaldo-datorii",
       "published": "2026-03-03"
+    }
+  },
+  {
+    "signal_id": "FIN-LOSS-TREND-01:5416e83d484a0ef3",
+    "cui": "99000033",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-LOSS-TREND-01",
+    "claim": "Net losses in 3 consecutive years: 2023 (-400,000 RON), 2024 (-1,900,000 RON), 2025 (-2,600,000 RON).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "from_year": 2023,
+      "to_year": 2025,
+      "years": 3,
+      "net_profit": {
+        "2023": -400000,
+        "2024": -1900000,
+        "2025": -2600000
+      }
+    }
+  },
+  {
+    "signal_id": "FIN-REVENUE-DECLINE-01:233f889b4a34e990",
+    "cui": "99000033",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-REVENUE-DECLINE-01",
+    "claim": "Turnover fell from 29,100,000 RON in 2023 to 15,200,000 RON in 2025 (-47.8%).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "from_year": 2023,
+      "to_year": 2025,
+      "turnover": {
+        "2023": 29100000,
+        "2025": 15200000
+      },
+      "change_pct": -47.8
     }
   }
 ]

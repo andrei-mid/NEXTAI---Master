@@ -11,6 +11,7 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 
 **Penalties (PROPOSAL):** info 0 · low 5 · medium 15 · high 35 · critical 60. Component score = `max(0, 100 − Σ penalty × confidence × match_score)`.
 
+
 ### identity
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
@@ -21,20 +22,21 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 | `ID-OFFICE-CHANGE-01` | low |  | Registered office changed in the last 12 months | onrc_bulk, anaf_v9 |
 | `ID-SHARED-OFFICE-01` | medium |  | Registered office shared by >= 20 companies (threshold configurable) | onrc_bulk |
 | `ID-CAEN-UNAUTH-01` | medium |  | Main CAEN activity not among authorized CAEN codes (Rev.2<->Rev.3 mapped) | onrc_bulk |
-| `ID-STATUS-01` | high |  | ONRC status is not active (dissolution, suspension, deregistered...) | onrc_bulk |
+| `ID-STATUS-01` | high (per status: deregistered/bankruptcy critical, insolvency/dissolution high, suspended medium, unknown high) |  | ONRC status is not active (dissolution, suspension, deregistered...). Deregistration cross-checked with ANAF `dataRadiere`: on disagreement the worse value wins, `sources_agree=false` | onrc_bulk, anaf_v9 |
 | `ID-NATURAL-PERSON-01` | info |  | Legal form PFA/II/IF: route to the natural-person flow (AI Act) | onrc_bulk, anaf_v9 |
+| `ID-SOURCE-MISMATCH-01` | high |  | ANAF and ONRC disagree on CUI, register number (old Jxx/nnn/yyyy format only) or name: possible wrong entity | anaf_v9, onrc_bulk |
 
 ### financials
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
 |---|---|---|---|---|
+| `FIN-NET-ASSETS-01` | high |  | Equity < 1/2 of share capital in the latest filed year (Law 31/1990 art. 153^24) | anaf_bilant |
+| `FIN-REVENUE-JUMP-01` | medium |  | Turnover grew > 300% from one year to the next (base >= 100k RON) | anaf_bilant |
+| `FIN-HEADCOUNT-01` | medium |  | Turnover per employee > 5x the average of the CAEN division (averages: config, PROPOSAL) | anaf_bilant |
+| `FIN-LOSS-TREND-01` | medium |  | Net loss in >= 2 consecutive years | anaf_bilant |
+| `FIN-DEBT-RISE-01` | medium |  | Debts grew > 50% over the last 3 filed years while turnover grew <= 10% (or fell) | anaf_bilant |
 | `FIN-REVENUE-DECLINE-01` | medium |  | Turnover fell > 25% over the last 3 filed years | anaf_bilant |
-| `FIN-LOSS-TREND-01` | medium |  | Net loss in >= 2 consecutive recent years | anaf_bilant |
-| `FIN-NET-ASSETS-01` | high |  | Equity < 1/2 of share capital (Law 31/1990 art. 153^24) | anaf_bilant |
-| `FIN-DEBT-RISE-01` | medium |  | Debts grow faster than turnover, or debts > 70% of turnover | anaf_bilant |
-| `FIN-HEADCOUNT-01` | medium |  | Turnover per employee > 3M RON (implausible for the activity) | anaf_bilant |
-| `FIN-REVENUE-JUMP-01` | medium |  | Turnover grew > 200% year over year | anaf_bilant |
-| `FIN-NO-FILING-01` | medium |  | No financial statement for the latest expected year | anaf_bilant |
+| `FIN-NO-FILING-01` | medium |  | No financial statement for the latest expected year (source reachable, nothing filed) | anaf_bilant |
 
 ### tax
 

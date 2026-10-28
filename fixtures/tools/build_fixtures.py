@@ -1003,6 +1003,45 @@ def sig(
 EXACT = EntityMatch(method="cui_exact", score=1.0)
 
 
+def financials_signals(cui: str) -> list[Signal]:
+    """Run the REAL financials agent on the raw fixtures just written, so the API fixtures
+    always show exactly what the agent produces."""
+    import asyncio
+    import tempfile
+
+    from verifirm.adapters.anaf_bilant import AnafBilantAdapter
+    from verifirm.adapters.base import AdapterDeps
+    from verifirm.agents.base import AgentContext
+    from verifirm.agents.financials.agent import FinancialsAgent
+    from verifirm.core.config import Settings
+    from verifirm.core.impl_local.cache import MemoryCache
+    from verifirm.core.impl_local.clock import FixedClock
+    from verifirm.core.impl_local.object_store import FilesystemObjectStore
+    from verifirm.core.impl_local.rate_limiter import MemoryRateLimiter
+
+    settings = Settings(fixture_mode=True, fixtures_dir=FIX)
+    clock = FixedClock(CHECKED_AT)
+    with tempfile.TemporaryDirectory() as tmp:
+        deps = AdapterDeps(
+            settings=settings,
+            cache=MemoryCache(),
+            object_store=FilesystemObjectStore(Path(tmp)),
+            rate_limiter=MemoryRateLimiter(),
+            clock=clock,
+        )
+        ctx = AgentContext(
+            run_id="fixture",
+            cui=cui,
+            identity=identity_sheet(cui),
+            settings=settings,
+            clock=clock,
+            adapters={"anaf_bilant": AnafBilantAdapter(deps)},
+        )
+        result = asyncio.run(FinancialsAgent().run(ctx))
+    assert result.status.value == "ok", result
+    return [s.model_copy(update={"data": {"fictional": True, **s.data}}) for s in result.signals]
+
+
 def signals_for(cui: str) -> list[Signal]:
     if cui == "99000017":
         return []
@@ -1017,7 +1056,7 @@ def signals_for(cui: str) -> list[Signal]:
     )
     media = ref(cui, "media.json", "Web search (Tavily)", SourceType.WEB, None)
     out: list[Signal] = []
-    IDN, F, T, L, N, M, P = (
+    IDN, _FIN, T, L, N, M, P = (
         Component.IDENTITY,
         Component.FINANCIALS,
         Component.TAX,
@@ -1065,66 +1104,6 @@ def signals_for(cui: str) -> list[Signal]:
                 1.0,
                 EXACT,
                 {"address": SHARED_OFFICE, "n_companies": 63, "threshold": 20},
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-REVENUE-JUMP-01",
-                Severity.MEDIUM,
-                "Turnover grew from 410,000 RON in 2022 to 1,900,000 RON in 2023 and 9,800,000 RON in 2024.",
-                b25,
-                "2024-12-31",
-                1.0,
-                EXACT,
-                {
-                    "turnover": {
-                        "2022": 410_000,
-                        "2023": 1_900_000,
-                        "2024": 9_800_000,
-                        "2025": 18_600_000,
-                    },
-                    "max_yoy_growth_pct": 415.8,
-                },
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-DEBT-RISE-01",
-                Severity.MEDIUM,
-                "Debts rose from 40,000 RON in 2021 to 14,200,000 RON in 2025, 76% of 2025 turnover.",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {"debts": {"2021": 40_000, "2025": 14_200_000}, "debt_to_turnover_2025": 0.76},
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-HEADCOUNT-01",
-                Severity.MEDIUM,
-                "2025 turnover of 18,600,000 RON was reported with 2 employees (9,300,000 RON per employee).",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {"turnover": 18_600_000, "employees": 2, "turnover_per_employee": 9_300_000},
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-NET-ASSETS-01",
-                Severity.HIGH,
-                "2025 equity was -111,000 RON, below half of the 200 RON share capital.",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {"equity": -111_000, "share_capital": 200, "net_profit": -350_000},
             ),
             sig(
                 cui,
@@ -1267,54 +1246,6 @@ def signals_for(cui: str) -> list[Signal]:
         out += [
             sig(
                 cui,
-                "financials",
-                F,
-                "FIN-REVENUE-DECLINE-01",
-                Severity.MEDIUM,
-                "Turnover fell from 29,100,000 RON in 2023 to 15,200,000 RON in 2025 (-48%).",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {
-                    "turnover": {
-                        "2021": 32_000_000,
-                        "2022": 34_500_000,
-                        "2023": 29_100_000,
-                        "2024": 21_700_000,
-                        "2025": 15_200_000,
-                    },
-                    "decline_pct": 47.8,
-                },
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-LOSS-TREND-01",
-                Severity.MEDIUM,
-                "Net losses in 2023 (-400,000 RON), 2024 (-1,900,000 RON) and 2025 (-2,600,000 RON).",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {"net_profit": {"2023": -400_000, "2024": -1_900_000, "2025": -2_600_000}},
-            ),
-            sig(
-                cui,
-                "financials",
-                F,
-                "FIN-DEBT-RISE-01",
-                Severity.MEDIUM,
-                "Debts rose from 9,800,000 RON in 2021 to 19,400,000 RON in 2025 while turnover fell.",
-                b25,
-                "2025-12-31",
-                1.0,
-                EXACT,
-                {"debts": {"2021": 9_800_000, "2025": 19_400_000}, "debt_to_turnover_2025": 1.28},
-            ),
-            sig(
-                cui,
                 "tax",
                 T,
                 "TAX-ARREARS-01",
@@ -1455,6 +1386,7 @@ def signals_for(cui: str) -> list[Signal]:
                 validated=False,
             ),
         ]
+    out += financials_signals(cui)  # produced by the real agent, never hand-written
     return out
 
 
@@ -1559,8 +1491,8 @@ MEMOS: dict[str, dict[str, Any]] = {
             "- Submitted 2025 net result +300,000 RON vs -2,600,000 RON at ANAF. [TAX-DECLARED-GAP-01]\n"
             "- Supplier claim of 1,800,000 RON on appeal in case 9102/99/2025. [LIT-MATERIAL-CLAIM-01]\n\n"
             "## Yellow signals\n\n"
-            "- Turnover fell from 29,100,000 RON (2023) to 15,200,000 RON (2025), with losses in 2023-2025 and debts up to "
-            "19,400,000 RON. [FIN-REVENUE-DECLINE-01, FIN-LOSS-TREND-01, FIN-DEBT-RISE-01]\n"
+            "- Turnover fell from 29,100,000 RON (2023) to 15,200,000 RON (2025), with net losses in 2023-2025. "
+            "[FIN-REVENUE-DECLINE-01, FIN-LOSS-TREND-01]\n"
             "- VAT cancelled on 2025-02-01, re-registered on 2025-09-15. D300 is 18% below e-Factura. "
             "[TAX-VAT-CANCELLED-01, TAX-EFACTURA-GAP-01]\n"
             "- Sole shareholder Calbrona Holding Fictiv SRL is ANAF inactive. [NET-PARTNER-INACTIVE-01]\n"
@@ -1744,10 +1676,10 @@ def write_dedeman() -> None:
     (d / "api").mkdir(parents=True, exist_ok=True)
     (d / "README.md").write_text(
         "# DEDEMAN SRL (CUI 2816464): REAL company, clean case\n\n"
-        "No figures are committed for this company. At demo time the adapters fetch live data from ANAF\n"
-        "(and the other official sources). Each adapter archives the raw response through the ObjectStore\n"
-        "and keeps a last-known-good copy (`lastgood/<adapter>/...`) that is served as a fallback if a\n"
-        "source is down during the demo.\n\n"
+        "No figures are committed for this company. Its real data is downloaded onto our server by\n"
+        '`apps/worker/sync.py:sync_company("2816464")` (local-first, docs/LOCAL_DATA.md). The raw\n'
+        "responses are archived in the ObjectStore and the agents read that local mirror only, so the\n"
+        "demo does not depend on ANAF being up. Sync it before the demo.\n\n"
         "`api/list_item.json` and `api/company.json` contain only public identity facts (name, CUI) and\n"
         "`band: null` (never checked), so the portfolio view can list it before the live run.\n",
         encoding="utf-8",

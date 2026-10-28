@@ -6,6 +6,8 @@ Fixture: fixtures/companies/<cui>_<slug>/efactura.json
    "issued_total_ron": 0, "received_total_ron": 0,
    "flows": [{"from_cui", "to_cui", "total_ron", "n_invoices", "period"}]}
 Used by TAX-EFACTURA-GAP-01 (vs D300) and NET-CIRCULAR-INVOICE-01 (cycles in `flows`).
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

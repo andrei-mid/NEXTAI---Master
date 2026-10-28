@@ -100,7 +100,7 @@
       }
     ]
   },
-  "score": 64.8,
+  "score": 67.8,
   "band": "red",
   "components": [
     {
@@ -116,13 +116,12 @@
       "component": "financials",
       "status": "ok",
       "available": true,
-      "score": 55.0,
+      "score": 70.0,
       "weight": 20.0,
       "effective_weight": 0.2,
       "signal_ids": [
-        "FIN-REVENUE-DECLINE-01:4f3fc1a2b6d13c5d",
-        "FIN-LOSS-TREND-01:b32c09e10196c931",
-        "FIN-DEBT-RISE-01:a91b51af9b418049"
+        "FIN-LOSS-TREND-01:5416e83d484a0ef3",
+        "FIN-REVENUE-DECLINE-01:233f889b4a34e990"
       ]
     },
     {
@@ -217,14 +216,6 @@
       "content_hash": "e4e390f60558ec3524b72fd9bd286d9c8d9a773a3ef6c2a281b362934dc2a882"
     },
     {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
-      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
-    },
-    {
       "name": "ANAF tax arrears list (MOCK)",
       "type": "mock",
       "url": null,
@@ -239,6 +230,14 @@
       "retrieved_at": "2026-10-28T08:00:00Z",
       "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/d300.json",
       "content_hash": "8286c0a6d1f56e8552b1a098a3d52be883ac0e3728aa188fb6fd3bd4fb7706ce"
+    },
+    {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
     },
     {
       "name": "Portal Just (portal.just.ro)",

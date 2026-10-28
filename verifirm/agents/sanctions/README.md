@@ -4,6 +4,8 @@
 
 **Component:** `sanctions` (weight 10, PROPOSAL) · **Sources:** EU FSF, UN, OFAC (bulk, OFFICIAL), **MOCK** PEP
 
+**Data access (local-first, [docs/LOCAL_DATA.md](../../../docs/LOCAL_DATA.md)):** locally ingested EU/UN/OFAC entries (ingest_sanctions job), `mock_pep`. Never call external APIs from the agent. "Not in the local mirror yet" is unavailable, never clean. Reference: `agents/financials/`.
+
 | rule_id | Severity (PROPOSAL) | Condition |
 |---|---|---|
 | SAN-MATCH-CONFIRMED-01 | critical, **auto-stop** | score ≥ 0.95 + a second identifier agrees |

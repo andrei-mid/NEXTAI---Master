@@ -32,7 +32,7 @@ Invalid CUI → `422`. Unknown company → `404`.
 
 | Band | Meaning | Colour |
 |---|---|---|
-| GREEN | ≥ 75, no high/critical signals, coverage ≥ 80%, identity + sanctions checked | green |
+| GREEN | ≥ 75, no high/critical signals, **all 8 sources checked OK** (any outage → at most YELLOW) | green |
 | YELLOW | 50–74, or 1 high signal, or coverage < 80% | amber |
 | RED | < 50, or ≥ 2 high signals in different components | red |
 | STOP | an auto-stop fact: confirmed sanctions, insolvency opened, criminal case against the company, ANAF inactive | dark red / black |
@@ -43,7 +43,7 @@ Invalid CUI → `422`. Unknown company → `404`.
 
 - **Always show coverage** next to the score, as "7/8 sources" plus the percentage. A missing source is never shown as clean.
 - Badges: **MOCK** when `source.type == "mock"`, **FICTIV** when `fictional == true` (company or record), **unvalidated** when `validated == false` (media).
-- Every signal shows its source and links to `source.url` when present.
+- Every signal shows its source and links to `source.url` when present. Also show the data date `source.retrieved_at` ("data as of …"): the backend works on a local copy of the official sources, so freshness must be visible.
 - The decision buttons only **record the analyst's decision** (with a mandatory comment). Never pre-select, suggest or highlight a decision.
 - **No scoring logic in the frontend.** Display the API's score, band and components as they are.
 - Show the memo's `verifier_report`: how many sentences were checked and which were removed, and why.

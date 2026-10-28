@@ -2,6 +2,8 @@
 
 Five Claude Code instances (roles 1–5) work here in parallel. Role 6 uses Claude + Lovable and reads `docs/SOLUTION.md` instead. Read this file fully before touching anything.
 
+**At the start of every session, read [docs/CHANGELOG.md](docs/CHANGELOG.md).** It lists what other instances changed and what you must now do differently. **After every change** that affects other folders, contracts, conventions or how to work, add an entry there (newest first) and update the READMEs it touches. The next Claude depends on it.
+
 ## 0. The product in one paragraph
 
 **verifirm** is an agentic background-check system for Raiffeisen Bank Romania's corporate clients. It continuously re-verifies the portfolio and fact-checks new credit applications (CUI + documents) against official Romanian sources. Eight agents run in parallel, a deterministic engine scores the results, an LLM writes a memo **only from the consolidated JSON**, and a critic removes any unsourced sentence. **The AI never decides. The analyst decides.**
@@ -33,17 +35,17 @@ If you need a change in `verifirm/schema/` or `verifirm/core/` (or any folder yo
 verifirm/                 the Python package (the brief's "packages/")
   schema/                 THE contract (Pydantic). Frozen without a DECISIONS.md entry
   core/                   cui gate, config, logging, registry, timebudget, ports/, impl_local/, impl_cloud/
-  adapters/               one file per source on top of adapters/base.py; mocks/ for unreachable sources
+  adapters/               one file per source on top of adapters/base.py (READ methods + sync()); mocks/; README = status table
   agents/<name>/          8 independent agents: agent.py, rules.py, README.md, tests/
   consolidation/          identity_sheet, entity_resolution, memo/, critic/
   scoring/                deterministic engine + config/weights.yaml (no LLM, no network)
   llm/                    the ONLY code that talks to LLM providers; json_output, untrusted
   persistence/            Postgres 17: engine.py, models/, repositories/, alembic.ini, migrations/
 apps/api/                 FastAPI. Serves fixtures in FIXTURE_MODE (contract-first)
-apps/worker/              queue consumer, orchestrator (pipeline flow), scheduler, jobs/
+apps/worker/              queue consumer, orchestrator (pipeline flow), sync.py (the only network step), scheduler, jobs/
 apps/wiring.py            Settings -> port implementations (the only place infra is chosen)
 fixtures/                 fictional demo data + tools/build_fixtures.py + tools/check_fixtures.py
-docs/                     SOLUTION, DECISIONS, ARCHITECTURE, RULES, SOURCES, DEMO, schema/
+docs/                     CHANGELOG (read first), LOCAL_DATA, DECISIONS, ARCHITECTURE, RULES, SOURCES, SOLUTION, DEMO, schema/
 tests/                    architecture/ (import rules, migrations), contract/ (API + schema), e2e/
 ```
 
@@ -66,7 +68,8 @@ Tests live **next to the code** (`<folder>/tests/test_<module>.py`, no `__init__
 13. **Postgres only (D5).** No SQLite anywhere, not even in tests. Every schema change is a new Alembic migration named `<area>_<what>`. Bulk loads use COPY (`persistence.engine.copy_records`).
 14. **No central lists.** Agents and adapters self-register (`@register_agent`, `@register_adapter`). Adding one never edits the orchestrator.
 15. **Idempotent jobs.** Every run has a `run_id`. Signal ids are deterministic (`agents.base.make_signal_id`), so re-runs never duplicate.
-16. **Config over code.** Weights, thresholds, time budgets, TTLs and model names go in `weights.yaml` / env (`.env.example`), not constants buried in logic.
+16. **Config over code.** Weights, thresholds, time budgets, mirror ages and model names go in config files (`weights.yaml`, `agents/<name>/config.yaml`) or env (`.env.example`), not constants buried in logic.
+17. **Local-first data ([docs/LOCAL_DATA.md](docs/LOCAL_DATA.md)).** External data is downloaded onto our server first: bulk via `ingest_*` jobs, per company via each adapter's `sync(cui)`. **Agents never call external APIs.** They read the local mirror through `ctx.adapter(...)` READ methods, and "not in the local mirror yet" is reported as unavailable, never as clean. Only `apps/worker/sync.py` and jobs use `infra.sync_adapters`. Data that can't change (a filed balance sheet) is never downloaded twice. Reference: `adapters/anaf_bilant.py` + `agents/financials/`.
 
 ## 5. Coding conventions
 
@@ -95,5 +98,8 @@ make db-revision m=signals_add_index   # role 1 only
 - [ ] The `pytest.skip("TODO…")` is replaced by real tests: rules on edge cases, the agent on fixtures, failure paths (source down / timeout gives unavailable or partial, never clean).
 - [ ] Works in `FIXTURE_MODE=1` with no network and with nobody else's unfinished code.
 - [ ] New rule_ids are in `rules.py` **and** `docs/RULES.md`. New sources are in `docs/SOURCES.md`.
+- [ ] Local-first: adapters have READ methods + `sync()` (or an ingest job). Agents make zero network calls (tested with `network=False`).
+- [ ] Your folder's README is up to date (status, what's implemented, how to use it). The `adapters/README.md` status table is updated if you touched an adapter.
+- [ ] A `docs/CHANGELOG.md` entry if anything outside your folder changes (what, why, what others must do).
 - [ ] `make check` is green. No new dependency without approval. No edits outside your folder.
 - [ ] Demo expectations in your agent's README still hold (`make demo-check` once the pipeline is complete).

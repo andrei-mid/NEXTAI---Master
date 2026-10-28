@@ -8,6 +8,8 @@ Rules:
 - The PDF parsing library is NOT chosen yet (PENDING in DECISIONS.md). Add it with the PR.
 - Fixture mode: read fixtures/companies/<cui>_<slug>/submitted/financials.json
   (already in SubmittedFinancials shape, `"fictional": true`).
+
+Local-first (docs/LOCAL_DATA.md): uploaded files are already local (ObjectStore keys from POST /applications). No sync.
 """
 
 from __future__ import annotations

@@ -4,6 +4,8 @@
 
 **Component:** `tax` (weight 15, PROPOSAL) · **Sources:** submitted documents vs `anaf_bilant` / `anaf_v9`; **MOCK:** arrears list, D300, e-Factura (SAF-T later)
 
+**Data access (local-first, [docs/LOCAL_DATA.md](../../../docs/LOCAL_DATA.md)):** `anaf_bilant`, `anaf_v9`, `anaf_efactura_registry` READ methods (mirror), mocks, and `ctx.submitted`. Never call external APIs from the agent. "Not in the local mirror yet" is unavailable, never clean. Reference: `agents/financials/`.
+
 | rule_id | Severity (PROPOSAL) | Condition |
 |---|---|---|
 | TAX-DECLARED-GAP-01 | high | submitted vs ANAF differ > 10% |

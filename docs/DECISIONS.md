@@ -25,6 +25,7 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 |---|---|
 | Dependencies approved | pydantic, pydantic-settings, httpx, PyYAML, fastapi, uvicorn, python-multipart, sqlalchemy[asyncio], alembic, asyncpg. Dev: pytest, pytest-asyncio, ruff, mypy, types-PyYAML. Implementing PRs may add: `anthropic`, `openai`, `redis`, `boto3`/`aioboto3` (approved "as needed", listed in the PR) |
 | Postgres version | 17 (RDS and docker-compose must match) |
+| Local-first data | DECIDED (2026-10-28): external data is downloaded onto our server (ingest jobs + per-company `sync()`). Agents only read the local mirror and never call external APIs. See `docs/LOCAL_DATA.md` |
 | Tests layout | Next to the code (`<folder>/tests/`), pytest `--import-mode=importlib` |
 | Tooling on Windows | `winget install astral-sh.uv ezwinports.make` |
 
@@ -32,14 +33,19 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 
 | Item | Owner | Notes |
 |---|---|---|
-| Scoring weights, penalties, thresholds, rule severities | role 2 + team | Proposal in `verifirm/scoring/config/weights.yaml` and `docs/RULES.md` |
+| Scoring weights, penalties, thresholds, rule severities | role 2 + team | Proposal in `verifirm/scoring/config/weights.yaml` and `docs/RULES.md`. Engine implemented with these values |
+| Financials: CAEN averages for FIN-HEADCOUNT-01 | role 3 | Approximate per-division values in `verifirm/agents/financials/config.yaml` (PROPOSAL, signal confidence 0.8). Replace with INS data |
+| Financials: interpretations of the brief | role 3 | DECIDED with the team lead: "debts +50% at constant revenue" = first vs last filed year within the last 3 years, turnover ≤ +10% (falling counts too). FIN-REVENUE-DECLINE-01 and FIN-NO-FILING-01 kept as additions to the brief. Thresholds stay PROPOSAL |
+| GREEN when a low-weight source is down | role 2 + team | The brief has "GREEN needs coverage ≥ 80%" AND "an outage can never produce GREEN". Implemented strictly: `green_requires_all_ok: true` (any unavailable/timeout/partial component → at most YELLOW, matching demo step 7). Set it to `false` to allow GREEN at ≥ 80% coverage with identity + sanctions available |
 | Second real company for the demo (besides Dedeman) | role 6 | Must be clean and public. Live data only, no committed figures |
 | Retention period for the GDPR audit log and submitted documents | role 1 + team | Affects `audit_*` tables and S3 lifecycle |
 | Auth for the demo (analyst identity on decisions) | role 5 | `DecisionRequest.analyst` is free text for now |
-| Dedeman live run while `FIXTURE_MODE=1` | role 2 | Today fixture mode serves only fixtures + last-known-good copies. Options: (a) run the demo with `FIXTURE_MODE=0` and pre-warmed caches for fictional companies, (b) add a per-CUI "live if real" switch, (c) pre-fetch Dedeman before the demo so the last-known-good copy serves it |
+| Dedeman live run while `FIXTURE_MODE=1` | role 2 | Fixture mode serves fixtures, falling back to the local mirror. Options: (a) run the demo with `FIXTURE_MODE=0` + the fictional companies served from fixtures some other way, (b) a per-CUI "real CUI → mirror" switch, (c) sync Dedeman before the demo (`sync_company`), so the mirror serves it even in fixture mode. (c) already works today |
 | Scheduler runtime | role 2 | APScheduler in the worker vs cron vs EventBridge (Fargate). Job definitions are in `apps/worker/scheduler.py` |
 | PDF parsing library for `documents.py` | role 5 | Not chosen |
 | Read API for the audit log (`GET /companies/{cui}/decisions`) | role 5 + 6 | DEMO step 8 shows the audit log, but the contract has no read route yet. Schema change → needs DECIDED |
 | Port for bulk tables (ONRC / sanctions / SEAP / Kohesio lookups) | role 1 + 2 | Adapters need local lookup tables. Today that is implicit in `persistence`. Decide whether it becomes a port |
 | SQS dedupe strategy | role 2 | FIFO queue + MessageDeduplicationId vs standard queue + Repository idempotency |
 | Real handles for CODEOWNERS | team | Replace the `@role-N-…` placeholders |
+| Identity thresholds | role 3 | `verifirm/agents/identity/config.yaml` (PROPOSAL): `window_days` 365, `shared_office_min_companies` 20, `conflict_confidence` 0.6, `stale_confidence` 0.8. Same pattern as `agents/financials/config.yaml` |
+| `onrc_bulk` per-company contract | role 1 + role 3 | The identity agent reads `onrc_bulk.company(cui)` in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...) and `None` for not found. It passes the **raw** ONRC address to `companies_at_address()`, so normalization should happen inside the adapter. Confirm or propose another shape |

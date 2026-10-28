@@ -5,6 +5,8 @@ Fixture: fixtures/companies/<cui>_<slug>/bpi.json
    "insolventa"|"faliment"|"reorganizare", "opened_on", "status", "publication_no"}]}
 An opened procedure feeds LIT-INSOLVENCY-OPENED-01 (auto-stop).
 A REQUEST to open (not yet opened) is NOT here. It comes from the court case (LIT-INSOLVENCY-REQUEST-01).
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

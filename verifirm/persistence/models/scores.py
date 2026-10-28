@@ -1,13 +1,29 @@
-"""STUB. Owner: @role-1-database. Deterministic scores per run.
+"""Deterministic scores per run. Owner: @role-1-database.
 
-Planned tables (write them as SQLAlchemy 2.0 typed models: `class X(Base)` with `Mapped[...]`,
-then generate the migration `alembic revision --autogenerate -m "scores_create_tables"`):
-- scores_scores: run_id PK, cui (indexed), trust_score, band (indexed), coverage_pct, config_version, computed_at, payload JSONB (schema.scoring.Score)
-- Portfolio view = latest score per cui (DISTINCT ON (cui) ORDER BY computed_at DESC)
+scores_scores: one score per run, payload = schema.scoring.Score.
+Latest score per cui = ORDER BY computed_at DESC (index on (cui, computed_at)).
 """
 
 from __future__ import annotations
 
-from verifirm.persistence.models.base import Base
+from datetime import datetime
+from typing import Any
 
-__all__ = ["Base"]
+from sqlalchemy import Index, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from verifirm.persistence.models.base import Base, CreatedAtMixin
+
+
+class ScoreRow(CreatedAtMixin, Base):
+    __tablename__ = "scores_scores"
+    __table_args__ = (Index("ix_scores_scores_cui_computed_at", "cui", "computed_at"),)
+
+    run_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    cui: Mapped[str] = mapped_column(String(16))
+    trust_score: Mapped[float | None]
+    band: Mapped[str] = mapped_column(String(16), index=True)
+    coverage_pct: Mapped[float]
+    config_version: Mapped[str] = mapped_column(String(64))
+    computed_at: Mapped[datetime]
+    payload: Mapped[dict[str, Any]]

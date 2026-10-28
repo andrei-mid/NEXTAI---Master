@@ -50,8 +50,14 @@ class Settings(BaseSettings):
     # --- pipeline
     agent_timeout_s: float = 60.0
     agent_timeouts_s: dict[str, float] = Field(default_factory=dict)  # per-agent override, JSON
-    cache_ttl_s: int = 86_400
-    cache_ttl_overrides_s: dict[str, int] = Field(default_factory=dict)  # per-adapter, JSON
+    mirror_max_age_s: int = (
+        86_400  # mirror copies older than this are "stale" (sync refreshes them)
+    )
+    mirror_max_age_overrides_s: dict[str, int] = Field(default_factory=dict)  # per-adapter, JSON
+    sync_timeout_s: float = 180.0  # per adapter, for the pipeline sync step and sync jobs
+    sync_on_application: bool = (
+        True  # new applications and rechecks download once before agents run
+    )
     http_timeout_s: float = 20.0
     http_max_retries: int = 3
     scoring_config_path: Path = REPO_ROOT / "verifirm" / "scoring" / "config" / "weights.yaml"
@@ -80,8 +86,8 @@ class Settings(BaseSettings):
     def timeout_for(self, agent: str) -> float:
         return self.agent_timeouts_s.get(agent, self.agent_timeout_s)
 
-    def ttl_for(self, adapter: str, default: int | None = None) -> int:
-        return self.cache_ttl_overrides_s.get(adapter, default or self.cache_ttl_s)
+    def max_age_for(self, adapter: str, default: int | None = None) -> int:
+        return self.mirror_max_age_overrides_s.get(adapter, default or self.mirror_max_age_s)
 
     def model_for(self, task: Literal["memo", "critic", "classify"]) -> str:
         specific = {
