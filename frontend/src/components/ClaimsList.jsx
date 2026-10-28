@@ -18,7 +18,7 @@ export default function ClaimsList({ claims }) {
 
       <ul className="claims">
         {claims.map((c) => (
-          <li key={c.rule_id + c.claim} className={c.source?.url ? '' : 'claim-unsourced'}>
+          <li key={c.signal_id}className={c.source?.url ? '' : 'claim-unsourced'}>
             <div className="claim-head">
               <span className={`pill sev-${c.severity}`}>{c.severity}</span>
               {c.source?.type === 'mock' && <span className="pill pill-mock">MOCK</span>}

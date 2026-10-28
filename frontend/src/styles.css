@@ -195,6 +195,8 @@ h2 {
 .sev-border-info { border-left-color: var(--sev-info); }
 
 .pill {
+  color: var(--text);
+  background: var(--border);
   display: inline-block;
   padding: 1px 8px;
   border-radius: 999px;
@@ -211,6 +213,15 @@ h2 {
 .sev-low { color: var(--sev-low); background: var(--sev-low-bg); }
 .sev-info { color: var(--sev-info); background: var(--sev-info-bg); }
 
+/* Bands (role 6 decides the exact colours) */
+.band-stop { color: #ffd6d6; background: #5a0d12; border: 1px solid #ff6b6b; }
+.band-red { color: #ff6b6b; background: #4a1c1f; }
+.band-yellow { color: #ffc24d; background: #45361a; }
+.band-green { color: #6fdc9b; background: #1c3a2a; }
+.band-grey { color: var(--sev-info); background: var(--sev-info-bg); }
+.band-none { color: var(--muted); background: transparent; border: 1px solid var(--border); }
+
+.pill-proposal { color: var(--muted); background: transparent; border: 1px dashed var(--muted); }
 .pill-fictiv { color: #d7b8ff; background: #33244a; }
 .pill-mock { color: var(--on-primary); background: var(--primary); }
 .pill-unvalidated { color: var(--sev-info); background: transparent; border: 1px dashed var(--sev-info); }
@@ -245,6 +256,104 @@ h2 {
   align-items: center;
   gap: 10px;
   margin-top: 12px;
+}
+
+/* Identity card */
+
+.score-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.score-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.coverage {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.stop-reasons {
+  margin: 10px 0 0;
+  padding: 8px 12px 8px 28px;
+  border-radius: 8px;
+  color: #ffd6d6;
+  background: #5a0d12;
+}
+
+.people {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0 24px;
+}
+
+.people ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+}
+
+/* Component bars */
+
+.bars {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.bars li {
+  display: grid;
+  grid-template-columns: 100px 1fr 90px;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.bar-name {
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.bar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--text);
+  opacity: 0.75;
+}
+
+.bar-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.bar-meta {
+  grid-column: 2 / 4;
+}
+
+.bar-unavailable .bar-track {
+  background: repeating-linear-gradient(45deg, var(--border), var(--border) 4px, transparent 4px, transparent 8px);
+}
+
+.bar-unavailable .bar-value,
+.bar-unavailable .bar-name {
+  color: var(--muted);
 }
 
 /* Claims and their sources */

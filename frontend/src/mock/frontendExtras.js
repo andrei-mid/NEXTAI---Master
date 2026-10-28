@@ -1,17 +1,12 @@
-// MOCK data for the company detail mockup. Everything here is invented (FICTIV):
-// bank products, amounts, contracts and past analyst flags. Not real bank data.
-// Values are generated from the CUI, so each company always gets the same mock data.
+// FRONTEND PROPOSAL, NOT IN THE API CONTRACT.
+// Mock data for screens the contract does not cover yet:
+//  - bank relationship (credit, loans, contracts): would come from the bank's own systems
+//  - flag history: would need a read endpoint for past decisions, e.g. GET /companies/{cui}/decisions
+// Everything here is invented (FICTIV). Not real bank data.
+
+import { seeded } from './seeded.js';
 
 const MOCK_TODAY = '2026-10-28';
-
-/** Small seeded random generator: same CUI -> same numbers on every reload. */
-function seeded(seed) {
-  let s = seed % 2147483647 || 1;
-  return () => {
-    s = (s * 16807) % 2147483647;
-    return (s - 1) / 2147483646;
-  };
-}
 
 function shiftMonths(months) {
   const d = new Date(`${MOCK_TODAY}T00:00:00Z`);
@@ -89,82 +84,6 @@ export function getBankRelationship(cui) {
   };
 }
 
-const CLAIM_TEMPLATES = [
-  {
-    rule_id: 'TAX-DECLARED-GAP-01',
-    claim: 'Declared VAT (D300) is 18% below e-Factura invoices for Q2 2026.',
-    severity: 'high',
-    evidence_date: '2026-06-30',
-    source: { name: 'RO e-Factura (MOCK)', type: 'mock', url: 'https://efactura.example/{cui}/2026-q2' },
-  },
-  {
-    rule_id: 'LIT-CASE-01',
-    claim: 'Defendant in a 1,200,000 RON claim (case 9402/99/2026), first instance.',
-    severity: 'medium',
-    evidence_date: '2026-03-11',
-    source: { name: 'portal.just.ro', type: 'official', url: 'https://portal-just.example/dosar/9402-99-2026' },
-  },
-  {
-    rule_id: 'ID-ADMIN-CHANGE-01',
-    claim: 'Administrator changed on 2025-11-02.',
-    severity: 'medium',
-    evidence_date: '2025-11-02',
-    source: { name: 'ONRC open data', type: 'official', url: 'https://onrc.example/firma/{cui}/istoric' },
-  },
-  {
-    rule_id: 'FIN-REVENUE-DROP-01',
-    claim: 'Turnover fell 41% between 2024 and 2025.',
-    severity: 'medium',
-    evidence_date: '2025-12-31',
-    source: { name: 'ANAF financial statements', type: 'official', url: 'https://anaf.example/bilant/2025/{cui}' },
-  },
-  {
-    rule_id: 'NET-SHARED-OFFICE-01',
-    claim: 'Registered office shared with 37 other companies.',
-    severity: 'low',
-    evidence_date: '2026-10-20',
-    source: { name: 'ONRC open data', type: 'official', url: 'https://onrc.example/sediu/{cui}' },
-  },
-];
-
-const EXTRA_CLAIMS = { critical: 3, high: 3, medium: 2, low: 1, info: 0 };
-
-// One company deliberately gets a claim WITHOUT a link, to show how the UI flags it.
-const UNSOURCED_DEMO_CUI = '99001061';
-
-/** All claims for one company: its top alert first, then the others. Each carries its source. */
-export function getClaims(company) {
-  const r = seeded(Number(company.cui) + 13);
-  const offset = Math.floor(r() * CLAIM_TEMPLATES.length);
-  const count = EXTRA_CLAIMS[company.alert.severity] ?? 0;
-
-  const extra = Array.from({ length: count }, (_, i) => {
-    const t = CLAIM_TEMPLATES[(offset + i) % CLAIM_TEMPLATES.length];
-    return {
-      ...t,
-      validated: true,
-      source: {
-        ...t.source,
-        url: t.source.url.replace('{cui}', company.cui),
-        retrieved_at: '2026-10-28T08:00:00Z',
-      },
-    };
-  });
-
-  if (company.cui === UNSOURCED_DEMO_CUI) {
-    extra.push({
-      rule_id: 'SAN-NAME-SIMILAR-01',
-      claim: 'Name is similar to an entry on a sanctions list.',
-      severity: 'medium',
-      validated: false,
-      evidence_date: null,
-      source: { name: 'Sanctions check', type: 'official', url: null, retrieved_at: null },
-    });
-  }
-
-  return [company.alert, ...extra];
-}
-
 const FLAG_TEMPLATES = [
   { choice: 'registry_mismatch', comment: 'ONRC shows the company as active, ANAF lists it as inactive. Asked the client for clarification.' },
   { choice: 'escalate', comment: 'Sent to the risk committee after a second overdue tax notice.' },
@@ -178,10 +97,10 @@ const FLAG_TEMPLATES = [
 
 const FLAG_COUNT = { critical: 7, high: 6, medium: 4, low: 3, info: 2 };
 
-/** Past analyst reviews for one company (mock). Newest first. */
-export function getFlagHistory(company) {
-  const r = seeded(Number(company.cui) + 7);
-  const count = FLAG_COUNT[company.alert.severity] ?? 2;
+/** Past analyst reviews for one company (mock). More severe companies have a longer history. */
+export function getFlagHistory(cui, severity) {
+  const r = seeded(Number(cui) + 7);
+  const count = FLAG_COUNT[severity] ?? 2;
   const offset = Math.floor(r() * FLAG_TEMPLATES.length);
 
   let monthsBack = 0;

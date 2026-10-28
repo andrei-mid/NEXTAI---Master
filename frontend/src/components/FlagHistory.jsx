@@ -19,6 +19,7 @@ export default function FlagHistory({ entries }) {
       <div className="card-head">
         <h3>Flag history</h3>
         <span className="pill pill-mock">MOCK</span>
+        <span className="pill pill-proposal">not in API contract</span>
       </div>
       <p className="muted small">
         Past reviews that raised a flag. {hiddenCount} review{hiddenCount === 1 ? '' : 's'} marked

@@ -1,35 +1,45 @@
-import { getBankRelationship, getClaims, getFlagHistory } from '../mockCompanyDetails.js';
+import { useEffect, useState } from 'react';
+import { getCompany, getSignals } from '../api.js';
+import { getBankRelationship, getFlagHistory } from '../mock/frontendExtras.js';
+import { sortSignals } from '../severity.js';
+import IdentityCard from './IdentityCard.jsx';
+import ComponentBars from './ComponentBars.jsx';
 import ClaimsList from './ClaimsList.jsx';
 import FlagHistory from './FlagHistory.jsx';
 import BankRelationship from './BankRelationship.jsx';
-import SourceLink from './SourceLink.jsx';
 
-export default function CompanyDetail({ company, sessionReviews }) {
-  const claims = getClaims(company);
-  const bank = getBankRelationship(company.cui);
-  const history = [...getFlagHistory(company), ...sessionReviews];
+/** Centre of the page for one company: loads GET /companies/{cui} and /signals. */
+export default function CompanyDetail({ item, sessionReviews }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    setData(null);
+    setError(null);
+    Promise.all([getCompany(item.cui), getSignals(item.cui)])
+      .then(([company, signals]) => active && setData({ company, signals }))
+      .catch((e) => active && setError(e));
+    return () => {
+      active = false;
+    };
+  }, [item.cui]);
+
+  if (error) {
+    return <div className="card source-missing">Could not load this company: {error.message}</div>;
+  }
+  if (!data) return <p className="muted">Loading…</p>;
+
+  const { company, signals } = data;
+  const history = [...getFlagHistory(item.cui, item.top_signal?.severity), ...sessionReviews];
 
   return (
     <div className="detail">
-      <section className="card">
-        <div className="card-head">
-          <h2>{company.name}</h2>
-          {company.fictional && <span className="pill pill-fictiv">FICTIV</span>}
-        </div>
-        <p className="muted">
-          CUI {company.cui} · {company.coverage.available}/{company.coverage.total} sources (
-          {company.coverage.weight_pct}%)
-        </p>
-        <div className="current-alert">
-          <span className={`pill sev-${company.alert.severity}`}>{company.alert.severity}</span>
-          <span>{company.alert.claim}</span>
-        </div>
-        <SourceLink source={company.alert.source} evidenceDate={company.alert.evidence_date} />
-      </section>
-
-      <ClaimsList claims={claims} />
+      <IdentityCard company={company} />
+      <ComponentBars components={company.components} sources={company.sources} />
+      <ClaimsList claims={sortSignals(signals)} />
       <FlagHistory entries={history} />
-      <BankRelationship bank={bank} />
+      <BankRelationship bank={getBankRelationship(item.cui)} />
     </div>
   );
 }

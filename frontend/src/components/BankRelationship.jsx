@@ -18,8 +18,12 @@ export default function BankRelationship({ bank }) {
       <div className="card-head">
         <h3>Relationship with the bank</h3>
         <span className="pill pill-mock">MOCK</span>
+        <span className="pill pill-proposal">not in API contract</span>
       </div>
-      <p className="muted small">Fictional numbers for the mockup. Not real bank data.</p>
+      <p className="muted small">
+        Fictional numbers for the mockup. Not real bank data. The real version would come from the
+        bank's own systems.
+      </p>
 
       <dl className="facts">
         <div>

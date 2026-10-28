@@ -1,16 +1,28 @@
-import { useState } from 'react';
-import { mockAlerts } from './mockAlerts.js';
-import AlertsSidebar, { sortByCriticality } from './components/AlertsSidebar.jsx';
+import { useEffect, useState } from 'react';
+import { getCompanies } from './api.js';
+import { sortByCriticality } from './severity.js';
+import AlertsSidebar from './components/AlertsSidebar.jsx';
 import ReviewPanel from './components/ReviewPanel.jsx';
 import CompanyDetail from './components/CompanyDetail.jsx';
 
-const alerts = sortByCriticality(mockAlerts);
-
 export default function App() {
-  const [selectedCui, setSelectedCui] = useState(alerts[0]?.cui ?? null);
+  const [items, setItems] = useState([]);
+  const [error, setError] = useState(null);
+  const [selectedCui, setSelectedCui] = useState(null);
   // Append-only list of reviews per CUI, kept in memory until the API is connected.
   const [reviews, setReviews] = useState({});
-  const selected = alerts.find((a) => a.cui === selectedCui);
+
+  useEffect(() => {
+    getCompanies()
+      .then((res) => {
+        const sorted = sortByCriticality(res.items);
+        setItems(sorted);
+        setSelectedCui((current) => current ?? sorted[0]?.cui ?? null);
+      })
+      .catch(setError);
+  }, []);
+
+  const selected = items.find((c) => c.cui === selectedCui);
 
   function addReview(cui, review) {
     setReviews((prev) => ({ ...prev, [cui]: [...(prev[cui] ?? []), review] }));
@@ -24,12 +36,17 @@ export default function App() {
       </header>
 
       <div className="shell">
-        <AlertsSidebar items={alerts} selectedCui={selectedCui} onSelect={setSelectedCui} />
+        <AlertsSidebar items={items} selectedCui={selectedCui} onSelect={setSelectedCui} />
 
         <main className="content">
           <p className="tagline">Prototype · a human analyst decides</p>
+          {error && <div className="card source-missing">Could not load companies: {error.message}</div>}
           {selected && (
-            <CompanyDetail company={selected} sessionReviews={reviews[selected.cui] ?? []} />
+            <CompanyDetail
+              key={selected.cui}
+              item={selected}
+              sessionReviews={reviews[selected.cui] ?? []}
+            />
           )}
         </main>
 
