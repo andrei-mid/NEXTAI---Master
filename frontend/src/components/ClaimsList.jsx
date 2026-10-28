@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import SourceLink from './SourceLink.jsx';
-import { formatUtc } from '../format.js';
+import { coverageLabel, formatUtc } from '../format.js';
 import { severityRank } from '../severity.js';
 
 // "Date found": the evidence date when the source gives one, else when we retrieved it.
@@ -26,7 +26,7 @@ function componentLabel(component) {
 }
 
 /** Signals from GET /companies/{cui}/signals. null = no data yet (404). Collapsed rows; click to open. */
-export default function ClaimsList({ claims, lastChecked }) {
+export default function ClaimsList({ claims, lastChecked, coverage }) {
   const [sort, setSort] = useState('importance');
   const unsourced = (claims ?? []).filter((c) => !c.source?.url).length;
   const sorted = claims ? [...claims].sort(SORTS[sort].compare) : null;
@@ -58,7 +58,10 @@ export default function ClaimsList({ claims, lastChecked }) {
         <p className="muted">Not checked yet: no signals available for this company.</p>
       )}
       {claims?.length === 0 && (
-        <p className="muted">No signals found in the checked sources as of {formatUtc(lastChecked)}.</p>
+        <p className="muted">
+          No signals found in the checked sources as of {formatUtc(lastChecked)}
+          {coverage && <> ({coverageLabel(coverage)} checked)</>}.
+        </p>
       )}
 
       {sorted?.length > 0 && (

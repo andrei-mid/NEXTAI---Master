@@ -7,8 +7,8 @@ const BANDS = [
   { key: 'red', label: 'Red', color: '#ff8f5a' },
   { key: 'yellow', label: 'Yellow', color: '#ffd25c' },
   { key: 'green', label: 'Green · nothing flagged', color: '#6fdc9b' },
-  // Includes the "grey" band and companies the API has not scored yet.
-  { key: 'none', label: 'Grey · not checked yet', color: '#73767d' },
+  // The "grey" band (too few sources checked) and companies the API has not scored yet.
+  { key: 'none', label: 'Inconclusive · not enough data', color: '#73767d' },
 ];
 
 const RADIUS = 80;
@@ -148,6 +148,7 @@ export default function Dashboard({ items, onOpenCompany }) {
   // items arrive sorted by criticality, so group[0] is the most urgent one.
   const urgent = items.filter((i) => i.band === 'stop' || i.band === 'red');
   const postponable = items.filter((i) => i.band === 'yellow');
+  const inconclusive = items.filter((i) => !i.band || i.band === 'grey');
 
   return (
     <div className="dashboard">
@@ -176,12 +177,21 @@ export default function Dashboard({ items, onOpenCompany }) {
           group={postponable}
           onOpenCompany={onOpenCompany}
         />
+        <SummaryCard
+          tone="inconclusive"
+          title="Inconclusive"
+          count={inconclusive.length}
+          detail="Not enough sources checked yet to reach a verdict."
+          group={inconclusive}
+          onOpenCompany={onOpenCompany}
+        />
       </div>
 
       <section className="card">
         <h3>Companies by risk band</h3>
         <p className="muted small">
-          Green means no flags were found, not that the company was approved.
+          Green means no flags were found, not that the company was approved. Inconclusive means
+          too few sources were checked.
         </p>
         {total === 0 ? (
           <p className="muted">No companies loaded.</p>

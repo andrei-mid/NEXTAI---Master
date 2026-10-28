@@ -1,5 +1,6 @@
 import { REVIEW_OPTIONS } from './ReviewPanel.jsx';
 import AnalystName from './AnalystName.jsx';
+import { getAnalyst } from '../mock/analysts.js';
 import { formatUtc } from '../format.js';
 
 // Reviews with these outcomes are not shown in the flag history.
@@ -11,6 +12,7 @@ const LABELS = {
 };
 
 /**
+ * Closed by default: the analyst opens it only when they want the history.
  * companyName: used in the subject of the e-mail to the analyst who made a review.
  * analystId: the signed-in account (no e-mail link to yourself).
  */
@@ -20,12 +22,11 @@ export default function FlagHistory({ entries, companyName, analystId }) {
   const hiddenCount = sorted.length - shown.length;
 
   return (
-    <section className="card">
-      <div className="card-head">
+    <details className="card section-toggle">
+      <summary className="card-head">
         <h3>Flag history</h3>
-        <span className="pill pill-mock">MOCK</span>
-        <span className="pill pill-proposal">not in API contract</span>
-      </div>
+        <span className="sidebar-count">{shown.length}</span>
+      </summary>
       <p className="muted small">
         Past reviews that raised a flag. {hiddenCount} review{hiddenCount === 1 ? '' : 's'} marked
         No risk or False positive {hiddenCount === 1 ? 'is' : 'are'} hidden.
@@ -34,28 +35,38 @@ export default function FlagHistory({ entries, companyName, analystId }) {
       {shown.length === 0 ? (
         <p className="muted">No flags raised for this company.</p>
       ) : (
-        <ol className="timeline">
-          {shown.map((e) => (
-            <li key={e.recorded_at + e.choice}>
-              <div className="timeline-head">
-                <span className="pill pill-outcome">{LABELS[e.choice] ?? e.choice}</span>
-                <span className="small">
-                  <AnalystName
-                    id={e.analyst_id}
-                    mailSubject={
-                      e.analyst_id === analystId
-                        ? undefined
-                        : `${companyName}: your review "${LABELS[e.choice] ?? e.choice}" of ${e.recorded_at.slice(0, 10)}`
-                    }
-                  />
-                </span>
-                <span className="muted small">{formatUtc(e.recorded_at)}</span>
-              </div>
-              <p>{e.comment}</p>
-            </li>
-          ))}
+        <ol className="claims">
+          {shown.map((e) => {
+            const label = LABELS[e.choice] ?? e.choice;
+            const who = getAnalyst(e.analyst_id)?.name ?? 'Unknown analyst';
+            return (
+              <li key={e.recorded_at + e.choice}>
+                <details className="claim">
+                  <summary>
+                    <span className="flag-outcome">{label}</span>
+                    <span className="claim-title muted">{who}</span>
+                    <span className="claim-date">{e.recorded_at.slice(0, 10)}</span>
+                  </summary>
+                  <div className="claim-body">
+                    <p className="claim-text">{e.comment}</p>
+                    <p className="small">
+                      <AnalystName
+                        id={e.analyst_id}
+                        mailSubject={
+                          e.analyst_id === analystId
+                            ? undefined
+                            : `${companyName}: your review "${label}" of ${e.recorded_at.slice(0, 10)}`
+                        }
+                      />
+                      <span className="muted"> · {formatUtc(e.recorded_at)}</span>
+                    </p>
+                  </div>
+                </details>
+              </li>
+            );
+          })}
         </ol>
       )}
-    </section>
+    </details>
   );
 }

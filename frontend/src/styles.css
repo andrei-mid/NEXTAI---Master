@@ -188,8 +188,64 @@ h2 {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+.card.summary-inconclusive {
+  border-left-color: var(--sev-info);
+}
+
+.summary-inconclusive .summary-count {
+  color: var(--sev-info);
+}
+
+/* Company page: grey band explained, sources, check history */
+
+.inconclusive-box {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--sev-info);
+  border-radius: 8px;
+  background: var(--sev-info-bg);
+}
+
+.source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.source-list .source-box {
+  margin-top: 0;
+}
+
+.check-history {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.check-history li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.check-date {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .card.summary-card {
@@ -326,7 +382,7 @@ h2 {
   text-align: right;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .summary-grid {
     grid-template-columns: 1fr;
   }
@@ -779,6 +835,49 @@ h2 {
   white-space: nowrap;
   text-overflow: ellipsis;
   font-size: 0.88rem;
+}
+
+/* A whole card that opens on click (e.g. Flag history) */
+
+.section-toggle > summary {
+  list-style: none;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.section-toggle > summary::-webkit-details-marker {
+  display: none;
+}
+
+.section-toggle > summary::after {
+  content: '▸';
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+
+.section-toggle[open] > summary {
+  margin-bottom: 8px;
+}
+
+.section-toggle[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.section-toggle > summary:hover h3 {
+  color: var(--primary);
+}
+
+.section-toggle > summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.flag-outcome {
+  flex-shrink: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .claim-date {
