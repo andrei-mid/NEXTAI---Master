@@ -2,6 +2,8 @@
 
 One file per external source, all on top of [`base.py`](base.py). **Local-first:** read [docs/LOCAL_DATA.md](../../docs/LOCAL_DATA.md) before writing or changing an adapter.
 
+**ANAF v9 (dated snapshots, one request per call, no retries):** see [`anaf_v9.md`](anaf_v9.md).
+
 **Reference implementation:** [`anaf_bilant.py`](anaf_bilant.py) (READ methods + `sync()` + immutable-data reuse + tests in `tests/test_anaf_bilant.py`).
 
 ## Every adapter has two halves
