@@ -1,4 +1,5 @@
 import { daysUntil, formatRon } from '../format.js';
+import AnalystName from './AnalystName.jsx';
 
 const SOON_DAYS = 90;
 
@@ -10,7 +11,11 @@ function EndBadge({ contract }) {
   return <span className="pill pill-outcome">{verb} in {days} days</span>;
 }
 
-export default function BankRelationship({ bank }) {
+/**
+ * companyName: used in the subject of the e-mail to a contract's responsible person.
+ * analystId: the signed-in account (no e-mail link to yourself).
+ */
+export default function BankRelationship({ bank, companyName, analystId }) {
   const next = bank.contracts[0];
 
   return (
@@ -74,6 +79,7 @@ export default function BankRelationship({ bank }) {
               <th>Start</th>
               <th>End</th>
               <th>Status</th>
+              <th>Responsible</th>
             </tr>
           </thead>
           <tbody>
@@ -92,6 +98,16 @@ export default function BankRelationship({ bank }) {
                 <td className="nowrap">{c.end}</td>
                 <td>
                   <EndBadge contract={c} />
+                </td>
+                <td>
+                  <AnalystName
+                    id={c.responsible_id}
+                    mailSubject={
+                      c.responsible_id === analystId
+                        ? undefined
+                        : `${companyName}: contract ${c.contract_no} (${c.product})`
+                    }
+                  />
                 </td>
               </tr>
             ))}

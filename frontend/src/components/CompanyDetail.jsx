@@ -9,7 +9,7 @@ import FlagHistory from './FlagHistory.jsx';
 import BankRelationship from './BankRelationship.jsx';
 
 /** Centre of the page for one company: loads GET /companies/{cui} and /signals. */
-export default function CompanyDetail({ item, sessionReviews }) {
+export default function CompanyDetail({ item, sessionReviews, analystId }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
@@ -42,9 +42,17 @@ export default function CompanyDetail({ item, sessionReviews }) {
       <IdentityCard company={company} signals={signals} origin={item.origin} />
       <ComponentBars components={company.components} />
       <ClaimsList claims={signals && sortSignals(signals)} lastChecked={company.last_checked} />
-      <FlagHistory entries={history} />
+      <FlagHistory
+        entries={history}
+        companyName={company.identity_sheet.current_name}
+        analystId={analystId}
+      />
       {fictional ? (
-        <BankRelationship bank={getBankRelationship(item.cui)} />
+        <BankRelationship
+          bank={getBankRelationship(item.cui)}
+          companyName={company.identity_sheet.current_name}
+          analystId={analystId}
+        />
       ) : (
         <section className="card">
           <h3>Relationship with the bank</h3>

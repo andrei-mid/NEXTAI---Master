@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatUtc } from '../format.js';
+import AnalystName from './AnalystName.jsx';
 
 // The analyst's own judgement. All options look the same: the UI never suggests one.
 export const REVIEW_OPTIONS = [
@@ -11,7 +12,8 @@ export const REVIEW_OPTIONS = [
 
 const labelOf = (value) => REVIEW_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
-export default function ReviewPanel({ company, history, onSubmit }) {
+/** analystId: the signed-in account; every recorded review is attributed to it. */
+export default function ReviewPanel({ company, analystId, history, onSubmit }) {
   const [choice, setChoice] = useState(null);
   const [comment, setComment] = useState('');
   const canSubmit = choice !== null && comment.trim().length > 0;
@@ -19,7 +21,12 @@ export default function ReviewPanel({ company, history, onSubmit }) {
   function handleSubmit(event) {
     event.preventDefault();
     if (!canSubmit) return;
-    onSubmit({ choice, comment: comment.trim(), recorded_at: new Date().toISOString() });
+    onSubmit({
+      choice,
+      comment: comment.trim(),
+      analyst_id: analystId,
+      recorded_at: new Date().toISOString(),
+    });
     setChoice(null);
     setComment('');
   }
@@ -28,6 +35,9 @@ export default function ReviewPanel({ company, history, onSubmit }) {
     <aside className="review-panel" aria-label="Analyst review">
       <h2 className="sidebar-title">Your review</h2>
       <p className="review-company">{company.name}</p>
+      <p className="muted small review-as">
+        Recorded as <AnalystName id={analystId} />
+      </p>
 
       <form onSubmit={handleSubmit}>
         <fieldset className="review-options">
@@ -78,6 +88,16 @@ export default function ReviewPanel({ company, history, onSubmit }) {
             <li key={r.recorded_at}>
               <strong>{labelOf(r.choice)}</strong>
               <span className="muted"> · {formatUtc(r.recorded_at)}</span>
+              <div className="small">
+                <AnalystName
+                  id={r.analyst_id}
+                  mailSubject={
+                    r.analyst_id === analystId
+                      ? undefined
+                      : `${company.name}: your review "${labelOf(r.choice)}" of ${r.recorded_at.slice(0, 10)}`
+                  }
+                />
+              </div>
               <p>{r.comment}</p>
             </li>
           ))}

@@ -1,4 +1,5 @@
 import { REVIEW_OPTIONS } from './ReviewPanel.jsx';
+import AnalystName from './AnalystName.jsx';
 import { formatUtc } from '../format.js';
 
 // Reviews with these outcomes are not shown in the flag history.
@@ -9,7 +10,11 @@ const LABELS = {
   false_positive: 'False positive',
 };
 
-export default function FlagHistory({ entries }) {
+/**
+ * companyName: used in the subject of the e-mail to the analyst who made a review.
+ * analystId: the signed-in account (no e-mail link to yourself).
+ */
+export default function FlagHistory({ entries, companyName, analystId }) {
   const sorted = [...entries].sort((a, b) => b.recorded_at.localeCompare(a.recorded_at));
   const shown = sorted.filter((e) => !HIDDEN.includes(e.choice));
   const hiddenCount = sorted.length - shown.length;
@@ -34,9 +39,17 @@ export default function FlagHistory({ entries }) {
             <li key={e.recorded_at + e.choice}>
               <div className="timeline-head">
                 <span className="pill pill-outcome">{LABELS[e.choice] ?? e.choice}</span>
-                <span className="muted small">
-                  {formatUtc(e.recorded_at)} · {e.analyst ?? 'You (this session)'}
+                <span className="small">
+                  <AnalystName
+                    id={e.analyst_id}
+                    mailSubject={
+                      e.analyst_id === analystId
+                        ? undefined
+                        : `${companyName}: your review "${LABELS[e.choice] ?? e.choice}" of ${e.recorded_at.slice(0, 10)}`
+                    }
+                  />
                 </span>
+                <span className="muted small">{formatUtc(e.recorded_at)}</span>
               </div>
               <p>{e.comment}</p>
             </li>

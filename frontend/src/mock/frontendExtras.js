@@ -5,6 +5,7 @@
 // Everything here is invented (FICTIV). Not real bank data.
 
 import { seeded } from './seeded.js';
+import { ANALYSTS, RELATIONSHIP_MANAGERS } from './analysts.js';
 
 const MOCK_TODAY = '2026-10-28';
 
@@ -73,6 +74,13 @@ export function getBankRelationship(cui) {
 
   contracts.sort((a, b) => a.end.localeCompare(b.end));
 
+  // Relationship manager responsible for each contract. Separate generator, so adding this
+  // did not change the figures above.
+  const pick = seeded(Number(cui) + 13);
+  for (const c of contracts) {
+    c.responsible_id = RELATIONSHIP_MANAGERS[Math.floor(pick() * RELATIONSHIP_MANAGERS.length)].id;
+  }
+
   return {
     client_since: shiftMonths(-between(30, 120)),
     segment: 'Corporate (FICTIV)',
@@ -110,7 +118,7 @@ export function getFlagHistory(cui, severity) {
     return {
       ...template,
       recorded_at: `${shiftMonths(-monthsBack)}T09:00:00Z`,
-      analyst: `Analyst ${'ABCD'[Math.floor(r() * 4)]} (FICTIV)`,
+      analyst_id: ANALYSTS[Math.floor(r() * ANALYSTS.length)].id,
     };
   });
 }
