@@ -6,6 +6,7 @@ score, band and components are passed through exactly as stored.
 
 from __future__ import annotations
 
+import asyncio
 import re
 import unicodedata
 from datetime import UTC, date, datetime, time
@@ -75,6 +76,12 @@ def score_point(score: Score) -> ScorePoint:
     )
 
 
+# How many companies the list loads at once. Each repository call is one database round trip
+# (~0.1 s from a laptop to a hosted Postgres): one after another, a page of companies took
+# ~13 s. Concurrent, it costs about one company. Kept modest for small hosted Postgres plans.
+LIST_CONCURRENCY = 8
+
+
 def _edge_role(person: Person) -> str | None:
     if person.role in (PersonRole.ADMINISTRATOR, PersonRole.LEGAL_REPRESENTATIVE):
         return "administrator" if person.valid_to is None else "former_administrator"
@@ -120,33 +127,38 @@ class RepoReadModel:
             cuis, total = await self.repo.list_portfolio_as_of(
                 as_of=end_of(as_of), band=band, q=q, page=page, page_size=page_size
             )
-        items: list[CompanyListItem] = []
-        for cui in cuis:
-            identity = await self.repo.get_identity_sheet(cui)
-            score = await self._score(cui, as_of)
-            signals = await self._signals(cui, as_of) if score else []
-            items.append(
-                CompanyListItem(
-                    cui=cui,
-                    name=identity.current_name if identity else cui,
-                    band=score.band if score else None,
-                    score=score.trust_score if score else None,
-                    coverage=score.coverage if score else None,
-                    last_checked=score.computed_at if score else None,
-                    top_signal=top_signal(signals),
-                    fictional=identity.fictional if identity else False,
+        gate = asyncio.Semaphore(LIST_CONCURRENCY)
+
+        async def item(cui: str) -> CompanyListItem:
+            async with gate:  # identity, score and signals at the same time
+                identity, score, signals = await asyncio.gather(
+                    self.repo.get_identity_sheet(cui),
+                    self._score(cui, as_of),
+                    self._signals(cui, as_of),
                 )
+            return CompanyListItem(
+                cui=cui,
+                name=identity.current_name if identity else cui,
+                band=score.band if score else None,
+                score=score.trust_score if score else None,
+                coverage=score.coverage if score else None,
+                last_checked=score.computed_at if score else None,
+                top_signal=top_signal(signals) if score else None,
+                fictional=identity.fictional if identity else False,
             )
+
+        items = list(await asyncio.gather(*(item(cui) for cui in cuis)))  # keeps page order
         return CompanyList(items=items, page=page, page_size=page_size, total=total)
 
     async def detail(self, cui: str, as_of: date | None = None) -> CompanyDetail:
         """`as_of`: the score and signals the bank had at the end of that day. The identity
         sheet is the current one (sheets are not versioned by date)."""
-        identity = await self._identity(cui)
-        score = await self._score(cui, as_of)
+        identity, score, all_signals = await asyncio.gather(
+            self._identity(cui), self._score(cui, as_of), self._signals(cui, as_of)
+        )
         if as_of is not None and score is None:
             raise HTTPException(status_code=404, detail=f"company {cui} not checked by {as_of}")
-        signals = await self._signals(cui, as_of) if score else []
+        signals = all_signals if score else []
         return CompanyDetail(
             identity_sheet=identity,
             score=score.trust_score if score else None,

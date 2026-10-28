@@ -273,3 +273,38 @@ async def test_history_between_two_dates() -> None:
     assert [e.evidence_date for e in history.events] == [date(2026, 6, 1), date(2026, 9, 1)]
     whole = await rm.history(CUI, None, None)
     assert len(whole.scores) == 3 and len(whole.events) == 3
+
+
+async def test_list_loads_companies_concurrently_and_keeps_the_page_order() -> None:
+    """One database round trip per call: loaded one after another, a page took ~13 s on Neon."""
+    import asyncio
+    import time
+
+    class SlowRepo(MemoryRepository):
+        async def get_identity_sheet(self, cui: str) -> IdentitySheet | None:
+            await asyncio.sleep(0.05)
+            return await super().get_identity_sheet(cui)
+
+        async def get_latest_score(self, cui: str) -> Score | None:
+            await asyncio.sleep(0.05)
+            return await super().get_latest_score(cui)
+
+        async def list_signals(self, cui: str) -> list[Signal]:
+            await asyncio.sleep(0.05)
+            return await super().list_signals(cui)
+
+    repo = SlowRepo()
+    cuis = [f"9900{i:04d}" for i in range(8)]
+    for cui in cuis:
+        await repo.save_identity_sheet("r", identity().model_copy(update={"cui": cui}))
+        await repo.save_run(
+            RunStatus(run_id=f"run-{cui}", cui=cui, state=RunState.COMPLETED, started_at=NOW)
+        )
+    started = time.perf_counter()
+    page = await RepoReadModel(repo).list_companies(band=None, q=None, page=1, page_size=50)
+    elapsed = time.perf_counter() - started
+
+    expected, _ = await repo.list_portfolio(band=None, q=None, page=1, page_size=50)
+    assert [i.cui for i in page.items] == expected  # the repository's page order, unchanged
+    assert len(page.items) == len(cuis)
+    assert elapsed < 0.05 * 3 * len(cuis) / 2  # well below one-after-another (1.2 s)
