@@ -5,6 +5,8 @@ INSERT and SELECT only: the table is append-only (trigger in the audit migration
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,11 +33,17 @@ class AuditStore:
         )
         await self.session.execute(stmt.on_conflict_do_nothing(index_elements=["decision_id"]))
 
-    async def list_decisions(self, cui: str) -> list[DecisionRecord]:
+    async def list_decisions(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[DecisionRecord]:
+        """Oldest first. `since` / `until` (inclusive) filter on recorded_at."""
+        stmt = select(DecisionRow).where(DecisionRow.cui == cui)
+        if since is not None:
+            stmt = stmt.where(DecisionRow.recorded_at >= since)
+        if until is not None:
+            stmt = stmt.where(DecisionRow.recorded_at <= until)
         rows = await self.session.scalars(
-            select(DecisionRow)
-            .where(DecisionRow.cui == cui)
-            .order_by(DecisionRow.recorded_at, DecisionRow.decision_id)
+            stmt.order_by(DecisionRow.recorded_at, DecisionRow.decision_id)
         )
         return [
             DecisionRecord.model_validate(

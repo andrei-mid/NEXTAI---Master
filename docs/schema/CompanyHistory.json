@@ -1,0 +1,428 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "Coverage": {
+      "properties": {
+        "weight_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight Pct",
+          "type": "number"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "weight_pct",
+        "available",
+        "total"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "DecisionKind": {
+      "enum": [
+        "approve",
+        "reject",
+        "escalate",
+        "request_info"
+      ],
+      "title": "DecisionKind",
+      "type": "string"
+    },
+    "DecisionRecord": {
+      "description": "Append-only audit-log entry. The analyst decides, the AI never does.",
+      "properties": {
+        "decision_id": {
+          "title": "Decision Id",
+          "type": "string"
+        },
+        "cui": {
+          "title": "Cui",
+          "type": "string"
+        },
+        "decision": {
+          "$ref": "#/$defs/DecisionKind"
+        },
+        "comment": {
+          "title": "Comment",
+          "type": "string"
+        },
+        "analyst": {
+          "title": "Analyst",
+          "type": "string"
+        },
+        "run_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Run Id"
+        },
+        "band_at_decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Band"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision_id",
+        "cui",
+        "decision",
+        "comment",
+        "analyst",
+        "run_id",
+        "band_at_decision",
+        "recorded_at"
+      ],
+      "title": "DecisionRecord",
+      "type": "object"
+    },
+    "EntityMatch": {
+      "properties": {
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "ambiguous": {
+          "default": false,
+          "title": "Ambiguous",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "method",
+        "score"
+      ],
+      "title": "EntityMatch",
+      "type": "object"
+    },
+    "ScorePoint": {
+      "description": "One check of the company on its timeline (known-at axis: when the bank knew it).",
+      "properties": {
+        "run_id": {
+          "title": "Run Id",
+          "type": "string"
+        },
+        "computed_at": {
+          "format": "date-time",
+          "title": "Computed At",
+          "type": "string"
+        },
+        "band": {
+          "$ref": "#/$defs/Band"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Score"
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        }
+      },
+      "required": [
+        "run_id",
+        "computed_at",
+        "band",
+        "score",
+        "coverage"
+      ],
+      "title": "ScorePoint",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Signal": {
+      "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "cui": {
+          "title": "Cui",
+          "type": "string"
+        },
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "component": {
+          "$ref": "#/$defs/Component"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        },
+        "evidence_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence Date"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "validated": {
+          "default": true,
+          "title": "Validated",
+          "type": "boolean"
+        },
+        "auto_stop_candidate": {
+          "default": false,
+          "title": "Auto Stop Candidate",
+          "type": "boolean"
+        },
+        "entity_match": {
+          "$ref": "#/$defs/EntityMatch"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        }
+      },
+      "required": [
+        "signal_id",
+        "cui",
+        "agent",
+        "component",
+        "rule_id",
+        "claim",
+        "source",
+        "evidence_date",
+        "confidence",
+        "severity",
+        "entity_match"
+      ],
+      "title": "Signal",
+      "type": "object"
+    },
+    "SourceRef": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "retrieved_at"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "official",
+        "aggregator",
+        "web",
+        "mock",
+        "submitted"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    }
+  },
+  "description": "GET /companies/{cui}/history?from=&to=: everything about one company in a period.\n\nTwo time axes, never mixed (docs/DECISIONS.md, \"Time-travel reads\"):\n- `scores` and `decisions`: what the bank knew / decided in the period (computed_at,\n  recorded_at). This is the replay.\n- `events`: what happened to the company in the period (Signal.evidence_date), as known\n  by its newest check. Signals without an evidence_date are not events.",
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "date_from": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Date From"
+    },
+    "date_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Date To"
+    },
+    "scores": {
+      "items": {
+        "$ref": "#/$defs/ScorePoint"
+      },
+      "title": "Scores",
+      "type": "array"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/Signal"
+      },
+      "title": "Events",
+      "type": "array"
+    },
+    "decisions": {
+      "items": {
+        "$ref": "#/$defs/DecisionRecord"
+      },
+      "title": "Decisions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "cui",
+    "date_from",
+    "date_to",
+    "scores",
+    "events",
+    "decisions"
+  ],
+  "title": "CompanyHistory",
+  "type": "object"
+}

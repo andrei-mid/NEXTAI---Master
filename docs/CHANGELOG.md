@@ -20,6 +20,41 @@
 
 ---
 
+## 2026-10-28: Time travel: `?as_of=` and `GET /companies/{cui}/history?from=&to=` (role 1, for role 6) · CONTRACT CHANGE
+
+**What:** the frontend can show a company or the portfolio **as of a date** and **everything from date X to date Y**. DECIDED in `docs/DECISIONS.md` ("Time-travel reads"). Contract in `docs/SOLUTION.md` ("Time travel"). Done by role 1 across folders at the team's request:
+
+- **`schema/api.py` (role 2):** new `ScorePoint`, `CompanyHistory`. `docs/schema/` regenerated.
+- **`core/ports/repository.py` + `core/impl_local/repository.py` (role 2):** six new port methods: `get_score_as_of`, `list_score_history`, `list_signals_as_of`, `list_events`, `list_portfolio_as_of`, `list_decisions_between`. `MemoryRepository` now keeps every score per company, not only the latest.
+- **`apps/api` (role 5):** `as_of` on `GET /companies`, `/companies/{cui}`, `/companies/{cui}/signals`; new `/history` route. Works in fixture mode too (one check per demo company, events from the fixture signals).
+- **`persistence` (role 1):** the SQL implementation, tested on PostgreSQL 17.11 (all persistence tests pass on a real Postgres now).
+
+Two time axes, never mixed: *known-at* (`computed_at`, `recorded_at`: what the bank knew) and *happened-at* (`Signal.evidence_date`: when the fact occurred).
+
+**What you must do:**
+- **Role 6:** use `?as_of=` and `/history` (see SOLUTION.md). In fixture mode `scores` has at most one point per company.
+- **Role 2 / role 5:** review the changes in your folders. Any new `Repository` implementation must implement the six methods.
+
+---
+
+## 2026-10-28: `onrc_bulk` works in fixture mode (role 1)
+
+**What:** `verifirm/adapters/onrc_bulk.py` READ methods are implemented for `FIXTURE_MODE=1` (this replaces role 2's first fixture version below, same behaviour plus more). The per-company contract is now DECIDED in `docs/DECISIONS.md`.
+
+- `company(cui)`: `onrc.json` when the company has one, otherwise a record built from `fixtures/sources/onrc/*_sample.csv` (so the 63 shell companies and the affiliates resolve too). A fixture folder without either (Dedeman) → `None`. A CUI with no fixture data at all → `SourceUnavailable` (kept from role 2's version: in fixture mode we can't say it's not in ONRC).
+- `companies_at_address(raw)`: normalizes inside (`normalize_address`: diacritics, case, `Strada`/`Str.`, `Bulevardul`/`B-dul`/`Bd.`, `nr.`). Zephyria's office → 63 CUIs.
+- `companies_of_person(name)`: affiliations with `stare` and `match {method, score, ambiguous}`. Ionel Fictivescu → Zephyria + 5 affiliates.
+- `iter_rows(path)`: streaming parser for the real files (delimiter + UTF-8/cp1250 sniffed, malformed lines counted). Used next by `ingest_onrc`.
+- The identity agent run with the real adapter gives the same signals as with its `FakeOnrc` on all 9 fictional companies (only `source.raw_ref` is more precise).
+- Outside fixture mode the READ methods raise `SourceUnavailable` (never empty) until the bulk-lookup port exists.
+
+**What you must do:**
+- **Role 3:** you can replace `FakeOnrc` in `agents/identity/tests/` with `OnrcBulkAdapter` (fixture mode). The network agent can use `companies_of_person`.
+- **Role 5:** `identity_sheet` already reads `onrc_bulk.company(cui)`: nothing to change.
+- **Role 2:** please review the bulk-lookup port proposal in `docs/DECISIONS.md` (PENDING, "Port for bulk tables"). It is what the live branch of `onrc_bulk` needs to read the tables.
+
+---
+
 ## 2026-10-28: Tax agent, anaf_v9, e-Factura registry and all 6 mocks implemented (role 3)
 
 **What:**

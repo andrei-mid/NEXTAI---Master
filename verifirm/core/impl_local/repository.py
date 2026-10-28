@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import date, datetime
 
 from verifirm.core.ports.repository import Repository
 from verifirm.schema.api import DecisionRecord
@@ -21,6 +22,9 @@ class MemoryRepository(Repository):
             dict
         )  # run_id -> agent -> result
         self._scores: dict[str, Score] = {}  # by cui (latest)
+        self._score_history: dict[str, dict[str, Score]] = defaultdict(
+            dict
+        )  # cui -> run_id -> score
         self._memos: dict[str, Memo] = {}  # by cui (latest)
         self._decisions: dict[str, list[DecisionRecord]] = defaultdict(list)
 
@@ -57,6 +61,7 @@ class MemoryRepository(Repository):
 
     async def save_score(self, score: Score) -> None:
         self._scores[score.cui] = score
+        self._score_history[score.cui][score.run_id] = score
 
     async def get_latest_score(self, cui: str) -> Score | None:
         return self._scores.get(cui)
@@ -89,3 +94,76 @@ class MemoryRepository(Repository):
 
     async def list_decisions(self, cui: str) -> list[DecisionRecord]:
         return list(self._decisions.get(cui, []))
+
+    # --- time-travel reads
+    def _history(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[Score]:
+        scores = sorted(
+            self._score_history.get(cui, {}).values(), key=lambda s: (s.computed_at, s.run_id)
+        )
+        return [
+            s
+            for s in scores
+            if (since is None or s.computed_at >= since)
+            and (until is None or s.computed_at <= until)
+        ]
+
+    async def get_score_as_of(self, cui: str, as_of: datetime) -> Score | None:
+        history = self._history(cui, until=as_of)
+        return history[-1] if history else None
+
+    async def list_score_history(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[Score]:
+        return self._history(cui, since, until)
+
+    async def list_signals_as_of(self, cui: str, as_of: datetime) -> list[Signal]:
+        score = await self.get_score_as_of(cui, as_of)
+        if score is None:
+            return []
+        return [s for r in await self.list_agent_results(score.run_id) for s in r.signals]
+
+    async def list_events(
+        self, cui: str, since: date | None = None, until: date | None = None
+    ) -> list[Signal]:
+        score = self._scores.get(cui)
+        if score is None:
+            return []
+        signals = [s for r in await self.list_agent_results(score.run_id) for s in r.signals]
+        events = [
+            s
+            for s in signals
+            if s.evidence_date is not None
+            and (since is None or s.evidence_date >= since)
+            and (until is None or s.evidence_date <= until)
+        ]
+        return sorted(events, key=lambda s: (s.evidence_date or date.min, s.signal_id))
+
+    async def list_portfolio_as_of(
+        self, *, as_of: datetime, band: Band | None, q: str | None, page: int, page_size: int
+    ) -> tuple[list[str], int]:
+        cuis = []
+        for cui in sorted(self._score_history):
+            score = await self.get_score_as_of(cui, as_of)
+            if score is None or (band is not None and score.band != band):
+                continue
+            name = (getattr(self._sheets.get(cui), "current_name", "") or "").lower()
+            if q and q.lower() not in cui and q.lower() not in name:
+                continue
+            cuis.append(cui)
+        start = (page - 1) * page_size
+        return cuis[start : start + page_size], len(cuis)
+
+    async def list_decisions_between(
+        self, cui: str, since: datetime | None = None, until: datetime | None = None
+    ) -> list[DecisionRecord]:
+        decisions = sorted(
+            self._decisions.get(cui, []), key=lambda d: (d.recorded_at, d.decision_id)
+        )
+        return [
+            d
+            for d in decisions
+            if (since is None or d.recorded_at >= since)
+            and (until is None or d.recorded_at <= until)
+        ]
