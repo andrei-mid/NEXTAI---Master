@@ -4,16 +4,20 @@
 
 ---
 
-## 2026-10-28: Time-travel reads in Postgres + persistence tests now run on a real Postgres 17 (role 1)
+## 2026-10-28: Time travel: `?as_of=` and `GET /companies/{cui}/history?from=&to=` (role 1, for role 6) · CONTRACT CHANGE
 
-**What:** `SqlRepository` has "as of date X" and "from X to Y" reads for the frontend's period view (role 6): `get_score_as_of`, `list_score_history`, `list_signals_as_of`, `list_events`, `list_portfolio_as_of`, `list_decisions_between`. Two time axes, never mixed: *known-at* (`computed_at`, `recorded_at`) and *happened-at* (`Signal.evidence_date`). They are **not on the `Repository` port yet**: the proposal is in `docs/DECISIONS.md` ("Time-travel reads", PENDING).
+**What:** the frontend can show a company or the portfolio **as of a date** and **everything from date X to date Y**. DECIDED in `docs/DECISIONS.md` ("Time-travel reads"). Contract in `docs/SOLUTION.md` ("Time travel"). Done by role 1 across folders at the team's request:
 
-All persistence tests (migrations, drift, append-only audit trigger, upserts, the new reads) pass on PostgreSQL 17.11.
+- **`schema/api.py` (role 2):** new `ScorePoint`, `CompanyHistory`. `docs/schema/` regenerated.
+- **`core/ports/repository.py` + `core/impl_local/repository.py` (role 2):** six new port methods: `get_score_as_of`, `list_score_history`, `list_signals_as_of`, `list_events`, `list_portfolio_as_of`, `list_decisions_between`. `MemoryRepository` now keeps every score per company, not only the latest.
+- **`apps/api` (role 5):** `as_of` on `GET /companies`, `/companies/{cui}`, `/companies/{cui}/signals`; new `/history` route. Works in fixture mode too (one check per demo company, events from the fixture signals).
+- **`persistence` (role 1):** the SQL implementation, tested on PostgreSQL 17.11 (all persistence tests pass on a real Postgres now).
+
+Two time axes, never mixed: *known-at* (`computed_at`, `recorded_at`: what the bank knew) and *happened-at* (`Signal.evidence_date`: when the fact occurred).
 
 **What you must do:**
-- **Role 2:** add the six methods to the port + `MemoryRepository`.
-- **Role 5:** `?as_of=` and `GET /companies/{cui}/history?from=&to=` once the port has them.
-- **Role 6:** until then the period view can only be mocked. Say which screens need it.
+- **Role 6:** use `?as_of=` and `/history` (see SOLUTION.md). In fixture mode `scores` has at most one point per company.
+- **Role 2 / role 5:** review the changes in your folders. Any new `Repository` implementation must implement the six methods.
 
 ---
 
