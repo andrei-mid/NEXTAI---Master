@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-10-29: Three fixes found on real data (role 3; financials is co-owned with role 2)
+
+**What:**
+- **FIN-HEADCOUNT-01, sector benchmark:** divisions missing from `financials/config.yaml` were compared with a generic 500,000 RON per employee. That flagged Hidroelectrica, Petrom and Dacia (energy, oil and car making naturally have very high turnover per employee). `fallback_avg_ron` is now `null`, so there's **no comparison without a real benchmark**. Add a division to the table (INS data) to check it.
+- **FIN-HEADCOUNT-01, CAEN padding:** ANAF v9 sends `0610` (oil extraction) as `610`. The division was read as 61 (telecom). Codes are padded to 4 digits first.
+- **Presence, official website:** the domain must be made **only** of the company name's words (plus "romania", "group"...). `getdante.com` no longer counts for DANTE INTERNATIONAL SA. Limit: a common-word name can still match another company's site (`dante.global`). eMAG's own site (brand ≠ legal name) is missed. A wrong website can only hide PRE-NO-FOOTPRINT-01, never create it.
+
+**What you must do:** role 2 / Andrei: the financials change is in your co-owned config. Revert `fallback_avg_ron` if you disagree.
+
+---
+
 ## 2026-10-29: Tavily web search live + a hidden ANAF request fixed (role 3, role 4's `web_search.py` with the human's approval)
 
 **What:**

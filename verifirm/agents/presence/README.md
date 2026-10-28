@@ -49,7 +49,7 @@ uv run pytest verifirm/agents/presence verifirm/adapters/tests/test_seap.py veri
 
 ## Next (to get real data)
 
-- **Website + jobs:** done (Tavily). Limit: the official site is found by a distinctive word of the legal name in the domain, so a brand that differs from the legal name (eMAG for DANTE INTERNATIONAL SA) shows "no website". Directories (listafirme, termene...) never count.
+- **Website + jobs:** done (Tavily). The official site is the first result whose domain is made **only** of the legal name's words (plus "romania", "group"...). Directories, social networks and press never count. Limits: a brand that differs from the legal name is missed (eMAG for DANTE INTERNATIONAL SA), and a common-word name can match another company's site (`dante.global`). A wrong website can only hide PRE-NO-FOOTPRINT-01, never create it.
 - **SEAP:** an ingest job for the procurement exports on data.gov.ro, then `contracts_for` reads the local table.
 - **Kohesio:** an ingest job for the Romanian beneficiaries export.
 

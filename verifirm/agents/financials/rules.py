@@ -106,7 +106,7 @@ class Headcount(BaseModel):
     multiplier: float
     confidence: float
     caen_avg_turnover_per_employee_ron: dict[str, int]
-    fallback_avg_ron: int
+    fallback_avg_ron: int | None = None  # None: no comparison for unlisted divisions
 
 
 class FinancialsConfig(BaseModel):
@@ -185,8 +185,12 @@ def check_headcount(
     """FIN-HEADCOUNT-01. Zephyria 2025 (CAEN 49): 18.6M RON / 2 employees = 9.3M per employee."""
     if not latest.turnover or not latest.employees or latest.employees <= 0:
         return None
-    division = (caen or "")[:2]
+    digits = "".join(ch for ch in (caen or "") if ch.isdigit())
+    # ANAF v9 drops leading zeros ("610" is 0610, oil extraction): pad before taking the division.
+    division = digits.zfill(4)[:2] if digits else ""
     average = cfg.caen_avg_turnover_per_employee_ron.get(division, cfg.fallback_avg_ron)
+    if average is None:
+        return None  # no benchmark for this sector: a generic average would only make noise
     per_employee = latest.turnover // latest.employees
     if per_employee <= average * cfg.multiplier:
         return None
