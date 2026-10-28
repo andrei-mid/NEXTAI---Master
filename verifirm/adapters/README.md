@@ -18,8 +18,8 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | Adapter | Kind | Status | How data gets to the server |
 |---|---|---|---|
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
-| `anaf_v9` | batch per company | stub | `sweep_anaf_v9` job (100 CUIs/call) → `store_in_mirror` per CUI; `sync()` for single applicants |
-| `anaf_efactura_registry` | per company | stub | probably derived from the v9 mirror entry (no extra call) |
+| `anaf_v9` | batch per company | **implemented** | READ `lookup` / `lookup_batch` (mirror, key = CUI). `sync()`: 1 request per applicant. `lookup_batch` on a network adapter: 100 CUIs per request → `store_in_mirror` per CUI (for the `sweep_anaf_v9` job, still a stub). Never retries a 429 |
+| `anaf_efactura_registry` | per company | **implemented** | derived from the v9 mirror entry (`statusRO_e_Factura`). No call, no sync of its own |
 | `onrc_bulk` | bulk | stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |
 | `scj` | per company, time window | stub | nightly batch 03:30–06:30 → mirror. `sync()` no-op outside the window |
@@ -27,6 +27,6 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | `seap`, `kohesio` | bulk | stub | ingest jobs (to add). `sync()` no-op |
 | `web_search` (Tavily) | per company | stub | `sync()` runs the media/presence queries once per application. Results go to the mirror |
 | `documents` | uploaded files | stub | files are already local (ObjectStore). No sync |
-| `mocks/*` | fixtures only | stub | always read `fixtures/`. No sync |
+| `mocks/*` | fixtures only | **implemented** (all 6) | always read `fixtures/` through `mocks.MockAdapter` (shape-checked; wrong shape or no file → unavailable). No sync. Production route: `docs/SOURCES.md` |
 
 Update this table when you change an adapter's status.

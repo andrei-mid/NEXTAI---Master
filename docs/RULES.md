@@ -42,10 +42,10 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
 |---|---|---|---|---|
-| `TAX-DECLARED-GAP-01` | high |  | Submitted figures differ from ANAF by > 10% (turnover, profit sign/amount, employees) | documents vs anaf_bilant |
-| `TAX-ARREARS-01` | high |  | Company is on ANAF's tax-arrears list | mock_restante |
+| `TAX-DECLARED-GAP-01` | high |  | Submitted figures differ from ANAF by > 10% (turnover, net result, employees, debts, equity; only fields on both sides). A profit/loss sign flip or ANAF showing 0 is always a gap. One signal per year | documents vs anaf_bilant |
+| `TAX-ARREARS-01` | high |  | Company is on ANAF's tax-arrears list. Not being on it is clean for that list only (ANAF lists debts above thresholds); the note names the quarter checked | mock_restante |
 | `TAX-VAT-CANCELLED-01` | medium |  | VAT registration cancelled in the last 24 months (even if re-registered) | anaf_v9 |
-| `TAX-EFACTURA-GAP-01` | medium |  | D300 declared sales differ from e-Factura issued totals by > 10% | mock_d300 vs mock_efactura |
+| `TAX-EFACTURA-GAP-01` | medium (D300 below e-Factura) · low (D300 above: can be legitimate, e.g. exports, B2C) |  | D300 declared sales differ from e-Factura issued totals by > 10% over the same period (D300 must cover every month) | mock_d300 vs mock_efactura |
 | `TAX-EFACTURA-REG-01` | low |  | Company not enrolled in RO e-Factura although required | anaf_efactura_registry |
 
 ### litigation

@@ -26,4 +26,15 @@ Every external source: endpoint, access, limits, real vs mock. Adapter docstring
 | `mock_shareholders` | Shareholders | paid ONRC extract | n/a | n/a | **MOCK** | `companies/*/shareholders.json` |
 | `mock_pep` | PEP list | commercial | n/a | n/a | **MOCK** | `sources/pep_sample.json` |
 
+**Mocks: where the real data will come from.** Every mock sits behind the same READ method the real source will have, so going live changes only the adapter, never the agents. Checked on 2026-10-28; contracts and prices are TO VERIFY.
+
+| Mock | Why there is no API for us | Production route |
+|---|---|---|
+| `mock_restante` | Public by law (art. 162 Fiscal Procedure Code, quarterly), but only as a search page with a captcha. Automating it would break ANAF's terms | (1) the applicant's **certificat de atestare fiscală** (definitive) via `documents`, (2) a licensed data provider. ANAF also publishes a **no-arrears list** (OPANAF 1923/2022): the mock accepts an optional `on_white_list` |
+| `mock_d300` | The company's confidential tax data: only via SPV with **its own** qualified certificate | The applicant submits D300 copies / SAF-T (D406) in the credit file (`documents`), or authorizes our app with their certificate |
+| `mock_efactura` | Same: OAuth tied to the company's certificate | Applicant consent (OAuth with their certificate) or exports submitted in the credit file |
+| `mock_bpi` | Free per-name lookup on bpi.ro, full bulletin paid, no API found | Paid ONRC subscription or a commercial provider. Insolvency is also seen for free via ONRC status (identity) and court cases (litigation) |
+| `mock_shareholders` | ONRC open data has no shareholders | Paid ONRC extract or a commercial provider |
+| `mock_pep` | Commercial lists only | The bank's existing compliance vendor |
+
 **CAEN Rev.2 → Rev.3:** the "CAEN not authorized" rule (`ID-CAEN-UNAUTH-01`) must map both revisions. Import the official INS correspondence table into `fixtures/sources/caen_rev2_rev3.csv` (role 3) and the `onrc_caen_rev2_rev3` table (role 1).

@@ -1,0 +1,18 @@
+# Tax agent thresholds. ALL VALUES ARE A PROPOSAL (docs/DECISIONS.md).
+# Loaded by verifirm/agents/tax/rules.py:load_config. Change values here, not in code.
+
+# TAX-DECLARED-GAP-01: a submitted figure differs from ANAF by more than this (% of ANAF's
+# value). A profit/loss sign flip, or ANAF showing 0, is always a gap.
+declared_gap_tolerance_pct: 10
+
+# TAX-VAT-CANCELLED-01: a VAT cancellation in the last N days (24 months), even if re-registered.
+vat_cancelled_window_days: 730
+
+# TAX-EFACTURA-GAP-01: D300 declared sales vs e-Factura issued invoices, % of e-Factura.
+efactura_gap_tolerance_pct: 10
+# D300 taxable base and e-Factura totals are close but not the same measure (exempt sales,
+# credit notes, timing), so the signal is slightly less certain than a direct match.
+efactura_gap_confidence: 0.95
+
+# Confidence when the data is a stale mirror copy (older than mirror_max_age_s).
+stale_confidence: 0.8
