@@ -2,6 +2,8 @@
 
 Every external source: endpoint, access, limits, real vs mock. Adapter docstrings hold the details. Keep this table in sync when you add or confirm a source.
 
+**Local-first ([LOCAL_DATA.md](LOCAL_DATA.md)):** none of these endpoints is ever called by an agent. Bulk sources are ingested by jobs. Per-company sources are downloaded by the adapter's `sync(cui)` into the local mirror, and agents read only that. How each source gets onto our server: [verifirm/adapters/README.md](../verifirm/adapters/README.md).
+
 | Adapter | Source | Endpoint | Auth | Limits / access | Real / Mock | Fixture |
 |---|---|---|---|---|---|---|
 | `anaf_v9` | ANAF VAT registry v9 | `POST https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva`, body `[{"cui": 123, "data": "YYYY-MM-DD"}]` | none | **max 100 CUIs/request, 1 req/s** (shared with /bilant). The response is `{found[], notFound[]}` with no cod/message wrapper on live 200s | REAL | `companies/*/anaf_v9.json` |

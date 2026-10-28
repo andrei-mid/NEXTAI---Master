@@ -13,6 +13,8 @@ Facts:
 - Write the SOAP envelopes by hand with httpx (no SOAP library dependency) and parse with
   xml.etree. The fixture is the raw SOAP response:
   fixtures/companies/<cui>_<slug>/portal_just.xml.
+
+Local-first (docs/LOCAL_DATA.md): sync(cui) runs CautareDosare for every current/former company name and stores the SOAP responses in the mirror (cache_key = normalized party name). poll_new_cases keeps them fresh with CautareDosare2. search_cases() reads the mirror only.
 """
 
 from __future__ import annotations

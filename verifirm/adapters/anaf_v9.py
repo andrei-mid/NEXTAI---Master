@@ -14,6 +14,8 @@ Facts:
 
 Used by: identity sheet (official), identity agent (inactive/reactivated), tax agent
 (VAT cancelled), and the background sweep (batches of 100: cheap change detection).
+
+Local-first (docs/LOCAL_DATA.md): batch per company: the sweep_anaf_v9 job downloads 100 CUIs per call and calls store_in_mirror(f"{cui}:{date}", <that company's found[] record>) once per CUI. sync(cui) downloads a single applicant. READ methods (lookup) never call ANAF.
 """
 
 from __future__ import annotations

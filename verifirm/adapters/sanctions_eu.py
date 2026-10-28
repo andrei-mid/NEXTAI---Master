@@ -7,6 +7,8 @@ Facts:
 - Bulk: download the whole list on a schedule (jobs/ingest_sanctions.py), normalize it into
   entries, store locally, and re-screen the portfolio when it changes (change detection).
 - Fixture: fixtures/sources/sanctions/eu_fsf_sample.xml (fictional entries only).
+
+Local-first (docs/LOCAL_DATA.md): bulk: the ingest_sanctions job downloads and loads the list locally. sync() stays the default no-op. Screening reads the local entries only.
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ RSS_URL = "https://webgate.ec.europa.eu/fsd/fsf/public/rss"
 class SanctionsEuAdapter(BaseAdapter):
     source_label = "EU Financial Sanctions (FSF)"
     source_type = SourceType.OFFICIAL
-    cache_ttl_s = 86_400
+    mirror_max_age_s = 86_400
 
     async def download_entries(self) -> Sourced[list[dict[str, Any]]]:
         """RSS -> file URL -> XML -> normalized entries:

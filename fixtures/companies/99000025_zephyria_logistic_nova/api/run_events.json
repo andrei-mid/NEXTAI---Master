@@ -27,7 +27,7 @@
     "run_id": "fixture",
     "agent": "financials",
     "status": "ok",
-    "n_signals": 4,
+    "n_signals": 3,
     "elapsed_ms": 3300,
     "done": false
   },

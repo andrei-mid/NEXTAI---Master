@@ -7,6 +7,7 @@ Rules (verifirm/<area>, test folders excluded):
 - adapters never import agents / consolidation / scoring / persistence.
 - an agent never imports another agent (agents.base is shared).
 - scoring is pure: no LLM, no network, no adapters, no DB.
+- agents and consolidation never import HTTP clients (local-first, docs/LOCAL_DATA.md).
 - only verifirm/llm talks to LLM SDKs. Only verifirm/persistence imports the DB stack.
 - nothing in verifirm imports apps.
 """
@@ -38,9 +39,9 @@ FORBIDDEN_EXTERNAL: dict[str, set[str]] = {
     "schema": LLM_SDKS | DB_STACK | NETWORK | {"fastapi"},
     "core": LLM_SDKS | DB_STACK | {"fastapi"},
     "scoring": LLM_SDKS | DB_STACK | NETWORK,
-    "agents": LLM_SDKS | DB_STACK,
+    "agents": LLM_SDKS | DB_STACK | NETWORK,  # local-first: agents read the mirror only
     "adapters": LLM_SDKS | DB_STACK,
-    "consolidation": LLM_SDKS | DB_STACK,
+    "consolidation": LLM_SDKS | DB_STACK | NETWORK,
     "llm": DB_STACK,
     "persistence": LLM_SDKS,
 }

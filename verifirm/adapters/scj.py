@@ -7,6 +7,8 @@ Facts:
   with a long TTL. Agents ONLY read the cached result. Outside the window, a cache miss is
   reported as UNAVAILABLE (never clean).
 - Fixture: fixtures/companies/<cui>_<slug>/scj.json (absent = no ICCJ cases in fixture mode).
+
+Local-first (docs/LOCAL_DATA.md): ICCJ is reachable only 03:30-06:30: nightly_refresh() (job) writes the mirror. sync() stays a no-op outside the window. search_cases() reads the mirror only. A miss = unavailable.
 """
 
 from __future__ import annotations
@@ -27,7 +29,7 @@ class ScjAdapter(BaseAdapter):
     source_label = "ICCJ (scj.ro)"
     source_type = SourceType.OFFICIAL
     rate_limit = RateLimit.per_second(1)  # PROPOSAL
-    cache_ttl_s = 3 * 86_400
+    mirror_max_age_s = 3 * 86_400
 
     def in_window(self) -> bool:
         """True if now (self.deps.clock, Europe/Bucharest) is inside WINDOW."""

@@ -36,7 +36,9 @@ bands:
   green_requires_components:     # GREEN: >= 75, no high/critical, coverage >= 80%, AND these available
     - identity
     - sanctions
-  # A source outage can never produce GREEN (coverage + required components).
+  # "A source outage can never produce GREEN": with true, every component must be status ok
+  # (unavailable / timeout / partial -> at most YELLOW). Demo step 7 relies on this.
+  green_requires_all_ok: true
 
 # STOP: any validated, non-media signal with one of these rule ids.
 auto_stop_rules:

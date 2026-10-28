@@ -1,18 +1,20 @@
 # D11: 6 people. Roles 1-5 use Claude Code, role 6 uses Claude + Lovable.
-# Replace the @role-* placeholders with real GitHub handles (or teams) once known.
+# Replace the remaining @role-* placeholders with real GitHub handles once known.
+# Enforced twice: by GitHub branch protection ("Require review from Code Owners") and, for
+# Claude Code, by .claude/hooks/ownership_guard.py (reads this file + your VERIFIRM_ROLE).
 # GitHub picks the LAST matching pattern, so specific paths come after general ones.
 # Paths: the brief's packages/<x>/ is verifirm/<x>/ in this repo.
 
-# ---- Role 2: Core. Default owner of shared plumbing, schema, core, scoring, orchestration
-*                                         @role-2-core
-/verifirm/schema/                         @role-2-core
-/verifirm/core/                           @role-2-core
-/verifirm/scoring/                        @role-2-core
-/verifirm/adapters/base.py                @role-2-core
-/verifirm/agents/base.py                  @role-2-core
-/apps/wiring.py                           @role-2-core
-/apps/worker/                             @role-2-core
-/tests/                                   @role-2-core
+# ---- Role 2: Core (@andrei-mid). Default owner of shared plumbing, schema, core, scoring, orchestration
+*                                         @andrei-mid
+/verifirm/schema/                         @andrei-mid
+/verifirm/core/                           @andrei-mid
+/verifirm/scoring/                        @andrei-mid
+/verifirm/adapters/base.py                @andrei-mid
+/verifirm/agents/base.py                  @andrei-mid
+/apps/wiring.py                           @andrei-mid
+/apps/worker/                             @andrei-mid
+/tests/                                   @andrei-mid
 
 # ---- Role 1: Database. Only role 1 writes Alembic migrations
 /verifirm/persistence/                    @role-1-database
@@ -22,10 +24,11 @@
 
 # ---- Role 3: Official agents + ANAF and mock adapters
 /verifirm/agents/identity/                @role-3-official-agents
-/verifirm/agents/financials/              @role-3-official-agents
+/verifirm/agents/financials/              @andrei-mid @role-3-official-agents
 /verifirm/agents/tax/                     @role-3-official-agents
 /verifirm/agents/network/                 @role-3-official-agents
 /verifirm/adapters/anaf_*                 @role-3-official-agents
+/verifirm/adapters/anaf_bilant.py         @andrei-mid @role-3-official-agents
 /verifirm/adapters/mocks/                 @role-3-official-agents
 /apps/worker/jobs/sweep_anaf_v9.py        @role-3-official-agents
 

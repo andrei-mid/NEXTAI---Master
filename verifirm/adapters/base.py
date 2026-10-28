@@ -1,17 +1,27 @@
 """BaseAdapter: everything an external source needs, so each adapter only knows its own API.
 
-`fetch()` gives every adapter, in order:
-  1. FIXTURE_MODE=1 -> read fixtures/ (no network). Missing fixture -> last-known-good copy
-     -> SourceUnavailable.
-  2. cache hit (TTL per adapter, default 24h)  -> archived raw bytes
-  3. rate limit (shared across workers via the RateLimiter port)
-  4. HTTP call with retry + exponential backoff on timeouts, 429 and 5xx
-  5. archive raw bytes in the ObjectStore (content hash -> audit + replay)
-  6. remember it as last-known-good (fallback when the source is down later)
-On failure after retries: last-known-good copy (stale=True) or SourceUnavailable.
+LOCAL-FIRST (docs/LOCAL_DATA.md). Every external response lives in a local MIRROR on our
+server. Agents only ever read the mirror. Only sync code (jobs + the pipeline's sync step)
+is allowed to call external APIs.
 
-A missing source is NEVER clean. Agents catch SourceUnavailable and put the adapter
-in `sources_failed`.
+    adapter instance with network=False  (agents, identity sheet)  -> mirror only
+    adapter instance with network=True   (sync jobs, sync step)    -> may download
+
+`fetch()` gives every adapter, in order:
+  1. FIXTURE_MODE=1 -> read fixtures/ (no network). Missing fixture -> mirror -> SourceUnavailable.
+  2. mirror hit that is fresh (age < mirror_max_age_s)       -> served, no network
+  3. no network allowed (agents)  -> stale mirror copy (stale=True) or SourceUnavailable
+                                     ("not in the local mirror yet: run sync")
+  4. network allowed (sync)       -> rate limit (global, RateLimiter port) -> HTTP with retry
+                                     -> raw bytes archived content-addressed in the ObjectStore
+                                     -> mirror entry updated
+     live failure                 -> stale mirror copy (stale=True) or SourceUnavailable
+A missing source is NEVER clean. Agents catch SourceUnavailable and put the adapter in
+`sources_failed`.
+
+Per-company adapters implement `sync(cui)` (download what the agents will need) plus READ
+methods that call `fetch()`. Bulk sources (ONRC, sanctions, SEAP, Kohesio) are downloaded by
+apps/worker/jobs/ingest_* instead, and their `sync()` stays a no-op.
 
 Adapters never import agents (tests/architecture/test_imports.py).
 """
@@ -22,7 +32,7 @@ import asyncio
 import hashlib
 import json
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, ClassVar
@@ -44,7 +54,7 @@ RequestFn = Callable[[httpx.AsyncClient], Awaitable[httpx.Response]]
 
 
 class SourceUnavailable(Exception):
-    """The source could not be read (down, timeout, no fixture, switched off...)."""
+    """The source could not be read (down, not synced yet, no fixture, switched off...)."""
 
     def __init__(self, adapter: str, reason: str) -> None:
         super().__init__(f"{adapter}: {reason}")
@@ -60,14 +70,15 @@ class AdapterDeps:
     rate_limiter: RateLimiter
     clock: Clock
     http: httpx.AsyncClient | None = None  # shared client. Created lazily if None.
+    network: bool = False  # True ONLY for sync code. Agents get network=False.
 
 
 @dataclass(frozen=True)
 class FetchResult:
     body: bytes
     source: SourceRef
-    from_cache: bool = False
-    stale: bool = False  # served from the last-known-good copy after a live failure
+    from_mirror: bool = False  # served from the local mirror (no network call)
+    stale: bool = False  # mirror copy older than mirror_max_age_s, or served after a live failure
     fixture: bool = False
 
     def json(self) -> Any:
@@ -86,22 +97,44 @@ class Sourced[T]:
     stale: bool = False
 
 
+@dataclass
+class SyncReport:
+    """What one adapter's sync() did for one company."""
+
+    adapter: str
+    cui: str
+    downloaded: int = 0  # network calls that succeeded
+    reused: int = 0  # already in the mirror and still valid: no call made
+    failed: list[str] = field(default_factory=list)  # cache keys that could not be downloaded
+    skipped: str | None = None  # reason when the adapter has nothing to sync per company
+
+
 class BaseAdapter:
     """Subclass, decorate with @register_adapter("<name>"), set the class attributes,
-    and implement source-specific methods on top of `fetch()`."""
+    implement READ methods on top of `fetch()` and, for per-company sources, `sync()`."""
 
     name: ClassVar[str] = "base"  # set by @register_adapter
     source_label: ClassVar[str] = ""  # human readable, shown in the UI ("ANAF VAT v9")
     source_type: ClassVar[SourceType] = SourceType.OFFICIAL
     rate_limit: ClassVar[RateLimit | None] = None
     rate_limit_key: ClassVar[str | None] = None  # share a limit across adapters (same host)
-    cache_ttl_s: ClassVar[int | None] = None  # None -> settings.cache_ttl_s
+    mirror_max_age_s: ClassVar[int | None] = None  # None -> settings.mirror_max_age_s
     retry_statuses: ClassVar[frozenset[int]] = frozenset({429, 500, 502, 503, 504})
 
     def __init__(self, deps: AdapterDeps) -> None:
         self.deps = deps
         self.settings = deps.settings
         self._http = deps.http
+
+    @property
+    def network(self) -> bool:
+        return self.deps.network and not self.settings.fixture_mode
+
+    # ------------------------------------------------------------------ sync (override)
+    async def sync(self, cui: str) -> SyncReport:
+        """Download into the mirror everything the agents will read for `cui`.
+        Default: nothing per company (bulk source, synced by an ingest job)."""
+        return SyncReport(adapter=self.name, cui=cui, skipped="no per-company sync")
 
     # ------------------------------------------------------------------ fixtures
     @property
@@ -132,28 +165,80 @@ class BaseAdapter:
         request: RequestFn,
         url: str | None = None,
         fixture: Path | None = None,
+        max_age_s: int | None = None,
     ) -> FetchResult:
         """Fetch one resource. `cache_key` must uniquely identify the request
-        (e.g. f"{cui}:{date}"). `fixture` is the file to serve in FIXTURE_MODE."""
+        (e.g. f"{cui}:{year}"). `fixture` is the file to serve in FIXTURE_MODE.
+        `max_age_s` overrides the freshness of the mirror copy for this call."""
         if self.settings.fixture_mode:
             return await self._from_fixture(cache_key, fixture, url)
 
-        cached = await self._from_cache(cache_key)
-        if cached is not None:
-            return cached
+        mirrored = await self.from_mirror(cache_key)
+        max_age = max_age_s if max_age_s is not None else self._max_age()
+        if mirrored is not None and self._age_s(mirrored) < max_age:
+            return mirrored
+
+        if not self.network:
+            if mirrored is not None:
+                return self._as_stale(mirrored)
+            raise SourceUnavailable(
+                self.name, f"{cache_key!r} is not in the local mirror yet (run sync)"
+            )
 
         try:
             body = await self._call_with_retry(request)
-        except SourceUnavailable as exc:
-            fallback = await self._last_good(cache_key)
-            if fallback is not None:
-                log.warning("serving last-known-good copy", extra={"adapter": self.name})
-                return fallback
-            raise exc
+        except SourceUnavailable:
+            if mirrored is not None:
+                log.warning(
+                    "live call failed, serving the mirror copy", extra={"adapter": self.name}
+                )
+                return self._as_stale(mirrored)
+            raise
+        return await self.store_in_mirror(cache_key, body, url)
 
-        return await self._archive(cache_key, body, url)
+    async def from_mirror(self, cache_key: str) -> FetchResult | None:
+        """The mirror copy for `cache_key`, whatever its age, or None. Never calls the network."""
+        meta_raw = await self.deps.object_store.get(self._key(cache_key))
+        if meta_raw is None:
+            return None
+        meta = json.loads(meta_raw)
+        body = await self.deps.object_store.get(meta["raw_ref"])
+        if body is None:
+            return None
+        return FetchResult(
+            body=body,
+            source=self._source_ref(
+                meta.get("url"),
+                meta["raw_ref"],
+                meta["content_hash"],
+                datetime.fromisoformat(meta["retrieved_at"]),
+            ),
+            from_mirror=True,
+        )
+
+    async def store_in_mirror(self, cache_key: str, body: bytes, url: str | None) -> FetchResult:
+        """Archive raw bytes (content-addressed) and point the mirror entry at them. Public so
+        batch downloads (e.g. v9 with 100 CUIs per call) can store one entry per company."""
+        at = self.deps.clock.now()
+        raw_ref = await self.deps.object_store.put(body, prefix=f"raw/{self.name}")
+        digest = content_hash(body)
+        meta = json.dumps(
+            {"raw_ref": raw_ref, "content_hash": digest, "retrieved_at": at.isoformat(), "url": url}
+        ).encode()
+        await self.deps.object_store.put_named(self._key(cache_key), meta)
+        return FetchResult(body=body, source=self._source_ref(url, raw_ref, digest, at))
 
     # ------------------------------------------------------------------ internals
+    def _max_age(self) -> int:
+        return self.settings.max_age_for(self.name, self.mirror_max_age_s)
+
+    def _age_s(self, result: FetchResult) -> float:
+        return (self.deps.clock.now() - result.source.retrieved_at).total_seconds()
+
+    @staticmethod
+    def _as_stale(result: FetchResult) -> FetchResult:
+        return FetchResult(body=result.body, source=result.source, from_mirror=True, stale=True)
+
     def _source_ref(
         self, url: str | None, raw_ref: str | None, digest: str | None, at: datetime
     ) -> SourceRef:
@@ -166,9 +251,9 @@ class BaseAdapter:
             content_hash=digest,
         )
 
-    def _key(self, kind: str, cache_key: str) -> str:
+    def _key(self, cache_key: str) -> str:
         digest = hashlib.sha256(cache_key.encode()).hexdigest()[:32]
-        return f"{kind}/{self.name}/{digest}"
+        return f"mirror/{self.name}/{digest}"
 
     async def _from_fixture(
         self, cache_key: str, fixture: Path | None, url: str | None
@@ -183,60 +268,10 @@ class BaseAdapter:
                 ),
                 fixture=True,
             )
-        fallback = await self._last_good(cache_key)
-        if fallback is not None:
-            return fallback
+        mirrored = await self.from_mirror(cache_key)
+        if mirrored is not None:
+            return mirrored
         raise SourceUnavailable(self.name, f"no fixture for {cache_key!r}")
-
-    async def _from_cache(self, cache_key: str) -> FetchResult | None:
-        meta_raw = await self.deps.cache.get(self._key("cache", cache_key))
-        if meta_raw is None:
-            return None
-        meta = json.loads(meta_raw)
-        body = await self.deps.object_store.get(meta["raw_ref"])
-        if body is None:
-            return None
-        return FetchResult(
-            body=body,
-            source=self._source_ref(
-                meta.get("url"),
-                meta["raw_ref"],
-                meta["content_hash"],
-                datetime.fromisoformat(meta["retrieved_at"]),
-            ),
-            from_cache=True,
-        )
-
-    async def _last_good(self, cache_key: str) -> FetchResult | None:
-        meta_raw = await self.deps.object_store.get(self._key("lastgood", cache_key))
-        if meta_raw is None:
-            return None
-        meta = json.loads(meta_raw)
-        body = await self.deps.object_store.get(meta["raw_ref"])
-        if body is None:
-            return None
-        return FetchResult(
-            body=body,
-            source=self._source_ref(
-                meta.get("url"),
-                meta["raw_ref"],
-                meta["content_hash"],
-                datetime.fromisoformat(meta["retrieved_at"]),
-            ),
-            stale=True,
-        )
-
-    async def _archive(self, cache_key: str, body: bytes, url: str | None) -> FetchResult:
-        at = self.deps.clock.now()
-        raw_ref = await self.deps.object_store.put(body, prefix=f"raw/{self.name}")
-        digest = content_hash(body)
-        meta = json.dumps(
-            {"raw_ref": raw_ref, "content_hash": digest, "retrieved_at": at.isoformat(), "url": url}
-        ).encode()
-        ttl = self.settings.ttl_for(self.name, self.cache_ttl_s)
-        await self.deps.cache.set(self._key("cache", cache_key), meta, ttl_s=ttl)
-        await self.deps.object_store.put_named(self._key("lastgood", cache_key), meta)
-        return FetchResult(body=body, source=self._source_ref(url, raw_ref, digest, at))
 
     async def _client(self) -> httpx.AsyncClient:
         if self._http is None:

@@ -11,6 +11,7 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 
 **Penalties (PROPOSAL):** info 0 · low 5 · medium 15 · high 35 · critical 60. Component score = `max(0, 100 − Σ penalty × confidence × match_score)`.
 
+
 ### identity
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
@@ -28,13 +29,13 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
 |---|---|---|---|---|
+| `FIN-NET-ASSETS-01` | high |  | Equity < 1/2 of share capital in the latest filed year (Law 31/1990 art. 153^24) | anaf_bilant |
+| `FIN-REVENUE-JUMP-01` | medium |  | Turnover grew > 300% from one year to the next (base >= 100k RON) | anaf_bilant |
+| `FIN-HEADCOUNT-01` | medium |  | Turnover per employee > 5x the average of the CAEN division (averages: config, PROPOSAL) | anaf_bilant |
+| `FIN-LOSS-TREND-01` | medium |  | Net loss in >= 2 consecutive years | anaf_bilant |
+| `FIN-DEBT-RISE-01` | medium |  | Debts grew > 50% over the last 3 filed years while turnover grew <= 10% (or fell) | anaf_bilant |
 | `FIN-REVENUE-DECLINE-01` | medium |  | Turnover fell > 25% over the last 3 filed years | anaf_bilant |
-| `FIN-LOSS-TREND-01` | medium |  | Net loss in >= 2 consecutive recent years | anaf_bilant |
-| `FIN-NET-ASSETS-01` | high |  | Equity < 1/2 of share capital (Law 31/1990 art. 153^24) | anaf_bilant |
-| `FIN-DEBT-RISE-01` | medium |  | Debts grow faster than turnover, or debts > 70% of turnover | anaf_bilant |
-| `FIN-HEADCOUNT-01` | medium |  | Turnover per employee > 3M RON (implausible for the activity) | anaf_bilant |
-| `FIN-REVENUE-JUMP-01` | medium |  | Turnover grew > 200% year over year | anaf_bilant |
-| `FIN-NO-FILING-01` | medium |  | No financial statement for the latest expected year | anaf_bilant |
+| `FIN-NO-FILING-01` | medium |  | No financial statement for the latest expected year (source reachable, nothing filed) | anaf_bilant |
 
 ### tax
 
