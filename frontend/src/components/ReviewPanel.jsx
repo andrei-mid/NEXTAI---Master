@@ -91,6 +91,7 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
               <div className="small">
                 <AnalystName
                   id={r.analyst_id}
+                  alert={{ cui: company.cui, name: company.name }}
                   mailSubject={
                     r.analyst_id === analystId
                       ? undefined
@@ -103,7 +104,7 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
           ))}
         </ul>
       )}
-      <p className="review-hint muted">Saved in this browser tab only. Not sent anywhere yet.</p>
+      <p className="review-hint muted">Saved in this browser only. Not sent anywhere yet.</p>
     </aside>
   );
 }

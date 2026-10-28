@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env
 .env.local
+# Local copy of the API's data (npm run snapshot). Can hold real-company figures: never commit.
+snapshot/
