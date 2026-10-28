@@ -127,3 +127,8 @@ def test_as_of_before_any_check(client: TestClient) -> None:
         client.get("/companies", params={"as_of": "2026-10-28"}).json()
     )
     assert now.total > 0
+
+
+def test_analyst_opinion_404_until_a_run_produced_one(client: TestClient) -> None:
+    response = client.get("/companies/99000025/analyst-opinion")
+    assert response.status_code == 404 and "analyst opinion" in response.json()["detail"]

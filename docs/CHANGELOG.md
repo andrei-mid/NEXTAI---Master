@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-10-29: AI analyst opinion runs in the pipeline, is stored and served (role 1, steps 4-6) · CONTRACT ADDITION
+
+**What:** every run now also produces the AI analyst's opinion, after scoring (see the 2026-10-28 entry below for what it is).
+
+- **`apps/worker/orchestrator.py` (role 2's folder):** step 9 `analyse()`, independent of the memo: if one LLM step fails the other still runs. A failure completes the run (the error says `analyst opinion not generated: …`) and **keeps the official score**. `ANALYST_ENABLED=0` switches it off (one LLM call per run). Sources switched off for the run (`disabled_sources`) are reported as such in the dossier.
+- **`core/ports/repository.py` + `MemoryRepository` (role 2's folder):** `save_analyst_opinion(opinion, dossier)`, `get_latest_analyst_opinion(cui)`.
+- **`persistence` (role 1):** table `analyst_opinions` (migration `analyst_create_tables`, new area `analyst`), with the dossier the model saw for audit and replay. `AnalystStore.get_dossier(run_id)`.
+- **`apps/api` (role 5's folder):** `GET /companies/{cui}/analyst-opinion` (contract in `docs/SOLUTION.md`). `404` until a run produced one.
+
+**What you must do:**
+- **Whoever hosts the database (Bianca):** run `uv run alembic -c verifirm/persistence/alembic.ini upgrade head` (new table `analyst_opinions`).
+- **Role 6:** show the opinion next to the official score, never instead of it, and always show `disclaimer`.
+- **Everyone running live:** `LLM_MODEL_ANALYST` in `.env` (a large model). Without an LLM key, runs complete without an opinion.
+- **Role 2 / role 5:** review the changes in your folders.
+
+---
+
+## 2026-10-29: Tavily web search live + a hidden ANAF request fixed (role 3, role 4's `web_search.py` with the human's approval)
+
+**What:**
+- `adapters/web_search.py` is implemented: `search()` (Tavily, mirror only for agents), `sync(cui)` (the 2 presence searches, website + jobs), `footprint()` live (picks the company's own site, never a directory or social network, plus job ads on known boards). Query builders live in the module (`presence_queries`), so sync and agents ask the same thing. No `TAVILY_API_KEY`: unavailable, never "no results".
+- Fetch tool: `sweep_anaf_v9 web <CUIs> [--send]`. Dry run by default, 2 Tavily searches per company.
+- **Bug fixed:** `web_search.sync`, `anaf_efactura_registry.is_registered` and the tool's `web` command looked up the company through a *network* v9 adapter. With no v9 data stored, that would have **sent a request to ANAF** from a non-ANAF path. They now read the v9 **mirror** only (`replace(deps, network=False)`). Regression tests fail on any request to ANAF.
+
+**What you must do:** role 4 (media agent): `ctx.web_search.search(query, since=...)` works live now (mirror only), so add your media queries to `web_search.sync()`. Everyone: never call `AnafV9Adapter(deps)` with network deps outside sync code.
+
+---
+
+## 2026-10-29: Presence agent implemented (role 4's files, built by role 3 with the human's approval)
+
+**What:** `verifirm/agents/presence/` is done: 3 rules, `config.yaml`, tests with the real adapters in FIXTURE_MODE, and a full-pipeline check (Zephyria gets PRE-NO-FOOTPRINT-01, Aurora nothing). Adapters: `seap.contracts_for`, `kohesio.projects_for` and the new `web_search.footprint` (website + job postings) read `presence.json` in FIXTURE_MODE through `adapters/presence_fixture.py`. **Live they report unavailable**, never empty. PRE-NO-FOOTPRINT-01 needs all four parts checked. With no footprint source at all, the agent is `unavailable` (turnover alone is not a presence check).
+
+**What you must do:**
+- **Role 4:** presence is done. `TavilyWebSearch.search()` (media) is still yours. For live presence data: run the website / job queries in `web_search.sync()`, plus ingest jobs for SEAP and Kohesio.
+- **Role 6:** `fixtures/companies/99000025_*/api/signals.json` has a stale `content_hash` for the presence signal (presence.json changed after it was generated). Regenerate with `make fixtures` when convenient.
+
+---
+
 ## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
 
 **What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.
@@ -17,6 +55,23 @@
 **What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
 
 **What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
+
+---
+
+## 2026-10-28: AI analyst opinion: dossier + LLM opinion + citation checks (role 1, steps 0-3) · CONTRACT ADDITION
+
+**What:** an LLM reads a company dossier built by code and returns its educated opinion: flags with evidence, an `opinion_score` 0-100 and an explanation. DECIDED in `docs/DECISIONS.md` ("AI analyst opinion"). Code: `verifirm/consolidation/analyst/` (README there).
+
+- **`schema/analyst.py` (new, role 2's folder):** `CompanyDossier`, `AnalystDraft`, `AnalystOpinion`, `DISCLAIMER`. Exported to `docs/schema/`.
+- **`core/config.py` (role 2's folder):** `LLM_MODEL_ANALYST`, `model_for("analyst")`. In `.env.example`.
+- The dossier compares ANAF with ONRC field by field (`match` true / false / null), lists the changes between the quarterly ANAF v9 snapshots, and has /bilant years plus indicators **computed in code**. People are aliases, never real names.
+- Every flag must cite dossier paths whose values check out, and every number in it must be in its evidence; otherwise it is rejected with the reason. Severity is capped at `high`, there is no decision wording, and the disclaimer is added by code.
+- **The official score and band are unchanged** (hard rule 8). The opinion is shown next to them.
+
+**What you must do:**
+- **Role 5:** the pipeline step (after scoring, like the memo) and `GET /companies/{cui}/analyst-opinion`. `write_opinion` raises on invalid output, so catch it like the memo step.
+- **Role 2:** review the two files in your folders.
+- **Everyone running it:** set `LLM_MODEL_ANALYST` in `.env` to a large model.
 
 ---
 

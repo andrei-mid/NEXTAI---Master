@@ -104,6 +104,7 @@ uv run python -m apps.worker.jobs.sweep_anaf_v9 status 2816464 160796        # n
 uv run python -m apps.worker.jobs.sweep_anaf_v9 v9 2816464 160796            # dry run
 uv run python -m apps.worker.jobs.sweep_anaf_v9 v9 2816464 160796 --send     # 1 request, 10 entries
 uv run python -m apps.worker.jobs.sweep_anaf_v9 bilant 2816464 --send        # 1 request: newest missing year
+uv run python -m apps.worker.jobs.sweep_anaf_v9 web 2816464 --send         # Tavily (not ANAF): 2 searches
 SYNC_ON_APPLICATION=0 uv run python -m apps.worker.seed 2816464 160796       # 0 requests: mirror -> Postgres
 ```
 

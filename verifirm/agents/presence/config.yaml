@@ -1,0 +1,15 @@
+# Presence agent thresholds. ALL VALUES ARE A PROPOSAL (docs/DECISIONS.md).
+# Loaded by verifirm/agents/presence/rules.py:load_config. Change values here, not in code.
+
+# PRE-NO-FOOTPRINT-01: a company this big normally leaves a public trace.
+min_turnover_ron: 5000000
+# Absence of evidence is weaker than evidence: the searches can miss a site or a job board.
+no_footprint_confidence: 0.8
+
+# PRE-ADDRESS-MISMATCH-01: word overlap (0-1) below which the website and ONRC addresses differ.
+address_min_similarity: 0.6
+# Website text is unvalidated web data (validated=false): a typo on a site is not a fact.
+address_mismatch_confidence: 0.6
+
+# How many years back to look for the latest filed statement (turnover for PRE-NO-FOOTPRINT-01).
+turnover_years_back: 2

@@ -1,0 +1,196 @@
+{
+  "$defs": {
+    "AnalystFlag": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/FlagCategory"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "claim",
+        "category",
+        "severity",
+        "evidence"
+      ],
+      "title": "AnalystFlag",
+      "type": "object"
+    },
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "Citation": {
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "value"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "FlagCategory": {
+      "enum": [
+        "cross_source_mismatch",
+        "financial_inconsistency",
+        "suspicious_change",
+        "data_gap",
+        "other"
+      ],
+      "title": "FlagCategory",
+      "type": "string"
+    },
+    "RejectedFlag": {
+      "properties": {
+        "flag": {
+          "$ref": "#/$defs/AnalystFlag"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "flag",
+        "reason"
+      ],
+      "title": "RejectedFlag",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Model"
+    },
+    "flags": {
+      "items": {
+        "$ref": "#/$defs/AnalystFlag"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "rejected": {
+      "items": {
+        "$ref": "#/$defs/RejectedFlag"
+      },
+      "title": "Rejected",
+      "type": "array"
+    },
+    "opinion_score": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opinion Score"
+    },
+    "explanation": {
+      "title": "Explanation",
+      "type": "string"
+    },
+    "disclaimer": {
+      "default": "This is my educated opinion, but I am not legally responsible: the analyst must confirm.",
+      "title": "Disclaimer",
+      "type": "string"
+    },
+    "official_band": {
+      "$ref": "#/$defs/Band"
+    },
+    "official_score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Official Score"
+    }
+  },
+  "required": [
+    "cui",
+    "run_id",
+    "generated_at",
+    "model",
+    "flags",
+    "explanation",
+    "official_band",
+    "official_score"
+  ],
+  "title": "AnalystOpinion",
+  "type": "object"
+}

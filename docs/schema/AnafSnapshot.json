@@ -1,0 +1,86 @@
+{
+  "description": "ANAF v9 as it was on one date (today + the last quarter-ends).",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Name"
+    },
+    "address": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Address"
+    },
+    "caen_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Caen Code"
+    },
+    "registration_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Registration Status"
+    },
+    "vat_payer": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Vat Payer"
+    },
+    "inactive": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Inactive"
+    },
+    "found": {
+      "default": true,
+      "title": "Found",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "address",
+    "caen_code",
+    "registration_status",
+    "vat_payer",
+    "inactive"
+  ],
+  "title": "AnafSnapshot",
+  "type": "object"
+}

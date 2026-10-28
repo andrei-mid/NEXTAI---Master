@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import date, datetime
 
 from verifirm.core.ports.repository import Repository
+from verifirm.schema.analyst import AnalystOpinion, CompanyDossier
 from verifirm.schema.api import DecisionRecord
 from verifirm.schema.financials import SubmittedFinancials
 from verifirm.schema.identity import IdentitySheet
@@ -27,6 +28,7 @@ class MemoryRepository(Repository):
         )  # cui -> run_id -> score
         self._memos: dict[str, Memo] = {}  # by cui (latest)
         self._decisions: dict[str, list[DecisionRecord]] = defaultdict(list)
+        self._opinions: dict[str, tuple[AnalystOpinion, CompanyDossier]] = {}  # by run_id
 
     async def save_run(self, status: RunStatus) -> None:
         self._runs[status.run_id] = status
@@ -167,3 +169,11 @@ class MemoryRepository(Repository):
             if (since is None or d.recorded_at >= since)
             and (until is None or d.recorded_at <= until)
         ]
+
+    # --- AI analyst opinion
+    async def save_analyst_opinion(self, opinion: AnalystOpinion, dossier: CompanyDossier) -> None:
+        self._opinions[opinion.run_id] = (opinion, dossier)
+
+    async def get_latest_analyst_opinion(self, cui: str) -> AnalystOpinion | None:
+        mine = [o for o, _ in self._opinions.values() if o.cui == cui]
+        return max(mine, key=lambda o: (o.generated_at, o.run_id)) if mine else None

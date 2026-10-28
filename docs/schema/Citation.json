@@ -1,0 +1,18 @@
+{
+  "properties": {
+    "path": {
+      "title": "Path",
+      "type": "string"
+    },
+    "value": {
+      "title": "Value",
+      "type": "string"
+    }
+  },
+  "required": [
+    "path",
+    "value"
+  ],
+  "title": "Citation",
+  "type": "object"
+}

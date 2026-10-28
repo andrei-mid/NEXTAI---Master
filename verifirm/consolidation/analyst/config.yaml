@@ -1,0 +1,10 @@
+# AI analyst dossier settings. Loaded by verifirm/consolidation/analyst/agent.py:load_config.
+# Change values here, not in code.
+
+# /bilant years in the dossier (same window as the financials agent).
+years_of_history: 5
+# Statements for year Y appear on ANAF around mid-year Y+1. From this month on the latest
+# expected year is (current year - 1), before it (current year - 2).
+filing_available_from_month: 7
+# Upper bound on the dossier JSON sent to the LLM. A larger dossier is an error, never cut.
+max_dossier_chars: 120000

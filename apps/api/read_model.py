@@ -14,6 +14,7 @@ from datetime import UTC, date, datetime, time
 from fastapi import HTTPException
 
 from verifirm.core.ports.repository import Repository
+from verifirm.schema.analyst import AnalystOpinion
 from verifirm.schema.api import (
     CompanyDetail,
     CompanyHistory,
@@ -187,6 +188,12 @@ class RepoReadModel:
             events=await self.repo.list_events(cui, date_from, date_to),
             decisions=await self.repo.list_decisions_between(cui, since, until),
         )
+
+    async def analyst_opinion(self, cui: str) -> AnalystOpinion:
+        opinion = await self.repo.get_latest_analyst_opinion(cui)
+        if opinion is None:
+            raise HTTPException(status_code=404, detail=f"no analyst opinion for company {cui}")
+        return opinion
 
     async def memo(self, cui: str) -> MemoResponse:
         memo = await self.repo.get_latest_memo(cui)

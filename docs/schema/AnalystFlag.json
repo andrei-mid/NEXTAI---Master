@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "Citation": {
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "value"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "FlagCategory": {
+      "enum": [
+        "cross_source_mismatch",
+        "financial_inconsistency",
+        "suspicious_change",
+        "data_gap",
+        "other"
+      ],
+      "title": "FlagCategory",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "claim": {
+      "title": "Claim",
+      "type": "string"
+    },
+    "category": {
+      "$ref": "#/$defs/FlagCategory"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Citation"
+      },
+      "minItems": 1,
+      "title": "Evidence",
+      "type": "array"
+    }
+  },
+  "required": [
+    "title",
+    "claim",
+    "category",
+    "severity",
+    "evidence"
+  ],
+  "title": "AnalystFlag",
+  "type": "object"
+}
