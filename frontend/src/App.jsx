@@ -1,20 +1,47 @@
+import { useState } from 'react';
+import { mockAlerts } from './mockAlerts.js';
+import AlertsSidebar, { sortByCriticality } from './components/AlertsSidebar.jsx';
+import ReviewPanel from './components/ReviewPanel.jsx';
+import CompanyDetail from './components/CompanyDetail.jsx';
+
+const alerts = sortByCriticality(mockAlerts);
+
 export default function App() {
+  const [selectedCui, setSelectedCui] = useState(alerts[0]?.cui ?? null);
+  // Append-only list of reviews per CUI, kept in memory until the API is connected.
+  const [reviews, setReviews] = useState({});
+  const selected = alerts.find((a) => a.cui === selectedCui);
+
+  function addReview(cui, review) {
+    setReviews((prev) => ({ ...prev, [cui]: [...(prev[cui] ?? []), review] }));
+  }
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>verifirm</h1>
-        <p className="tagline">Prototype · a human analyst decides</p>
+    <>
+      <header className="topbar">
+        <span className="brand">verifirm</span>
+        <span className="pill pill-mock">MOCK DATA</span>
       </header>
 
-      <main className="card">
-        <h2>Setup check</h2>
-        <p>If you can see this page with colored buttons, the setup works.</p>
-        <div className="button-row">
-          <button type="button" className="btn btn-primary">Primary</button>
-          <button type="button" className="btn btn-secondary">Secondary</button>
-          <button type="button" className="btn btn-danger">Danger</button>
-        </div>
-      </main>
-    </div>
+      <div className="shell">
+        <AlertsSidebar items={alerts} selectedCui={selectedCui} onSelect={setSelectedCui} />
+
+        <main className="content">
+          <p className="tagline">Prototype · a human analyst decides</p>
+          {selected && (
+            <CompanyDetail company={selected} sessionReviews={reviews[selected.cui] ?? []} />
+          )}
+        </main>
+
+        {selected && (
+          <ReviewPanel
+            key={selected.cui}
+            company={selected}
+            history={reviews[selected.cui] ?? []}
+            onSubmit={(review) => addReview(selected.cui, review)}
+          />
+        )}
+      </div>
+    </>
   );
 }
