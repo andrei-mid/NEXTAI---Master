@@ -15,7 +15,7 @@ function EndBadge({ contract }) {
  * companyName: used in the subject of the e-mail to a contract's responsible person.
  * analystId: the signed-in account (no e-mail link to yourself).
  */
-export default function BankRelationship({ bank, companyName, analystId }) {
+export default function BankRelationship({ bank, cui, companyName, analystId }) {
   const next = bank.contracts[0];
 
   return (
@@ -100,6 +100,7 @@ export default function BankRelationship({ bank, companyName, analystId }) {
                 <td>
                   <AnalystName
                     id={c.responsible_id}
+                    alert={{ cui, name: companyName }}
                     mailSubject={
                       c.responsible_id === analystId
                         ? undefined
