@@ -23,6 +23,16 @@
 
 ---
 
+## 2026-10-28: `make seed-real`: the same real companies in everyone's database (role 2)
+
+**What:** `apps/worker/seed.py` runs DEDEMAN, AUTOMOBILE-DACIA, OMV PETROM, DANTE INTERNATIONAL (eMAG), ALTEX ROMANIA and HIDROELECTRICA through the real pipeline (ANAF → local mirror → agents → scoring → your Postgres). Real-company figures are never committed (CLAUDE.md rule 11), so we share this script, not a database dump. ~7 ANAF calls per company. Re-runs only refresh stale data.
+
+Also: a missing/misconfigured LLM (e.g. `LLM_PROVIDER=anthropic` without `ANTHROPIC_API_KEY`) no longer fails the run. Agents get `llm=None`, and only the memo is missing (`apps/worker/orchestrator.py`).
+
+**What you must do:** to see the real companies: Postgres up (see `infra/local/README.md`), `make db-upgrade`, then `make seed-real`. Add CUIs: `uv run python -m apps.worker.seed <cui> <cui>`.
+
+---
+
 ## 2026-10-28: Live end to end: ANAF → mirror → agents → Postgres → API (role 2, with role 3/5 pieces)
 
 **What works now (tested on DEDEMAN SRL with real ANAF data):** `POST /companies/{cui}/recheck` → sync downloads ANAF v9 + 6 balance sheets into the local mirror → identity sheet → 8 agents → scoring → saved in Postgres → `GET /companies` serves it. Guide: [infra/local/README.md](../infra/local/README.md).
