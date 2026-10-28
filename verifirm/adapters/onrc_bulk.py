@@ -17,6 +17,8 @@ Facts:
 Ingestion (apps/worker/jobs/ingest_onrc.py) writes local tables. Lookups read those tables.
 Fixture mode: fixtures/sources/onrc/*.csv (same columns, fictional rows, J99 numbers) plus
 fixtures/companies/<cui>_<slug>/onrc.json for the per-company view.
+
+Local-first (docs/LOCAL_DATA.md): bulk: the ingest_onrc job downloads and COPYs into Postgres. sync() stays the default no-op. READ methods query the local tables only.
 """
 
 from __future__ import annotations
@@ -45,7 +47,7 @@ FILES = (
 class OnrcBulkAdapter(BaseAdapter):
     source_label = "ONRC open data (data.gov.ro)"
     source_type = SourceType.OFFICIAL
-    cache_ttl_s = 30 * 86_400
+    mirror_max_age_s = 30 * 86_400
 
     async def download(self, dest_dir: Path) -> dict[str, Path]:
         """Stream every file in FILES to dest_dir (httpx streaming, chunked). Return name -> path.

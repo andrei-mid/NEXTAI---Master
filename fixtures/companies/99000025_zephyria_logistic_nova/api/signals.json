@@ -64,140 +64,6 @@
     }
   },
   {
-    "signal_id": "FIN-REVENUE-JUMP-01:581dddaa7e01cb79",
-    "cui": "99000025",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-REVENUE-JUMP-01",
-    "claim": "Turnover grew from 410,000 RON in 2022 to 1,900,000 RON in 2023 and 9,800,000 RON in 2024.",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
-      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
-    },
-    "evidence_date": "2024-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "turnover": {
-        "2022": 410000,
-        "2023": 1900000,
-        "2024": 9800000,
-        "2025": 18600000
-      },
-      "max_yoy_growth_pct": 415.8
-    }
-  },
-  {
-    "signal_id": "FIN-DEBT-RISE-01:f996f2247e915581",
-    "cui": "99000025",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-DEBT-RISE-01",
-    "claim": "Debts rose from 40,000 RON in 2021 to 14,200,000 RON in 2025, 76% of 2025 turnover.",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
-      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "debts": {
-        "2021": 40000,
-        "2025": 14200000
-      },
-      "debt_to_turnover_2025": 0.76
-    }
-  },
-  {
-    "signal_id": "FIN-HEADCOUNT-01:b511b27b071a9b0c",
-    "cui": "99000025",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-HEADCOUNT-01",
-    "claim": "2025 turnover of 18,600,000 RON was reported with 2 employees (9,300,000 RON per employee).",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
-      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "medium",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "turnover": 18600000,
-      "employees": 2,
-      "turnover_per_employee": 9300000
-    }
-  },
-  {
-    "signal_id": "FIN-NET-ASSETS-01:e04749ef823bb549",
-    "cui": "99000025",
-    "agent": "financials",
-    "component": "financials",
-    "rule_id": "FIN-NET-ASSETS-01",
-    "claim": "2025 equity was -111,000 RON, below half of the 200 RON share capital.",
-    "source": {
-      "name": "ANAF financial statements (bilanț)",
-      "type": "official",
-      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
-      "retrieved_at": "2026-10-28T08:00:00Z",
-      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
-      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
-    },
-    "evidence_date": "2025-12-31",
-    "confidence": 1.0,
-    "severity": "high",
-    "validated": true,
-    "auto_stop_candidate": false,
-    "entity_match": {
-      "method": "cui_exact",
-      "score": 1.0,
-      "ambiguous": false
-    },
-    "data": {
-      "fictional": true,
-      "equity": -111000,
-      "share_capital": 200,
-      "net_profit": -350000
-    }
-  },
-  {
     "signal_id": "TAX-DECLARED-GAP-01:f09bcd9990a5267f",
     "cui": "99000025",
     "agent": "tax",
@@ -432,6 +298,126 @@
       "jobs": 0,
       "seap": 0,
       "kohesio": 0
+    }
+  },
+  {
+    "signal_id": "FIN-NET-ASSETS-01:946fb6067dae21fe",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-NET-ASSETS-01",
+    "claim": "2025 equity was -111,000 RON, below half of the 200 RON share capital.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "year": 2025,
+      "equity": -111000,
+      "share_capital": 200,
+      "threshold": 100.0
+    }
+  },
+  {
+    "signal_id": "FIN-REVENUE-JUMP-01:35f0f9cc85df8097",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-REVENUE-JUMP-01",
+    "claim": "Turnover grew from 1,900,000 RON in 2023 to 9,800,000 RON in 2024 (+415.8%).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2024&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2024.json",
+      "content_hash": "5ef46d997a5cc1ff6417d47a42a4fe1e07307fd66f61299c07e20699361bb5ce"
+    },
+    "evidence_date": "2024-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "from_year": 2023,
+      "to_year": 2024,
+      "from_turnover": 1900000,
+      "to_turnover": 9800000,
+      "growth_pct": 415.8,
+      "all_jumps": [
+        {
+          "from_year": 2022,
+          "to_year": 2023,
+          "from_turnover": 410000,
+          "to_turnover": 1900000,
+          "growth_pct": 363.4
+        },
+        {
+          "from_year": 2023,
+          "to_year": 2024,
+          "from_turnover": 1900000,
+          "to_turnover": 9800000,
+          "growth_pct": 415.8
+        }
+      ]
+    }
+  },
+  {
+    "signal_id": "FIN-HEADCOUNT-01:26df309eeea01bf2",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-HEADCOUNT-01",
+    "claim": "2025 turnover of 18,600,000 RON was reported with 2 employees (9,300,000 RON per employee, 20.7x the estimated CAEN 49 average).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 0.8,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "year": 2025,
+      "turnover": 18600000,
+      "employees": 2,
+      "turnover_per_employee": 9300000,
+      "caen_division": "49",
+      "caen_avg_turnover_per_employee": 450000,
+      "ratio_to_avg": 20.7,
+      "average_is_proposal": true
     }
   }
 ]

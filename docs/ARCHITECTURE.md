@@ -11,6 +11,8 @@
                                           apps/worker/main.py   (N stateless workers)
                                                    |
   1. CUI gate ............ core/cui.py               invalid -> REJECTED
+  1b. Sync (local-first) . apps/worker/sync.py       ONLY network step: download this company's data
+                                                     into the local mirror once (skipped for sweep runs)
   2. Identity sheet ...... consolidation/identity_sheet.py   (anaf_v9 + onrc_bulk + mock shareholders; never web)
   3. Submitted docs ...... adapters/documents.py     PDF -> SubmittedFinancials (untrusted text stays inside)
   4. 8 agents in parallel, each under a time budget (core/timebudget.py)
@@ -62,7 +64,7 @@ All infrastructure sits behind a port in `verifirm/core/ports`. `apps/wiring.py`
 4. **Stateless API and workers.** State lives in Repository / Cache / Queue only, so you can run N replicas.
 5. **Shared rate limits.** Declared on each adapter class and enforced via the RateLimiter port (Redis in multi-worker setups).
 6. **Bulk-first data.** ONRC, sanctions, ICCJ, SEAP and Kohesio are ingested on a schedule (`apps/worker/jobs/ingest_*`, Postgres COPY). Agents read local tables.
-7. **Cache everything external.** `BaseAdapter.fetch()`: TTL cache (default 24h, per adapter), raw archive in ObjectStore with a sha256 (audit + replay), last-known-good fallback.
+7. **Local-first ([LOCAL_DATA.md](LOCAL_DATA.md)).** Everything external is downloaded onto our server (bulk ingest jobs + per-company `sync()`), raw-archived with a sha256 (audit + replay). Agents only read the local mirror (`network=False`). Immutable data, such as a filed balance sheet, is downloaded once ever.
 8. **Change detection instead of brute force.** Cheap global sweeps (v9 batches of 100, sanctions re-screen, new cases, ONRC diff) → `change_detection` enqueues full runs only where needed.
 9. **Fixture mode.** `FIXTURE_MODE=1` makes adapters read `fixtures/`. Every team member can work offline and independently.
 10. **Contract-first API.** Routes serve schema-valid fixtures from day one (`tests/contract/test_api.py`).

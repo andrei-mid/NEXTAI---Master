@@ -45,6 +45,12 @@ JOBS: tuple[JobSpec, ...] = (
         "Hourly Portal Just CautareDosare2 (last-modified) + nightly ICCJ refresh inside 03:30-06:30",
     ),
     JobSpec(
+        "sync_portfolio",
+        "0 3 * * *",
+        "apps.worker.jobs.sync_portfolio:run",
+        "Daily: every adapter's per-company sync() into the local mirror (filed data never re-downloaded)",
+    ),
+    JobSpec(
         "change_detection",
         "0 7 * * *",
         "apps.worker.jobs.change_detection:run",

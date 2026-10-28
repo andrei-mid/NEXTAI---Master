@@ -1,12 +1,26 @@
-"""STUB. Owner: @role-1-database. Memos after the critic pass.
+"""Memos after the critic pass. Owner: @role-1-database.
 
-Planned tables (write them as SQLAlchemy 2.0 typed models: `class X(Base)` with `Mapped[...]`,
-then generate the migration `alembic revision --autogenerate -m "memos_create_tables"`):
-- memos_memos: run_id PK, cui (indexed), generated_at, model, verifier_passed bool, payload JSONB (schema.memo.Memo)
+memos_memos: one memo per run, payload = schema.memo.Memo. Latest per cui = ORDER BY generated_at DESC.
 """
 
 from __future__ import annotations
 
-from verifirm.persistence.models.base import Base
+from datetime import datetime
+from typing import Any
 
-__all__ = ["Base"]
+from sqlalchemy import Index, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from verifirm.persistence.models.base import Base, CreatedAtMixin
+
+
+class MemoRow(CreatedAtMixin, Base):
+    __tablename__ = "memos_memos"
+    __table_args__ = (Index("ix_memos_memos_cui_generated_at", "cui", "generated_at"),)
+
+    run_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    cui: Mapped[str] = mapped_column(String(16))
+    generated_at: Mapped[datetime]
+    model: Mapped[str | None] = mapped_column(String(128))
+    verifier_passed: Mapped[bool | None]  # None when the critic has not run
+    payload: Mapped[dict[str, Any]]

@@ -5,6 +5,8 @@ Fixture: fixtures/companies/<cui>_<slug>/restante.json
    "obligations": [{"type": "principal"|"accesorii", "amount_ron": 0}]}
 A file with an empty `obligations` list = checked and clean. A missing file = UNAVAILABLE.
 Feeds TAX-ARREARS-01.
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

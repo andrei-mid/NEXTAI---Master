@@ -5,6 +5,8 @@ Facts / to confirm:
   on data.gov.ro. Ingest them on a schedule and look up by supplier CUI locally.
   Confirm the dataset URLs and columns, then record them in docs/SOURCES.md.
 - Fixture: fixtures/companies/<cui>_<slug>/presence.json -> key "seap".
+
+Local-first (docs/LOCAL_DATA.md): bulk: an ingest job (to add) loads the procurement exports locally. sync() no-op. contracts_for() reads local data only.
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ from verifirm.schema.signals import SourceType
 class SeapAdapter(BaseAdapter):
     source_label = "SEAP public procurement"
     source_type = SourceType.OFFICIAL
-    cache_ttl_s = 7 * 86_400
+    mirror_max_age_s = 7 * 86_400
 
     async def contracts_for(self, cui: str) -> Sourced[list[dict[str, Any]]]:
         """Contracts where the company is the supplier: {authority, date, value_ron, cpv, ref}."""

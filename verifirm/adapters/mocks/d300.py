@@ -5,6 +5,8 @@ Fixture: fixtures/companies/<cui>_<slug>/d300.json
   {"fictional": true, "cui": "...", "returns": [{"period": "2025-12", "taxable_base_ron": 0,
    "vat_collected_ron": 0, "vat_deductible_ron": 0}]}
 Used by TAX-EFACTURA-GAP-01 (declared sales vs e-Factura issued totals).
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

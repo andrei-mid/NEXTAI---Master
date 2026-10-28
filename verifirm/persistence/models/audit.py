@@ -1,14 +1,29 @@
-"""STUB. Owner: @role-1-database. APPEND-ONLY audit log of analyst decisions (the AI never decides).
+"""APPEND-ONLY audit log of analyst decisions (the AI never decides). Owner: @role-1-database.
 
-Planned tables (write them as SQLAlchemy 2.0 typed models: `class X(Base)` with `Mapped[...]`,
-then generate the migration `alembic revision --autogenerate -m "audit_create_tables"`):
-- audit_decisions: decision_id PK, cui (indexed), run_id, decision, comment, analyst, band_at_decision, recorded_at
-- The application DB role gets INSERT/SELECT only (no UPDATE/DELETE): grant it in the migration.
-- Retention period: PENDING in docs/DECISIONS.md (GDPR).
+audit_decisions: one row per DecisionRecord. The migration installs a trigger that rejects
+UPDATE and DELETE for every role, owner included.
+Retention period: PENDING in docs/DECISIONS.md (GDPR). A retention job will need to bypass the
+trigger explicitly, which is the point.
 """
 
 from __future__ import annotations
 
-from verifirm.persistence.models.base import Base
+from datetime import datetime
 
-__all__ = ["Base"]
+from sqlalchemy import String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from verifirm.persistence.models.base import Base, CreatedAtMixin
+
+
+class DecisionRow(CreatedAtMixin, Base):
+    __tablename__ = "audit_decisions"
+
+    decision_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    cui: Mapped[str] = mapped_column(String(16), index=True)
+    run_id: Mapped[str | None] = mapped_column(String(64))
+    decision: Mapped[str] = mapped_column(String(32))
+    comment: Mapped[str] = mapped_column(Text)
+    analyst: Mapped[str] = mapped_column(Text)
+    band_at_decision: Mapped[str | None] = mapped_column(String(16))
+    recorded_at: Mapped[datetime]

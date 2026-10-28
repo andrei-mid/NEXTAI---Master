@@ -1,0 +1,44 @@
+# Financials agent thresholds. ALL VALUES ARE A PROPOSAL (docs/DECISIONS.md).
+# Loaded by verifirm/agents/financials/rules.py:load_config. Change values here, not in code.
+
+years_of_history: 5
+# Statements for year Y become available on ANAF around mid-year Y+1. From this month on,
+# the latest expected filed year is (current year - 1). Before it, (current year - 2).
+filing_available_from_month: 7
+
+revenue_jump:                 # FIN-REVENUE-JUMP-01
+  min_growth_pct: 300         # turnover grew > 300% from one year to the next
+  min_base_turnover_ron: 100000   # ignore jumps from a tiny base
+
+net_assets:                   # FIN-NET-ASSETS-01 (Law 31/1990 art. 153^24)
+  max_equity_to_share_capital: 0.5
+
+loss_trend:                   # FIN-LOSS-TREND-01
+  min_consecutive_years: 2
+
+debt_rise:                    # FIN-DEBT-RISE-01: debts up while revenue stagnates
+  window_years: 3             # first vs last filed year in the most recent N years
+  min_debt_growth_pct: 50
+  max_turnover_growth_pct: 10 # "constant" revenue = grew at most +10% (falling counts too)
+
+revenue_decline:              # FIN-REVENUE-DECLINE-01 (addition to the brief)
+  window_years: 3
+  min_drop_pct: 25
+
+headcount:                    # FIN-HEADCOUNT-01: turnover per employee far above the CAEN average
+  multiplier: 5               # flag when > 5 x the division average
+  confidence: 0.8             # the averages below are approximate
+  # Average turnover per employee (RON) by CAEN division (first 2 digits).
+  # PROPOSAL: rough placeholder values. Replace with INS data before relying on them.
+  caen_avg_turnover_per_employee_ron:
+    "01": 600000    # agriculture (crops)
+    "41": 450000    # construction of buildings
+    "42": 550000    # civil engineering
+    "43": 300000    # specialised construction
+    "46": 1500000   # wholesale trade
+    "47": 700000    # retail trade
+    "49": 450000    # land transport
+    "62": 350000    # IT services
+    "64": 1000000   # financial / holdings
+    "82": 200000    # business support services
+  fallback_avg_ron: 500000    # divisions not listed above

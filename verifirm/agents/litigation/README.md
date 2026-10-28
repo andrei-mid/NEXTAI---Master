@@ -4,6 +4,8 @@
 
 **Component:** `litigation` (weight 15, PROPOSAL) · **Sources:** `portal_just` (SOAP), `scj` (ICCJ, nightly 03:30–06:30 only), **MOCK** `mock_bpi`
 
+**Data access (local-first, [docs/LOCAL_DATA.md](../../../docs/LOCAL_DATA.md)):** `portal_just` + `scj` mirror entries (written by sync / nightly jobs), `mock_bpi`. Never call external APIs from the agent. "Not in the local mirror yet" is unavailable, never clean. Reference: `agents/financials/`.
+
 | rule_id | Severity (PROPOSAL) | Condition |
 |---|---|---|
 | LIT-INSOLVENCY-OPENED-01 | critical, **auto-stop** | insolvency opened |

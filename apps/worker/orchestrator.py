@@ -14,6 +14,7 @@ from collections.abc import Awaitable, Callable
 from functools import partial
 
 from apps.wiring import Infra
+from apps.worker.sync import sync_company
 from verifirm.adapters.base import SourceUnavailable
 from verifirm.agents.base import AgentContext, BaseAgent
 from verifirm.consolidation.critic.agent import verify_memo
@@ -25,7 +26,7 @@ from verifirm.core.logging import get_logger, log_context
 from verifirm.core.registry import discover_agents
 from verifirm.core.timebudget import BudgetedTask, run_all
 from verifirm.schema.memo import ConsolidatedReport
-from verifirm.schema.runs import AgentProgressEvent, RunRequest, RunState, RunStatus
+from verifirm.schema.runs import AgentProgressEvent, RunRequest, RunState, RunStatus, RunTrigger
 from verifirm.schema.signals import AgentResult
 from verifirm.scoring.engine import load_scoring_config, score
 
@@ -64,6 +65,13 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
         except InvalidCUIError as exc:
             return await finish(RunState.REJECTED, error=str(exc))
         await repo.save_run(status)
+
+        # 1b. Local-first: download this company's data into the mirror ONCE, before any agent
+        # runs. Agents never call external APIs (docs/LOCAL_DATA.md). Sweep runs skip this:
+        # the portfolio is kept fresh by apps/worker/jobs/sync_portfolio.py.
+        if settings.sync_on_application and request.trigger != RunTrigger.SWEEP:
+            await sync_company(cui, infra, skip=request.disabled_sources)
+            await publish(AgentProgressEvent(run_id=request.run_id, agent="sync"))
 
         try:
             # 2. Identity sheet (official sources only)

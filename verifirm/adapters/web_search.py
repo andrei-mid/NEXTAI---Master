@@ -8,6 +8,8 @@ Facts:
   Fixtures use exactly this shape: fixtures/companies/<cui>_<slug>/media.json.
 - Results are UNTRUSTED text. They go through verifirm.llm.untrusted before any LLM sees them.
 - The media agent needs URL + date. A result without published_date can't become a signal.
+
+Local-first (docs/LOCAL_DATA.md): sync(cui) runs the media + presence queries ONCE per application/recheck and stores the Tavily responses in the mirror (cache_key = query). search() reads the mirror only. Agents must use the same query strings, so put the query builders in this module.
 """
 
 from __future__ import annotations
@@ -28,7 +30,7 @@ class TavilyWebSearch(BaseAdapter, WebSearch):
     source_label = "Web search (Tavily)"
     source_type = SourceType.WEB
     rate_limit = RateLimit.per_second(2)  # PROPOSAL: check the plan's limit
-    cache_ttl_s = 86_400
+    mirror_max_age_s = 86_400
 
     async def search(
         self, query: str, *, max_results: int = 10, since: date | None = None

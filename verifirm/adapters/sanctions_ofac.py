@@ -7,6 +7,8 @@ Facts:
 - Aliases are in ALT.CSV and addresses in ADD.CSV at the same base URL. Add them if matching needs them.
 - Bulk download on a schedule. Normalize to the same entry shape as sanctions_eu.
 - Fixture: fixtures/sources/sanctions/ofac_sdn_sample.csv (fictional entries only).
+
+Local-first (docs/LOCAL_DATA.md): bulk: the ingest_sanctions job. sync() no-op. Screening reads local entries only.
 """
 
 from __future__ import annotations
