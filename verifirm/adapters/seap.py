@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-4-external-agents. Public procurement contracts won (SEAP / e-licitatie.ro) (OFFICIAL).
+"""Owner: @role-4-external-agents. Public procurement contracts won (SEAP / e-licitatie.ro) (OFFICIAL).
 
 Facts / to confirm:
 - Bulk-first: the procurement open-data exports (contracts / direct awards) are published
@@ -13,7 +13,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import BaseAdapter, Sourced, SourceUnavailable
+from verifirm.adapters.presence_fixture import read_parts
 from verifirm.core.registry import register_adapter
 from verifirm.schema.signals import SourceType
 
@@ -25,5 +26,12 @@ class SeapAdapter(BaseAdapter):
     mirror_max_age_s = 7 * 86_400
 
     async def contracts_for(self, cui: str) -> Sourced[list[dict[str, Any]]]:
-        """Contracts where the company is the supplier: {authority, date, value_ron, cpv, ref}."""
-        raise NotImplementedError
+        """Contracts where the company is the supplier: {authority, date, value_ron, cpv, ref}.
+        Empty list = checked, none found. FIXTURE_MODE: presence.json -> "seap". Live: unavailable
+        until the procurement ingest job exists (never "no contracts" by default)."""
+        if not self.settings.fixture_mode:
+            raise SourceUnavailable(
+                self.name, "no local SEAP data yet (procurement ingest job to add)"
+            )
+        result = await read_parts(self, cui, {"seap": (list,)})
+        return Sourced(data=result.data["seap"], source=result.source, stale=result.stale)

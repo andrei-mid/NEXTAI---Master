@@ -26,8 +26,9 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |
 | `scj` | per company, time window | stub | nightly batch 03:30–06:30 → mirror. `sync()` no-op outside the window |
 | `sanctions_eu/un/ofac` | bulk | stub | `ingest_sanctions` job. `sync()` no-op |
-| `seap`, `kohesio` | bulk | stub | ingest jobs (to add). `sync()` no-op |
-| `web_search` (Tavily) | per company | stub | `sync()` runs the media/presence queries once per application. Results go to the mirror |
+| `seap` | bulk | **fixture mode only** | `contracts_for()` reads `presence.json` in FIXTURE_MODE. Live: unavailable until a procurement ingest job (data.gov.ro) exists. `sync()` no-op |
+| `kohesio` | bulk | **fixture mode only** | `projects_for()` reads `presence.json` in FIXTURE_MODE. Live: unavailable until a Kohesio ingest job exists. `sync()` no-op |
+| `web_search` (Tavily) | per company | partly | `footprint()` (website + jobs, presence agent) reads `presence.json` in FIXTURE_MODE, live unavailable. `search()` (Tavily, media agent) still a stub. `sync()` should run the media/presence queries once per application |
 | `documents` | uploaded files | stub | files are already local (ObjectStore). No sync |
 | `mocks/*` | fixtures only | **implemented** (all 6) | always read `fixtures/` through `mocks.MockAdapter` (shape-checked; wrong shape or no file → unavailable). No sync. Production route: `docs/SOURCES.md` |
 

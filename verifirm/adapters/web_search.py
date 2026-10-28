@@ -15,8 +15,10 @@ Local-first (docs/LOCAL_DATA.md): sync(cui) runs the media + presence queries ON
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
 
-from verifirm.adapters.base import BaseAdapter
+from verifirm.adapters.base import BaseAdapter, Sourced, SourceUnavailable
+from verifirm.adapters.presence_fixture import read_parts
 from verifirm.core.ports.rate_limiter import RateLimit
 from verifirm.core.ports.web_search import WebResult, WebSearch
 from verifirm.core.registry import register_adapter
@@ -38,3 +40,13 @@ class TavilyWebSearch(BaseAdapter, WebSearch):
         """Call Tavily through self.fetch() (cache + archive). Map results to WebResult.
         In fixture mode, self.fetch() serves media.json. Find it with the company name in the query."""
         raise NotImplementedError
+
+    async def footprint(self, cui: str, company_name: str) -> Sourced[dict[str, Any]]:
+        """Presence agent: {website: {url, address_on_site} | None, jobs: [{title, url, posted}]}.
+        `website: None` and `jobs: []` mean "searched, nothing found". FIXTURE_MODE: presence.json.
+        Live: unavailable until the presence queries run in sync() (needs TAVILY_API_KEY)."""
+        if not self.settings.fixture_mode:
+            raise SourceUnavailable(
+                self.name, "website / job-posting search not built yet (Tavily sync + key)"
+            )
+        return await read_parts(self, cui, {"website": (dict, type(None)), "jobs": (list,)})
