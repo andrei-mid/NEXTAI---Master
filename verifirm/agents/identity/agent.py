@@ -8,7 +8,8 @@ Inputs (as the pipeline contract says):
   onrc_bulk.companies_at_address(address): the shared-office count.
 
 Source authority (see README): legal status and administrators -> ONRC, fiscal inactivity ->
-ANAF, deregistration -> both. One ANAF call per run (cached and rate limited by BaseAdapter).
+ANAF, deregistration -> both. Local-first (docs/LOCAL_DATA.md): every call reads the local
+mirror / tables, never the network. One anaf_v9 read per run.
 
 A source that fails, is not implemented yet, or returns data the rules can't check goes into
 `sources_failed` with a note. It is never reported clean.
@@ -105,7 +106,7 @@ class IdentityAgent(BaseAgent):
             if source not in failed and source not in checked:
                 checked.append(source)
             if result.stale:
-                notes.append(f"{source}: served from the last-known-good copy (stale)")
+                notes.append(f"{source}: stale mirror copy (older than mirror_max_age_s)")
             return result
 
         def confidence(*sourced: Sourced[Any] | None, agree: bool = True) -> float:
@@ -138,7 +139,7 @@ class IdentityAgent(BaseAgent):
                 )
             )
 
-        # --- 1. ANAF v9: one lookup for today's date (cached, rate limited, batched upstream).
+        # --- 1. ANAF v9: one mirror read for today's date (synced upstream, 100 CUIs per call).
         v9 = None
         v9_adapter = await self._adapter(ctx, "anaf_v9", fail)
         if v9_adapter is not None:
@@ -202,7 +203,9 @@ class IdentityAgent(BaseAgent):
                 onrc = None
 
         if registry is not None and onrc is not None and onrc.data is not None:
-            await self._check_onrc(ctx, today, onrc, v9, anaf_dereg, emit, confidence, fail)
+            await self._check_onrc(
+                ctx, today, onrc, v9, anaf_dereg, emit, confidence, fail, notes.append
+            )
 
             address = ctx.identity.registered_office.raw if ctx.identity.registered_office else None
             if address:
@@ -277,6 +280,7 @@ class IdentityAgent(BaseAgent):
         emit: Callable[..., None],
         confidence: Callable[..., float],
         fail: Callable[[str, str], None],
+        note: Callable[[str], None],
     ) -> None:
         """ONRC-authority rules: status, administrators, office, CAEN."""
         assert onrc.data is not None
@@ -345,11 +349,16 @@ class IdentityAgent(BaseAgent):
                     },
                 )
 
-        # Registered office history.
+        # Registered office history. Live ONRC / ANAF only publish the current office, so an
+        # empty history with a known office means "no change detectable", not a failed source.
         offices = [
             {"address": a.raw, "valid_from": a.valid_from, "valid_to": a.valid_to}
             for a in sheet.office_history
         ]
+        if not offices and sheet.registered_office is not None:
+            office = sheet.registered_office
+            offices = [{"address": office.raw, "valid_from": office.valid_from, "valid_to": None}]
+            note("onrc_bulk: no office history, ID-OFFICE-CHANGE-01 can't see past moves")
         try:
             moved = rules.check_office_change(offices, today, self.config.window_days)
         except ValueError as exc:

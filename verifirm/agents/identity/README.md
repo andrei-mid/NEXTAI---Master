@@ -145,6 +145,9 @@ server is punished under the law.**
 **Not verified on live data yet:** whether `OD_REPREZENTANTI_LEGALI` has end dates for
 administrators (needed for ADMIN-CHANGE), and whether any office history exists outside our
 fixtures (ANAF v9 and the ONRC files are current snapshots, so OFFICE-CHANGE may need snapshot diffs).
+Until then, an empty `office_history` with a known `registered_office` is **not** a failed source:
+the agent adds a note ("no office history") and stays `ok`. Otherwise one low-severity rule would
+block GREEN for every real company. With no office at all, ONRC is reported as failed.
 
 ## How `agent.py` runs (one run, one company)
 

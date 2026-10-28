@@ -380,6 +380,21 @@ async def test_no_administrators_is_partial() -> None:
     assert result.sources_failed == ["onrc_bulk"]
 
 
+async def test_no_office_history_with_known_office_is_not_a_failure() -> None:
+    """Live ONRC has no office history: that must not block GREEN for every company."""
+    result = await run(ctx(AURORA, identity=sheet(AURORA, office_history=[])))
+    assert result.status is AgentStatus.OK
+    assert result.sources_failed == []
+    assert result.notes is not None and "no office history" in result.notes
+
+
+async def test_no_office_at_all_is_partial() -> None:
+    identity = sheet(AURORA, office_history=[], registered_office=None)
+    result = await run(ctx(AURORA, identity=identity))
+    assert result.status is AgentStatus.PARTIAL
+    assert result.sources_failed == ["onrc_bulk"]
+
+
 async def test_stale_data_lowers_confidence() -> None:
     result = await run(ctx(VANTIRO, v9=FakeV9(stale=True)))
     assert by_rule(result)["ID-INACTIVE-01"].confidence == 0.8
