@@ -35,6 +35,35 @@ All persistence tests (migrations, drift, append-only audit trigger, upserts, th
 
 ---
 
+## 2026-10-28: Tax agent, anaf_v9, e-Factura registry and all 6 mocks implemented (role 3)
+
+**What:**
+- **`verifirm/agents/tax/`** is done: 5 rules, `config.yaml`, tests with the **real adapters** in `FIXTURE_MODE`. Zephyria's and Brunaldo's output matches `api/signals.json` field by field. Decisions are in its README.
+- **`adapters/anaf_v9.py`** is implemented. READ `lookup` / `lookup_batch` reads the mirror only. `sync()` makes 1 request per applicant. `lookup_batch` on a network adapter sends 100 CUIs per request and stores one mirror entry per CUI. It **never retries an HTTP 429**. The mirror key is the **CUI** (latest record), not `cui:date`; the reason is in DECISIONS.md.
+- **`anaf_v9` was written twice in parallel** (role 2 in "Live end to end" below, role 3 here). Merged into one file. The public API is unchanged (`lookup`, `lookup_batch`, `sync`, `split_response`), and both test suites are kept. Role 3 added: **no retry on HTTP 429**, a corrupt mirror entry is downloaded again instead of being reused for 24h, and duplicate CUIs are dropped from batches.
+- **`adapters/anaf_efactura_registry.py`** is derived from the v9 mirror entry: no call, no sync.
+- **All 6 mocks** (`restante`, `d300`, `efactura`, `bpi`, `shareholders`, `pep`) are implemented on a shared `mocks.MockAdapter`. A missing file or wrong shape gives `SourceUnavailable`, never "nothing found".
+- `docs/SOURCES.md` now has the **production route** for every mock (the applicant's documents or a paid provider).
+- New severity rule: `TAX-EFACTURA-GAP-01` is medium when D300 is below e-Factura and low when above (`docs/RULES.md`).
+
+**What you must do:**
+- **Role 4 (litigation, sanctions):** `mock_bpi.proceedings(cui)` and `mock_pep.entries()` work now. Both return `Sourced[list[dict]]`.
+- **Role 2 (`sweep_anaf_v9`, change detection):** use `AnafV9Adapter.lookup_batch(cuis, date)` on a `sync_adapters` instance. It handles the 100-CUI chunks and the mirror. Never loop over `lookup` to call ANAF.
+- **Role 5 (`identity_sheet`, `documents`):** read v9 through `anaf_v9.lookup(cui, today)`. When `documents.extract` lands, the tax agent picks up `ctx.submitted` with no change.
+- **Role 6 (fixtures):** optional. Add `"on_white_list": true|false` to `restante.json` if you want the demo to show ANAF's no-arrears list.
+
+---
+
+## 2026-10-28: `make seed-real`: the same real companies in everyone's database (role 2)
+
+**What:** `apps/worker/seed.py` runs DEDEMAN, AUTOMOBILE-DACIA, OMV PETROM, DANTE INTERNATIONAL (eMAG), ALTEX ROMANIA and HIDROELECTRICA through the real pipeline (ANAF → local mirror → agents → scoring → your Postgres). Real-company figures are never committed (CLAUDE.md rule 11), so we share this script, not a database dump. ~7 ANAF calls per company. Re-runs only refresh stale data.
+
+Also: a missing/misconfigured LLM (e.g. `LLM_PROVIDER=anthropic` without `ANTHROPIC_API_KEY`) no longer fails the run. Agents get `llm=None`, and only the memo is missing (`apps/worker/orchestrator.py`).
+
+**What you must do:** to see the real companies: Postgres up (see `infra/local/README.md`), `make db-upgrade`, then `make seed-real`. Add CUIs: `uv run python -m apps.worker.seed <cui> <cui>`.
+
+---
+
 ## 2026-10-28: Live end to end: ANAF → mirror → agents → Postgres → API (role 2, with role 3/5 pieces)
 
 **What works now (tested on DEDEMAN SRL with real ANAF data):** `POST /companies/{cui}/recheck` → sync downloads ANAF v9 + 6 balance sheets into the local mirror → identity sheet → 8 agents → scoring → saved in Postgres → `GET /companies` serves it. Guide: [infra/local/README.md](../infra/local/README.md).
@@ -79,7 +108,7 @@ All persistence tests (migrations, drift, append-only audit trigger, upserts, th
 **What you must do:**
 - **Role 1:** `onrc_bulk.company(cui)` is read in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...), with `None` meaning not found. `companies_at_address()` receives the **raw** ONRC address, so normalize inside the adapter. PENDING in `docs/DECISIONS.md`. Confirm it or propose another shape.
 - **Role 5:** the agent reads `ctx.identity.administrators` (with `valid_from`/`valid_to`), `office_history`, `caen_code`, `authorized_caen_codes` and `legal_form`. Fill them from ONRC in `identity_sheet`.
-- **Role 3:** `anaf_v9.lookup` is still a stub. Until it lands, the agent reports `anaf_v9` as "adapter not implemented yet" (partial), never clean.
+- **Role 3:** ~~`anaf_v9.lookup` is still a stub~~ Done (see the tax entry above).
 
 ---
 

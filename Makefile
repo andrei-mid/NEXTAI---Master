@@ -5,7 +5,7 @@
 ALEMBIC := uv run alembic -c verifirm/persistence/alembic.ini
 
 .PHONY: help install test test-pg lint format typecheck schema fixtures fixtures-check \
-        run-api run-worker demo-check up down db-upgrade db-revision check
+        run-api run-worker seed-real demo-check up down db-upgrade db-revision check
 
 help:
 	@echo "install         uv sync (Python 3.12 + all deps)"
@@ -18,6 +18,7 @@ help:
 	@echo "fixtures-check  enforce the fictional-data rules"
 	@echo "run-api         FastAPI on http://localhost:8000 (docs at /docs)"
 	@echo "run-worker      queue consumer"
+	@echo "seed-real       fill your local Postgres with real companies from ANAF (needs db-upgrade)"
 	@echo "demo-check      fixtures-check + e2e demo bands"
 	@echo "up / down       docker compose: postgres 17 + redis"
 	@echo "db-upgrade      alembic upgrade head"
@@ -58,6 +59,9 @@ run-api:
 
 run-worker:
 	uv run python -m apps.worker.main
+
+seed-real:
+	uv run python -m apps.worker.seed
 
 demo-check: fixtures-check
 	uv run pytest tests/e2e -v

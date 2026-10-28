@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-3-official-agents. MOCK of ANAF's quarterly list of tax arrears (real one is behind a captcha).
+"""Owner: @role-3-official-agents. MOCK of ANAF's quarterly list of tax arrears (real one is behind a captcha).
 
 Fixture: fixtures/companies/<cui>_<slug>/restante.json
   {"fictional": true, "cui": "...", "list_period": "2026-Q2",
@@ -11,17 +11,21 @@ Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No s
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import Sourced
+from verifirm.adapters.mocks import MockAdapter
 from verifirm.core.registry import register_adapter
-from verifirm.schema.signals import SourceType
 
 
 @register_adapter("mock_restante")
-class MockRestanteAdapter(BaseAdapter):
+class MockRestanteAdapter(MockAdapter):
     source_label = "ANAF tax arrears list (MOCK)"
-    source_type = SourceType.MOCK
 
     async def arrears(self, cui: str) -> Sourced[dict[str, Any]]:
-        raise NotImplementedError
+        """The company's entry in the latest list (empty `obligations` = checked, clean).
+        Optional `on_white_list` (bool): ANAF's list of companies WITHOUT arrears."""
+        result = await self.read_company(
+            cui, "restante.json", {"list_period": str, "obligations": list}
+        )
+        return cast(Sourced[dict[str, Any]], result)

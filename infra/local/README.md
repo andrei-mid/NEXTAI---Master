@@ -19,6 +19,7 @@ Real data from ANAF, stored in Postgres, shown in the frontend. No Docker needed
    TEST_DATABASE_URL=postgresql+asyncpg://verifirm:verifirm@localhost:5433/verifirm_test
    ```
 3. `make db-upgrade` (Alembic migrations).
+   Then `make seed-real` fills it with 6 real companies from ANAF (Dedeman, Dacia, Petrom, eMAG, Altex, Hidroelectrica).
 4. **API + embedded worker** (the API also processes the queue, so no Redis or separate worker is needed):
    ```bash
    FIXTURE_MODE=0 REPOSITORY_BACKEND=postgres EMBEDDED_WORKER=1 LLM_PROVIDER=fake make run-api

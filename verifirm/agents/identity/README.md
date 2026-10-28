@@ -14,7 +14,8 @@ person, or the official sources not agreeing on who the company is.
 |---|---|
 | `rules.py` (9 pure checks) | **done**, unit-tested (`tests/test_rules.py`) |
 | `agent.py` (`run`) | **done**, tested on every fixture company and every failure path (`tests/test_agent.py`) |
-| Real `anaf_v9.lookup`, `onrc_bulk.company` / `companies_at_address`, `identity_sheet` | **not implemented yet** (roles 3 / 1 / 5). Tests use stand-ins that read the same fixture files. Until they land, the agent reports those sources as failed with "adapter not implemented yet", never as clean |
+| `anaf_v9.lookup` | **implemented** (role 3): reads the mirror / fixtures |
+| `onrc_bulk.company` / `companies_at_address`, `identity_sheet` | **not implemented yet** (roles 1 / 5). Tests use stand-ins that read the same fixture files. Until they land, the agent reports `onrc_bulk` as failed with "adapter not implemented yet", never as clean |
 | Thresholds | `config.yaml` in this folder (PROPOSAL), loaded by `rules.load_config()`. Change values there, not in code |
 
 ## Rules
@@ -151,7 +152,7 @@ block GREEN for every real company. With no office at all, ONRC is reported as f
 
 ## How `agent.py` runs (one run, one company)
 
-1. `anaf_v9.lookup(cui, today)`: **one** ANAF call (cached, rate limited). Gives INACTIVE, REACTIVATED and the
+1. `anaf_v9.lookup(cui, today)`: **one** mirror read, no network. Gives INACTIVE, REACTIVATED and the
    deregistration date.
 2. `onrc_bulk.company(cui)`: gives STATUS (cross-checked with ANAF), plus ADMIN-CHANGE, OFFICE-CHANGE and CAEN-UNAUTH
    from `ctx.identity`. Then `companies_at_address(address)` gives SHARED-OFFICE.

@@ -88,7 +88,14 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
                 if submitted is not None:
                     await repo.save_submitted_financials(request.run_id, submitted)
 
-            # 4. Agents in parallel, each under its own time budget
+            # 4. Agents in parallel, each under its own time budget.
+            # A misconfigured LLM (e.g. no API key) must not stop the run: agents get llm=None
+            # and fall back to their deterministic path. Only the memo is then missing.
+            try:
+                llm = infra.llm
+            except Exception as exc:
+                log.warning("LLM unavailable, agents run without it", extra={"error": str(exc)})
+                llm = None
             ctx = AgentContext(
                 run_id=request.run_id,
                 cui=cui,
@@ -96,7 +103,7 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
                 settings=settings,
                 clock=clock,
                 adapters=infra.adapters,
-                llm=infra.llm,
+                llm=llm,
                 web_search=infra.web_search,
                 submitted=submitted,
                 disabled_sources=frozenset(request.disabled_sources),
