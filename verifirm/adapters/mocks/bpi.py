@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-3-official-agents. MOCK of BPI, the Insolvency Proceedings Bulletin (real one is paid).
+"""Owner: @role-3-official-agents. MOCK of BPI, the Insolvency Proceedings Bulletin (real one is paid).
 
 Fixture: fixtures/companies/<cui>_<slug>/bpi.json
   {"fictional": true, "cui": "...", "proceedings": [{"case_no", "court", "type":
@@ -13,15 +13,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import Sourced
+from verifirm.adapters.mocks import MockAdapter
 from verifirm.core.registry import register_adapter
-from verifirm.schema.signals import SourceType
 
 
 @register_adapter("mock_bpi")
-class MockBpiAdapter(BaseAdapter):
+class MockBpiAdapter(MockAdapter):
     source_label = "BPI insolvency bulletin (MOCK)"
-    source_type = SourceType.MOCK
 
     async def proceedings(self, cui: str) -> Sourced[list[dict[str, Any]]]:
-        raise NotImplementedError
+        """Published insolvency proceedings (empty list = checked, none published)."""
+        result = await self.read_company(cui, "bpi.json", {"proceedings": list})
+        return Sourced(data=result.data["proceedings"], source=result.source)

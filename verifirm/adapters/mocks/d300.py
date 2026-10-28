@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-3-official-agents. MOCK of D300 VAT returns (and SAF-T D406). The real ones need the
+"""Owner: @role-3-official-agents. MOCK of D300 VAT returns (and SAF-T D406). The real ones need the
 company's certificate.
 
 Fixture: fixtures/companies/<cui>_<slug>/d300.json
@@ -13,15 +13,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import Sourced
+from verifirm.adapters.mocks import MockAdapter
 from verifirm.core.registry import register_adapter
-from verifirm.schema.signals import SourceType
 
 
 @register_adapter("mock_d300")
-class MockD300Adapter(BaseAdapter):
+class MockD300Adapter(MockAdapter):
     source_label = "D300 VAT returns (MOCK)"
-    source_type = SourceType.MOCK
 
     async def returns(self, cui: str) -> Sourced[list[dict[str, Any]]]:
-        raise NotImplementedError
+        """The VAT returns, one per period ("2025-Q1" or "2025-03")."""
+        result = await self.read_company(cui, "d300.json", {"returns": list})
+        return Sourced(data=result.data["returns"], source=result.source)

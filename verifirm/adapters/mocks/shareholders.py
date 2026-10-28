@@ -1,4 +1,4 @@
-"""STUB. Owner: @role-3-official-agents. MOCK of shareholders (ONRC open data has none. The real
+"""Owner: @role-3-official-agents. MOCK of shareholders (ONRC open data has none. The real
 source is a paid ONRC extract).
 
 Fixture: fixtures/companies/<cui>_<slug>/shareholders.json
@@ -13,15 +13,16 @@ from __future__ import annotations
 
 from typing import Any
 
-from verifirm.adapters.base import BaseAdapter, Sourced
+from verifirm.adapters.base import Sourced
+from verifirm.adapters.mocks import MockAdapter
 from verifirm.core.registry import register_adapter
-from verifirm.schema.signals import SourceType
 
 
 @register_adapter("mock_shareholders")
-class MockShareholdersAdapter(BaseAdapter):
+class MockShareholdersAdapter(MockAdapter):
     source_label = "Shareholders (MOCK)"
-    source_type = SourceType.MOCK
 
     async def shareholders(self, cui: str) -> Sourced[list[dict[str, Any]]]:
-        raise NotImplementedError
+        """[{name, is_company, cui, share_pct, since}]."""
+        result = await self.read_company(cui, "shareholders.json", {"shareholders": list})
+        return Sourced(data=result.data["shareholders"], source=result.source)
