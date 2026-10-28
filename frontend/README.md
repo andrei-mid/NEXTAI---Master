@@ -8,3 +8,17 @@
 - Demo script: [../docs/DEMO.md](../docs/DEMO.md).
 
 No scoring logic in the frontend: display what the API returns.
+
+## Run locally (React + Vite)
+
+Requires Node.js LTS. In this folder:
+
+```
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. On Windows PowerShell, if `npm` is blocked by the execution policy, use `npm.cmd` instead.
+
+- `src/App.jsx`: the page
+- `src/styles.css`: colours (top of the file) and styles
