@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-10-28: Postgres repository for the core tables (role 1)
+
+**What:** `SqlRepository` (`verifirm/persistence/repositories/sql_repository.py`) implements the whole `Repository` port. Migrations exist for `companies_*`, `runs_*`, `signals_*`, `scores_*`, `memos_*`, `audit_*`. `REPOSITORY_BACKEND=postgres` now works (`make up`, then `uv run alembic -c verifirm/persistence/alembic.ini upgrade head`).
+
+- `audit_decisions` is append-only through a trigger: UPDATE / DELETE / TRUNCATE raise for every role.
+- Signals live only in `signals_signals`. `save_agent_result` replaces the agent's signals for that run (stale ones are deleted), so re-runs never duplicate.
+- `list_portfolio` reads `companies_companies.latest_band`, which only moves forward (an older score saved late doesn't overwrite it).
+
+**What you must do:** nothing, unless your tests need Postgres: use the `migrated_db` / `repo` fixtures pattern from `verifirm/persistence/conftest.py` (skip when unreachable, never truncate).
+
+---
+
 ## 2026-10-28: File ownership is enforced (role 2) · ACTION NEEDED
 
 **What:** a Claude Code hook (`.claude/settings.json` → `.claude/hooks/ownership_guard.py`) refuses Edit/Write on files CODEOWNERS doesn't give you. CODEOWNERS now names `@andrei-mid` for role 2. `agents/financials/` + `adapters/anaf_bilant.py` are co-owned by `@andrei-mid` and role 3. On GitHub, `main` requires review from Code Owners.
