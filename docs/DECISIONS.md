@@ -1,4 +1,4 @@
-# DECISIONS
+﻿# DECISIONS
 
 Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if your work depends on one, ask the human before choosing. To propose a change to `verifirm/schema` or `verifirm/core`, add a PENDING entry here (who, what, why) and tell the team.
 
@@ -52,3 +52,5 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | `LLM_MODEL_DEFAULT` default is a Claude id | role 5 -> role 2 | With `LLM_PROVIDER=openai` / `openai_compatible` the model names must be set in `.env`. The providers raise a clear error otherwise |
 | Anthropic / OpenAI providers use httpx, not the vendor SDKs | role 5 | No new dependency needed. Bedrock stays a stub (needs SigV4: boto3 or the anthropic SDK). Say if you want it |
 | Graph depth > 1 in the live read model | role 5 + role 1 | `GET /companies/{cui}/graph` returns one hop from the identity sheet until graph tables exist |
+| Identity thresholds | role 3 | `verifirm/agents/identity/config.yaml` (PROPOSAL): `window_days` 365, `shared_office_min_companies` 20, `conflict_confidence` 0.6, `stale_confidence` 0.8. Same pattern as `agents/financials/config.yaml` |
+| `onrc_bulk` per-company contract | role 1 + role 3 | The identity agent reads `onrc_bulk.company(cui)` in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...) and `None` for not found. It passes the **raw** ONRC address to `companies_at_address()`, so normalization should happen inside the adapter. Confirm or propose another shape |

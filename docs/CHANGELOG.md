@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-10-28: Ownership guard removed (role 2) · ACTION NEEDED
+
+**What:** the Claude Code ownership hook (`.claude/settings.json` + `.claude/hooks/ownership_guard.py`) and everything tied to `VERIFIRM_ROLE` are gone. They blocked teammates' work. CODEOWNERS is back to the `@role-N-…` placeholders. The ownership *rules* in CLAUDE.md ("Stay inside your folder") still apply. They are just not enforced by a hook any more.
+
+**What you must do:** delete your `.claude/settings.local.json` if it only contained `VERIFIRM_ROLE` (it's git-ignored, so it never blocks commits), then restart Claude Code.
+
+---
+
+## 2026-10-28: Identity agent implemented, new rule ID-SOURCE-MISMATCH-01 (role 3)
+
+**What:** `verifirm/agents/identity/` is done: `rules.py` (9 pure checks), `agent.py`, `config.yaml` (thresholds, PROPOSAL), tests on every fixture company and every failure path. Zephyria's output matches `fixtures/companies/99000025_*/api/signals.json` field by field. The README has the full contract.
+
+- **New rule `ID-SOURCE-MISMATCH-01`** (high): ANAF and ONRC disagree on CUI, register number or name, which means the wrong entity may have been matched. It is in `docs/RULES.md`.
+- **`ID-STATUS-01` severity now varies by status** (PROPOSAL): deregistered and bankruptcy critical, insolvency and dissolution high, suspended medium, unknown high. Deregistration is cross-checked with ANAF `dataRadiere`: on disagreement the worse value wins, `data.sources_agree=false`, confidence 0.6.
+- **Source authority:** legal status and administrators come from ONRC, fiscal inactivity from ANAF, deregistration from both. ANAF "INREGISTRAT" next to ONRC "faliment" is **not** a conflict (a company stays a taxpayer until it is deregistered).
+
+**What you must do:**
+- **Role 1:** `onrc_bulk.company(cui)` is read in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...), with `None` meaning not found. `companies_at_address()` receives the **raw** ONRC address, so normalize inside the adapter. PENDING in `docs/DECISIONS.md`. Confirm it or propose another shape.
+- **Role 5:** the agent reads `ctx.identity.administrators` (with `valid_from`/`valid_to`), `office_history`, `caen_code`, `authorized_caen_codes` and `legal_form`. Fill them from ONRC in `identity_sheet`.
+- **Role 3:** `anaf_v9.lookup` is still a stub. Until it lands, the agent reports `anaf_v9` as "adapter not implemented yet" (partial), never clean.
+
+---
+
 ## 2026-10-28: Postgres repository for the core tables (role 1)
 
 **What:** `SqlRepository` (`verifirm/persistence/repositories/sql_repository.py`) implements the whole `Repository` port. Migrations exist for `companies_*`, `runs_*`, `signals_*`, `scores_*`, `memos_*`, `audit_*`. `REPOSITORY_BACKEND=postgres` now works (`make up`, then `uv run alembic -c verifirm/persistence/alembic.ini upgrade head`).
@@ -13,17 +36,6 @@
 - `list_portfolio` reads `companies_companies.latest_band`, which only moves forward (an older score saved late doesn't overwrite it).
 
 **What you must do:** nothing, unless your tests need Postgres: use the `migrated_db` / `repo` fixtures pattern from `verifirm/persistence/conftest.py` (skip when unreachable, never truncate).
-
----
-
-## 2026-10-28: File ownership is enforced (role 2) · ACTION NEEDED
-
-**What:** a Claude Code hook (`.claude/settings.json` → `.claude/hooks/ownership_guard.py`) refuses Edit/Write on files CODEOWNERS doesn't give you. CODEOWNERS now names `@andrei-mid` for role 2. `agents/financials/` + `adapters/anaf_bilant.py` are co-owned by `@andrei-mid` and role 3. On GitHub, `main` requires review from Code Owners.
-
-**What you must do (everyone):**
-1. Create `.claude/settings.local.json` with `{"env": {"VERIFIRM_ROLE": "@your-handle"}}` and restart Claude Code. Until you do, the hook refuses all edits.
-2. Send your GitHub handle to role 2 so the `@role-N-…` placeholder in CODEOWNERS is replaced.
-3. If your Claude gets "owned by …": don't work around it. Add a PENDING entry in `docs/DECISIONS.md` (editable by everyone) and tell the owner.
 
 ---
 

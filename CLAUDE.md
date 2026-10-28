@@ -25,14 +25,6 @@ Five Claude Code instances (roles 1–5) work here in parallel. Role 6 uses Clau
 | 5 AI + API | `verifirm/llm/`, `verifirm/consolidation/`, `verifirm/adapters/documents.py`, `apps/api/` |
 | 6 Frontend + demo | `frontend/`, `fixtures/`, `docs/DEMO.md` |
 
-### Ownership is enforced (CODEOWNERS)
-
-- **Claude Code:** `.claude/settings.json` runs `.claude/hooks/ownership_guard.py` before every Edit/Write. It refuses edits to files whose CODEOWNERS owner isn't you. **Setup, once per person:** create `.claude/settings.local.json` (git-ignored) with `{"env": {"VERIFIRM_ROLE": "@your-github-handle"}}` (or your `@role-N-…` placeholder until handles are filled in), then restart Claude Code. Without it, every edit is refused.
-- Shared logs that everyone may edit: `docs/CHANGELOG.md`, `docs/DECISIONS.md`, `docs/RULES.md`, `docs/SOURCES.md`, `verifirm/adapters/README.md`.
-- **If an edit is refused:** do **not** work around it (no Bash/sed edits, no copying the file elsewhere). Follow "Stay inside your folder" below.
-- **GitHub:** `main` requires a PR plus review from Code Owners, so a PR touching someone else's files can't merge without their approval.
-- Role 2 is `@andrei-mid`. `verifirm/agents/financials/` and `adapters/anaf_bilant.py` are co-owned by `@andrei-mid` and role 3.
-
 ### Stay inside your folder
 
 If you need a change in `verifirm/schema/` or `verifirm/core/` (or any folder you don't own): **don't edit it.** Add a `PENDING` entry to `docs/DECISIONS.md` describing the change and why, tell the human, and continue with a local workaround. Schema changes need a `DECIDED` entry first, because every package depends on the schema.
