@@ -4,11 +4,11 @@
 
 ---
 
-## 2026-10-28: `.claude/settings.local.json` removed from git (role 2) · ACTION NEEDED
+## 2026-10-28: Ownership guard removed (role 2) · ACTION NEEDED
 
-**What:** a personal `.claude/settings.local.json` (`VERIFIRM_ROLE=@andrei-mid`) was committed to `main` by mistake. Anyone who pulled it was treated as role 2 by the ownership guard, so their Claude could edit any file. It's now untracked and git-ignored.
+**What:** the Claude Code ownership hook (`.claude/settings.json` + `.claude/hooks/ownership_guard.py`) and everything tied to `VERIFIRM_ROLE` are gone. They blocked teammates' work. CODEOWNERS is back to the `@role-N-…` placeholders. The ownership *rules* in CLAUDE.md ("Stay inside your folder") still apply. They are just not enforced by a hook any more.
 
-**What you must do:** after pulling, git deletes your copy of that file. Recreate it with **your own** handle, `{"env": {"VERIFIRM_ROLE": "@your-handle"}}`, and restart Claude Code. Never commit it (`.gitignore` already covers it).
+**What you must do:** delete your `.claude/settings.local.json` if it only contained `VERIFIRM_ROLE` (it's git-ignored, so it never blocks commits), then restart Claude Code.
 
 ---
 
@@ -36,17 +36,6 @@
 - `list_portfolio` reads `companies_companies.latest_band`, which only moves forward (an older score saved late doesn't overwrite it).
 
 **What you must do:** nothing, unless your tests need Postgres: use the `migrated_db` / `repo` fixtures pattern from `verifirm/persistence/conftest.py` (skip when unreachable, never truncate).
-
----
-
-## 2026-10-28: File ownership is enforced (role 2) · ACTION NEEDED
-
-**What:** a Claude Code hook (`.claude/settings.json` → `.claude/hooks/ownership_guard.py`) refuses Edit/Write on files CODEOWNERS doesn't give you. CODEOWNERS now names `@andrei-mid` for role 2. `agents/financials/` + `adapters/anaf_bilant.py` are co-owned by `@andrei-mid` and role 3. On GitHub, `main` requires review from Code Owners.
-
-**What you must do (everyone):**
-1. Create `.claude/settings.local.json` with `{"env": {"VERIFIRM_ROLE": "@your-handle"}}` and restart Claude Code. Until you do, the hook refuses all edits.
-2. Send your GitHub handle to role 2 so the `@role-N-…` placeholder in CODEOWNERS is replaced.
-3. If your Claude gets "owned by …": don't work around it. Add a PENDING entry in `docs/DECISIONS.md` (editable by everyone) and tell the owner.
 
 ---
 

@@ -27,18 +27,6 @@ curl -N http://localhost:8000/runs/<run_id>/events                           # l
 
 Optional services (Postgres 17 + Redis): `make up`, then set `REPOSITORY_BACKEND=postgres` in `.env` once role 1 ships the repository, and run `make db-upgrade`.
 
-## Team setup (once per person)
-
-1. Clone, `make install`, `make test`.
-2. **Claude Code users:** create `.claude/settings.local.json` (git-ignored):
-   ```json
-   { "env": { "VERIFIRM_ROLE": "@your-github-handle" } }
-   ```
-   The ownership guard (`.claude/hooks/ownership_guard.py`) then lets your Claude edit only the files CODEOWNERS gives you. Restart Claude Code after creating the file.
-3. Work on a branch, open a PR. CI must pass and Code Owners must approve.
-
-**Repo admin, once** (GitHub → Settings → Branches → add a rule for `main`): *Require a pull request before merging* + *Require review from Code Owners* + *Require status checks to pass* (`ci / check`) + no force pushes. On a **private** repo this needs GitHub Pro/Team (or a public repo), otherwise the rule is not enforced.
-
 ## Where to read next
 
 | You are… | Read |
