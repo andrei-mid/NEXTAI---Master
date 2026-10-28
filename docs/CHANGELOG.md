@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-10-28: `.claude/settings.local.json` removed from git (role 2) · ACTION NEEDED
+
+**What:** a personal `.claude/settings.local.json` (`VERIFIRM_ROLE=@andrei-mid`) was committed to `main` by mistake. Anyone who pulled it was treated as role 2 by the ownership guard, so their Claude could edit any file. It's now untracked and git-ignored.
+
+**What you must do:** after pulling, git deletes your copy of that file. Recreate it with **your own** handle, `{"env": {"VERIFIRM_ROLE": "@your-handle"}}`, and restart Claude Code. Never commit it (`.gitignore` already covers it).
+
+---
+
 ## 2026-10-28: Postgres repository for the core tables (role 1)
 
 **What:** `SqlRepository` (`verifirm/persistence/repositories/sql_repository.py`) implements the whole `Repository` port. Migrations exist for `companies_*`, `runs_*`, `signals_*`, `scores_*`, `memos_*`, `audit_*`. `REPOSITORY_BACKEND=postgres` now works (`make up`, then `uv run alembic -c verifirm/persistence/alembic.ini upgrade head`).
