@@ -18,7 +18,7 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | Adapter | Kind | Status | How data gets to the server |
 |---|---|---|---|
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
-| `anaf_v9` | batch per company | **implemented** | READ `lookup` / `lookup_batch` (mirror only, key = CUI). `sync()`: 1 request per applicant. `lookup_batch` on a network adapter: 100 CUIs per request → `store_in_mirror` per CUI (for the `sweep_anaf_v9` job, still a stub). Never retries a 429. Role 2 and role 3 versions merged |
+| `anaf_v9` | batch per company + dated snapshots | **implemented** | Mirror: `CUI` = latest record, `CUI:date` = what ANAF answered for that date (past dates downloaded once, ever). `sync()`: today + the previous 12 month-ends, only what's missing, 100 entries (cui+date) per request (first sync of a company = 1 request). `lookup_batch` on a network adapter: 100 entries per request for the `sweep_anaf_v9` job (still a stub). READ: `lookup`, `history`. Never retries a 429 |
 | `anaf_efactura_registry` | per company | **implemented** | derived from the v9 mirror entry (`statusRO_e_Factura`). No call, no sync of its own |
 | `onrc_bulk` | bulk | **fixture reads only** | `company()` + `companies_at_address()` read `fixtures/` in FIXTURE_MODE. Live: reports unavailable until `ingest_onrc` (role 1) loads the tables. `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |

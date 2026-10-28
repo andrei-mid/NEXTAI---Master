@@ -249,3 +249,12 @@ def test_config_yaml_loads() -> None:
     cfg = rules.load_config()
     assert cfg.declared_gap_tolerance_pct == 10
     assert cfg.vat_cancelled_window_days == 730
+
+
+def test_vat_periods_as_a_single_object() -> None:
+    """ANAF's v9 documentation shows perioade_TVA as one object, not a list."""
+    period = {"data_inceput_ScpTVA": "2010-01-01", "data_sfarsit_ScpTVA": "2026-05-01"}
+    assert rules.check_vat_cancelled(period, TODAY) == {
+        "cancelled_on": date(2026, 5, 1),
+        "reregistered_on": None,
+    }

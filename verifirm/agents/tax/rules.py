@@ -189,13 +189,15 @@ def check_arrears(restante: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def check_vat_cancelled(
-    vat_periods: list[dict[str, Any]], today: date, window_days: int = 730
+    vat_periods: list[dict[str, Any]] | dict[str, Any], today: date, window_days: int = 730
 ) -> dict[str, Any] | None:
     """TAX-VAT-CANCELLED-01. Input: anaf_v9 inregistrare_scop_Tva.perioade_TVA.
     Brunaldo: cancelled 2025-02-01, re-registered 2025-09-15.
 
     A period's end date (data_sfarsit_ScpTVA) is a cancellation. The latest one inside the
     window wins; re-registration = the first period starting on or after it."""
+    if isinstance(vat_periods, dict):
+        vat_periods = [vat_periods]  # ANAF's documentation shows a single object, live is a list
     if not isinstance(vat_periods, list) or not all(isinstance(p, dict) for p in vat_periods):
         raise ValueError("perioade_TVA must be a list of periods")
     starts = [d for d in (_as_date(p.get("data_inceput_ScpTVA")) for p in vat_periods) if d]

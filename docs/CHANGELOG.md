@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-10-28: anaf_v9 keeps several dated snapshots per company (role 3)
+
+**What:** ANAF v9 answers "as of a date" (`data` in the request), and one request can ask the same CUI for several dates. `adapters/anaf_v9.py` now stores, per company:
+- `CUI`: the latest record (unchanged: `lookup` reads it).
+- `CUI:date`: what ANAF answered for that date. `sync()` asks for **today plus the previous 12 month-ends in ONE request** (13 entries), only the ones missing. A past date never changes, so it is downloaded once, ever. After the first sync, a company costs at most one entry per request.
+- New READ method **`history(cui, dates=None) -> Sourced[{ISO date: record | None}]`**: mirror only, never the network. In FIXTURE_MODE it has today's fixture only.
+- ANAF's limit counts **entries (cui+date)**: max 100 per request. The batch code chunks by entries.
+- `split_entries()` matches answers on `date_generale.cui` **and** `date_generale.data`, so two dates of one CUI never overwrite each other.
+- Fixed: a network `lookup` could make two requests (once through `fetch()`, once through the batch path). It's always one now (tested).
+- `tax/rules.check_vat_cancelled` accepts `perioade_TVA` as a single object too, as ANAF's documentation shows it.
+
+**What you can do with it:** name, address, CAEN and legal form **as of each month-end**, from an official source. Role 3 will use it for `ID-OFFICE-CHANGE-01` (live ONRC has no office history). Role 5 / identity sheet: `history()` can fill `names` and `office_history`.
+
+---
+
 ## 2026-10-28: Tax agent, anaf_v9, e-Factura registry and all 6 mocks implemented (role 3)
 
 **What:**
