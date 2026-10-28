@@ -1,0 +1,14 @@
+{
+  "fictional": true,
+  "cui": "99000041",
+  "proceedings": [
+    {
+      "case_no": "9001/99/2024",
+      "court": "Tribunalul Fictiv",
+      "type": "faliment",
+      "opened_on": "2024-04-15",
+      "status": "in_desfasurare",
+      "publication_no": "BPI-FICTIV-2024-0415"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "fictional": true,
+  "cui": "99000017",
+  "denumire": "AURORA SOFT LABS SRL",
+  "cod_inmatriculare": "J99/2101/2019",
+  "data_inmatriculare": "2019-05-20",
+  "forma_juridica": "SRL",
+  "stare": "functiune",
+  "adresa": "Str. Algoritmului nr. 7, Localitatea Fictivă, Județul Fictiv",
+  "judet": "Județul Fictiv",
+  "caen_principal": {
+    "cod": "6201",
+    "revizie": "rev2",
+    "denumire": "Activități de realizare a soft-ului la comandă"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "6201",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "AURORA SOFT LABS SRL",
+      "de_la": "2019-05-20",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Str. Algoritmului nr. 7, Localitatea Fictivă, Județul Fictiv",
+      "de_la": "2019-05-20",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "ANA EXEMPLESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2019-05-20",
+      "pana_la": null
+    }
+  ]
+}

@@ -1,0 +1,399 @@
+[
+  {
+    "signal_id": "FIN-REVENUE-DECLINE-01:4f3fc1a2b6d13c5d",
+    "cui": "99000033",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-REVENUE-DECLINE-01",
+    "claim": "Turnover fell from 29,100,000 RON in 2023 to 15,200,000 RON in 2025 (-48%).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "turnover": {
+        "2021": 32000000,
+        "2022": 34500000,
+        "2023": 29100000,
+        "2024": 21700000,
+        "2025": 15200000
+      },
+      "decline_pct": 47.8
+    }
+  },
+  {
+    "signal_id": "FIN-LOSS-TREND-01:b32c09e10196c931",
+    "cui": "99000033",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-LOSS-TREND-01",
+    "claim": "Net losses in 2023 (-400,000 RON), 2024 (-1,900,000 RON) and 2025 (-2,600,000 RON).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "net_profit": {
+        "2023": -400000,
+        "2024": -1900000,
+        "2025": -2600000
+      }
+    }
+  },
+  {
+    "signal_id": "FIN-DEBT-RISE-01:a91b51af9b418049",
+    "cui": "99000033",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-DEBT-RISE-01",
+    "claim": "Debts rose from 9,800,000 RON in 2021 to 19,400,000 RON in 2025 while turnover fell.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "debts": {
+        "2021": 9800000,
+        "2025": 19400000
+      },
+      "debt_to_turnover_2025": 1.28
+    }
+  },
+  {
+    "signal_id": "TAX-ARREARS-01:239efc600595d3b9",
+    "cui": "99000033",
+    "agent": "tax",
+    "component": "tax",
+    "rule_id": "TAX-ARREARS-01",
+    "claim": "The company is on the Q2 2026 ANAF arrears list with 412,560 RON principal and 96,300 RON accessories.",
+    "source": {
+      "name": "ANAF tax arrears list (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/restante.json",
+      "content_hash": "8150ac5fc8604102a6868111b8ccb87444f1c3a734b50846a415712e1e7c9f0d"
+    },
+    "evidence_date": "2026-06-30",
+    "confidence": 1.0,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "list_period": "2026-Q2",
+      "principal_ron": 412560,
+      "accessories_ron": 96300
+    }
+  },
+  {
+    "signal_id": "TAX-VAT-CANCELLED-01:047e4a12e66d563c",
+    "cui": "99000033",
+    "agent": "tax",
+    "component": "tax",
+    "rule_id": "TAX-VAT-CANCELLED-01",
+    "claim": "VAT registration was cancelled on 2025-02-01 and re-registered on 2025-09-15.",
+    "source": {
+      "name": "ANAF VAT registry v9",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/anaf_v9.json",
+      "content_hash": "34d3746fabcfb51e52996cf3969106b2b3dc2c506762e9dc34d52733a3edf846"
+    },
+    "evidence_date": "2025-02-01",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "cancelled_on": "2025-02-01",
+      "reregistered_on": "2025-09-15"
+    }
+  },
+  {
+    "signal_id": "TAX-EFACTURA-GAP-01:b622275edef1b321",
+    "cui": "99000033",
+    "agent": "tax",
+    "component": "tax",
+    "rule_id": "TAX-EFACTURA-GAP-01",
+    "claim": "2025 D300 declared sales (12,464,000 RON) are 18% below e-Factura issued invoices (15,200,000 RON).",
+    "source": {
+      "name": "D300 VAT returns (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/d300.json",
+      "content_hash": "8286c0a6d1f56e8552b1a098a3d52be883ac0e3728aa188fb6fd3bd4fb7706ce"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 0.95,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "d300_ron": 12464000,
+      "efactura_ron": 15200000,
+      "gap_pct": 18.0
+    }
+  },
+  {
+    "signal_id": "TAX-DECLARED-GAP-01:19b98b18d1349ce9",
+    "cui": "99000033",
+    "agent": "tax",
+    "component": "tax",
+    "rule_id": "TAX-DECLARED-GAP-01",
+    "claim": "Submitted 2025 net result is +300,000 RON while ANAF shows -2,600,000 RON.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000033",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/bilant_2025.json",
+      "content_hash": "c5f752426106855c7720f47c523b032482390a2b181850185e5177141dba558d"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "year": 2025,
+      "submitted": {
+        "net_profit": 300000
+      },
+      "official": {
+        "net_profit": -2600000
+      }
+    }
+  },
+  {
+    "signal_id": "LIT-INSOLVENCY-REQUEST-01:7ce34e153e38c390",
+    "cui": "99000033",
+    "agent": "litigation",
+    "component": "litigation",
+    "rule_id": "LIT-INSOLVENCY-REQUEST-01",
+    "claim": "ANAF requested the opening of insolvency in case 9101/99/2026 (first instance, next hearing 2026-11-20). The procedure is not opened.",
+    "source": {
+      "name": "Portal Just (portal.just.ro)",
+      "type": "official",
+      "url": "http://portalquery.just.ro/query.asmx",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/portal_just.xml",
+      "content_hash": "91710cacbc0697cf484cab165a6333e33ca7bdb93ca32e1b1bb37304697363ea"
+    },
+    "evidence_date": "2026-07-14",
+    "confidence": 0.9,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "name+county",
+      "score": 0.9,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "case_no": "9101/99/2026",
+      "stage": "first_instance",
+      "next_hearing": "2026-11-20",
+      "opened": false,
+      "becomes_stop_if": "LIT-INSOLVENCY-OPENED-01"
+    }
+  },
+  {
+    "signal_id": "LIT-MATERIAL-CLAIM-01:34f63dd7c9b34fe6",
+    "cui": "99000033",
+    "agent": "litigation",
+    "component": "litigation",
+    "rule_id": "LIT-MATERIAL-CLAIM-01",
+    "claim": "A supplier claims 1,800,000 RON in case 9102/99/2025, now on appeal.",
+    "source": {
+      "name": "Portal Just (portal.just.ro)",
+      "type": "official",
+      "url": "http://portalquery.just.ro/query.asmx",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/portal_just.xml",
+      "content_hash": "91710cacbc0697cf484cab165a6333e33ca7bdb93ca32e1b1bb37304697363ea"
+    },
+    "evidence_date": "2025-03-03",
+    "confidence": 0.9,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "name+county",
+      "score": 0.9,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "case_no": "9102/99/2025",
+      "claim_ron": 1800000,
+      "stage": "appeal",
+      "share_of_turnover_pct": 11.8
+    }
+  },
+  {
+    "signal_id": "LIT-MINOR-01:2d764672a74cefe1",
+    "cui": "99000033",
+    "agent": "litigation",
+    "component": "litigation",
+    "rule_id": "LIT-MINOR-01",
+    "claim": "A labour dispute is pending in case 9103/99/2025 (first instance).",
+    "source": {
+      "name": "Portal Just (portal.just.ro)",
+      "type": "official",
+      "url": "http://portalquery.just.ro/query.asmx",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/portal_just.xml",
+      "content_hash": "91710cacbc0697cf484cab165a6333e33ca7bdb93ca32e1b1bb37304697363ea"
+    },
+    "evidence_date": "2025-06-20",
+    "confidence": 0.9,
+    "severity": "low",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "name+county",
+      "score": 0.9,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "case_no": "9103/99/2025",
+      "subject": "labour"
+    }
+  },
+  {
+    "signal_id": "NET-PARTNER-INACTIVE-01:e3d7e869f215048a",
+    "cui": "99000033",
+    "agent": "network",
+    "component": "network",
+    "rule_id": "NET-PARTNER-INACTIVE-01",
+    "claim": "The sole shareholder Calbrona Holding Fictiv SRL is ANAF inactive since 2023-09-01.",
+    "source": {
+      "name": "Shareholders (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/shareholders.json",
+      "content_hash": "c7848c54029ba23998e65a8581e6aa99f4f6c88caf75ce2b2a1b110be8c225c1"
+    },
+    "evidence_date": "2023-09-01",
+    "confidence": 0.95,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "partner_cui": "99000090",
+      "share_pct": 100.0,
+      "inactive_since": "2023-09-01"
+    }
+  },
+  {
+    "signal_id": "MED-NEGATIVE-01:005996a2c2477238",
+    "cui": "99000033",
+    "agent": "media",
+    "component": "media",
+    "rule_id": "MED-NEGATIVE-01",
+    "claim": "An article published on 2026-03-03 reports that suppliers say the company has unpaid invoices.",
+    "source": {
+      "name": "Web search (Tavily)",
+      "type": "web",
+      "url": "https://ziar-inventat.example/brunaldo-datorii",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/media.json",
+      "content_hash": "f45a5aab0bf1a67d0eadd98a8973b6ead209219c51ea61322407e0dc48016de1"
+    },
+    "evidence_date": "2026-03-03",
+    "confidence": 0.6,
+    "severity": "low",
+    "validated": false,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "name_fuzzy",
+      "score": 0.8,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "url": "https://ziar-inventat.example/brunaldo-datorii",
+      "published": "2026-03-03"
+    }
+  }
+]

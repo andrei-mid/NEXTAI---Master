@@ -1,0 +1,51 @@
+{
+  "$defs": {
+    "RejectedSentence": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "reason"
+      ],
+      "title": "RejectedSentence",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "passed": {
+      "title": "Passed",
+      "type": "boolean"
+    },
+    "checked_sentences": {
+      "title": "Checked Sentences",
+      "type": "integer"
+    },
+    "rejected": {
+      "items": {
+        "$ref": "#/$defs/RejectedSentence"
+      },
+      "title": "Rejected",
+      "type": "array"
+    },
+    "verified_at": {
+      "format": "date-time",
+      "title": "Verified At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "passed",
+    "checked_sentences",
+    "verified_at"
+  ],
+  "title": "VerifierReport",
+  "type": "object"
+}

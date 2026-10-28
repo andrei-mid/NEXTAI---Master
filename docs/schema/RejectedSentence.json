@@ -1,0 +1,18 @@
+{
+  "properties": {
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "reason"
+  ],
+  "title": "RejectedSentence",
+  "type": "object"
+}

@@ -1,0 +1,195 @@
+{
+  "$defs": {
+    "ClientQuestion": {
+      "properties": {
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "reason_signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Reason Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "question",
+        "reason_signal_ids"
+      ],
+      "title": "ClientQuestion",
+      "type": "object"
+    },
+    "MemoSection": {
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/SectionKind"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "sentences": {
+          "items": {
+            "$ref": "#/$defs/MemoSentence"
+          },
+          "title": "Sentences",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "title",
+        "sentences"
+      ],
+      "title": "MemoSection",
+      "type": "object"
+    },
+    "MemoSentence": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "MemoSentence",
+      "type": "object"
+    },
+    "RejectedSentence": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "reason"
+      ],
+      "title": "RejectedSentence",
+      "type": "object"
+    },
+    "SectionKind": {
+      "enum": [
+        "summary",
+        "red_signals",
+        "yellow_signals",
+        "coverage",
+        "next_steps"
+      ],
+      "title": "SectionKind",
+      "type": "string"
+    },
+    "VerifierReport": {
+      "properties": {
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "checked_sentences": {
+          "title": "Checked Sentences",
+          "type": "integer"
+        },
+        "rejected": {
+          "items": {
+            "$ref": "#/$defs/RejectedSentence"
+          },
+          "title": "Rejected",
+          "type": "array"
+        },
+        "verified_at": {
+          "format": "date-time",
+          "title": "Verified At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "passed",
+        "checked_sentences",
+        "verified_at"
+      ],
+      "title": "VerifierReport",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/MemoSection"
+      },
+      "title": "Sections",
+      "type": "array"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/ClientQuestion"
+      },
+      "title": "Questions",
+      "type": "array"
+    },
+    "markdown": {
+      "title": "Markdown",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "verifier_report": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/VerifierReport"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "cui",
+    "run_id",
+    "sections",
+    "markdown",
+    "generated_at"
+  ],
+  "title": "Memo",
+  "type": "object"
+}

@@ -1,0 +1,50 @@
+{
+  "fictional": true,
+  "cui": "99000025",
+  "denumire": "ZEPHYRIA LOGISTIC NOVA SRL",
+  "cod_inmatriculare": "J99/1234/2021",
+  "data_inmatriculare": "2021-03-15",
+  "forma_juridica": "SRL",
+  "stare": "functiune",
+  "adresa": "Str. Exemplului nr. 1, Sector 9, București",
+  "judet": "București",
+  "caen_principal": {
+    "cod": "4941",
+    "revizie": "rev2",
+    "denumire": "Transporturi rutiere de mărfuri"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "4941",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "ZEPHYRIA LOGISTIC NOVA SRL",
+      "de_la": "2021-03-15",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Str. Exemplului nr. 1, Sector 9, București",
+      "de_la": "2021-03-15",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "MARCELA INVENTATU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2021-03-15",
+      "pana_la": "2025-11-02"
+    },
+    {
+      "nume": "IONEL FICTIVESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2025-11-02",
+      "pana_la": null
+    }
+  ]
+}

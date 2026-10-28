@@ -1,0 +1,28 @@
+{
+  "fictional": true,
+  "cui": "99000025",
+  "years": [
+    {
+      "year": 2025,
+      "turnover": 25400000,
+      "net_profit": 1200000,
+      "total_debts": null,
+      "equity": null,
+      "share_capital": null,
+      "employees": 14,
+      "extra": {},
+      "source": {
+        "name": "Documents submitted by the applicant",
+        "type": "submitted",
+        "url": null,
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/submitted/financials.json",
+        "content_hash": null
+      }
+    }
+  ],
+  "document_names": [
+    "situatii_financiare_2025_zephyria_logistic_nova.pdf"
+  ],
+  "extracted_at": "2026-10-28T08:00:00Z"
+}

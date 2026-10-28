@@ -1,0 +1,43 @@
+{
+  "markdown": "## Summary\n\nBRUNALDO TRADE IMPEX SRL (fictional) scores 64.8 (RED) with 8/8 sources available. High signals appear in tax and litigation. The band is not STOP: the insolvency procedure is requested, not opened.\n\n## Red signals\n\n- ANAF requested insolvency in case 9101/99/2026 (first instance, next hearing 2026-11-20). If the procedure is opened, the band becomes STOP. [LIT-INSOLVENCY-REQUEST-01]\n- On the Q2 2026 ANAF arrears list: 412,560 RON principal and 96,300 RON accessories. [TAX-ARREARS-01] (MOCK source)\n- Submitted 2025 net result +300,000 RON vs -2,600,000 RON at ANAF. [TAX-DECLARED-GAP-01]\n- Supplier claim of 1,800,000 RON on appeal in case 9102/99/2025. [LIT-MATERIAL-CLAIM-01]\n\n## Yellow signals\n\n- Turnover fell from 29,100,000 RON (2023) to 15,200,000 RON (2025), with losses in 2023-2025 and debts up to 19,400,000 RON. [FIN-REVENUE-DECLINE-01, FIN-LOSS-TREND-01, FIN-DEBT-RISE-01]\n- VAT cancelled on 2025-02-01, re-registered on 2025-09-15. D300 is 18% below e-Factura. [TAX-VAT-CANCELLED-01, TAX-EFACTURA-GAP-01]\n- Sole shareholder Calbrona Holding Fictiv SRL is ANAF inactive. [NET-PARTNER-INACTIVE-01]\n- Labour dispute pending (case 9103/99/2025). [LIT-MINOR-01]\n- **Unvalidated:** an article published on 2026-03-03 reports unpaid suppliers. [MED-NEGATIVE-01]\n\n## Coverage\n\nAll 8 agents completed. MOCK sources used: tax arrears list, D300, e-Factura, BPI, shareholders.\n",
+  "questions": [
+    {
+      "question": "Please provide a current tax compliance certificate (certificat de atestare fiscală).",
+      "reason_signal_ids": [
+        "TAX-ARREARS-01:239efc600595d3b9"
+      ]
+    },
+    {
+      "question": "What is your position in insolvency case 9101/99/2026, and is a payment schedule agreed with ANAF?",
+      "reason_signal_ids": [
+        "TAX-ARREARS-01:239efc600595d3b9",
+        "LIT-INSOLVENCY-REQUEST-01:7ce34e153e38c390"
+      ]
+    },
+    {
+      "question": "Please explain the submitted 2025 profit of +300,000 RON versus the -2,600,000 RON loss filed with ANAF.",
+      "reason_signal_ids": [
+        "TAX-DECLARED-GAP-01:19b98b18d1349ce9"
+      ]
+    },
+    {
+      "question": "Why was the VAT registration cancelled in February 2025?",
+      "reason_signal_ids": [
+        "TAX-VAT-CANCELLED-01:047e4a12e66d563c"
+      ]
+    },
+    {
+      "question": "How will the 1,800,000 RON supplier claim be covered if the appeal is lost?",
+      "reason_signal_ids": [
+        "LIT-MATERIAL-CLAIM-01:34f63dd7c9b34fe6"
+      ]
+    }
+  ],
+  "generated_at": "2026-10-28T08:00:00Z",
+  "verifier_report": {
+    "passed": true,
+    "checked_sentences": 11,
+    "rejected": [],
+    "verified_at": "2026-10-28T08:00:00Z"
+  }
+}

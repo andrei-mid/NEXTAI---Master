@@ -1,0 +1,83 @@
+{
+  "fictional": true,
+  "found": [
+    {
+      "date_generale": {
+        "cui": 99000066,
+        "data": "2026-10-28",
+        "denumire": "PELINOR CONSTRUCT GRUP SRL",
+        "adresa": "Str. Schelei nr. 8, Sector 9, București",
+        "nrRegCom": "J99/3003/2020",
+        "telefon": "",
+        "fax": "",
+        "codPostal": "",
+        "act": "",
+        "stare_inregistrare": "INREGISTRAT din data 2020-01-10",
+        "data_inregistrare": "2020-01-10",
+        "cod_CAEN": "4120",
+        "iban": "",
+        "statusRO_e_Factura": true,
+        "organFiscalCompetent": "Administrația Fiscală Fictivă",
+        "forma_de_proprietate": "PROPR.PRIVATA-CAPITAL PRIVAT AUTOHTON",
+        "forma_organizare": "PERSOANA JURIDICA",
+        "forma_juridica": "SOCIETATE COMERCIALĂ CU RĂSPUNDERE LIMITATĂ"
+      },
+      "inregistrare_scop_Tva": {
+        "scpTVA": true,
+        "perioade_TVA": [
+          {
+            "data_inceput_ScpTVA": "2020-01-10",
+            "data_sfarsit_ScpTVA": "",
+            "data_anul_imp_ScpTVA": "",
+            "mesaj_ScpTVA": ""
+          }
+        ]
+      },
+      "inregistrare_RTVAI": {
+        "dataInceputTvaInc": "",
+        "dataSfarsitTvaInc": "",
+        "dataActualizareTvaInc": "",
+        "dataPublicareTvaInc": "",
+        "tipActTvaInc": "",
+        "statusTvaIncasare": false
+      },
+      "stare_inactiv": {
+        "dataInactivare": "",
+        "dataReactivare": "",
+        "dataPublicare": "",
+        "dataRadiere": "",
+        "statusInactivi": false
+      },
+      "inregistrare_SplitTVA": {
+        "dataInceputSplitTVA": "",
+        "dataAnulareSplitTVA": "",
+        "statusSplitTVA": false
+      },
+      "adresa_sediu_social": {
+        "sdenumire_Strada": "Str. Schelei nr. 8",
+        "snumar_Strada": "",
+        "sdenumire_Localitate": "",
+        "scod_Localitate": "",
+        "sdenumire_Judet": "București",
+        "scod_Judet": "99",
+        "scod_JudetAuto": "FI",
+        "stara": "",
+        "sdetalii_Adresa": "",
+        "scod_Postal": ""
+      },
+      "adresa_domiciliu_fiscal": {
+        "ddenumire_Strada": "Str. Schelei nr. 8",
+        "dnumar_Strada": "",
+        "ddenumire_Localitate": "",
+        "dcod_Localitate": "",
+        "ddenumire_Judet": "București",
+        "dcod_Judet": "99",
+        "dcod_JudetAuto": "FI",
+        "dtara": "",
+        "ddetalii_Adresa": "",
+        "dcod_Postal": ""
+      }
+    }
+  ],
+  "notFound": []
+}

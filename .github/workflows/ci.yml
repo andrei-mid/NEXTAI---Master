@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17  # same major version as RDS (D5)
+        env:
+          POSTGRES_USER: verifirm
+          POSTGRES_PASSWORD: verifirm
+          POSTGRES_DB: verifirm
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U verifirm -d verifirm"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      FIXTURE_MODE: "1"
+      LLM_PROVIDER: fake
+      DATABASE_URL: postgresql+asyncpg://verifirm:verifirm@localhost:5432/verifirm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --locked
+      - run: make lint
+      - run: make typecheck
+      - run: make fixtures-check
+      - run: make test

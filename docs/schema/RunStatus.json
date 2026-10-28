@@ -1,0 +1,95 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "RunState": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "failed",
+        "rejected"
+      ],
+      "title": "RunState",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/RunState"
+    },
+    "started_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Started At"
+    },
+    "finished_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finished At"
+    },
+    "band": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Band"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    }
+  },
+  "required": [
+    "run_id",
+    "cui",
+    "state"
+  ],
+  "title": "RunStatus",
+  "type": "object"
+}

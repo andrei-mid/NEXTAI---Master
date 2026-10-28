@@ -1,0 +1,110 @@
+{
+  "fictional": true,
+  "an": 2024,
+  "cui": 99000017,
+  "deni": "AURORA SOFT LABS SRL",
+  "caen": 6201,
+  "den_caen": "Activități de realizare a soft-ului la comandă",
+  "i": [
+    {
+      "indicator": "I1",
+      "val_indicator": 312000,
+      "val_den_indicator": "Active imobilizate - total"
+    },
+    {
+      "indicator": "I2",
+      "val_indicator": 2428000,
+      "val_den_indicator": "Active circulante - total, din care"
+    },
+    {
+      "indicator": "I3",
+      "val_indicator": 195000,
+      "val_den_indicator": "Stocuri (materii prime, materiale, productie in curs de executie, semifabricate, produse finite, marfuri etc.)"
+    },
+    {
+      "indicator": "I4",
+      "val_indicator": 780000,
+      "val_den_indicator": "Creante"
+    },
+    {
+      "indicator": "I5",
+      "val_indicator": 117000,
+      "val_den_indicator": "Casa si conturi la banci"
+    },
+    {
+      "indicator": "I6",
+      "val_indicator": 0,
+      "val_den_indicator": "Cheltuieli in avans"
+    },
+    {
+      "indicator": "I7",
+      "val_indicator": 420000,
+      "val_den_indicator": "Datorii"
+    },
+    {
+      "indicator": "I8",
+      "val_indicator": 0,
+      "val_den_indicator": "Venituri in avans"
+    },
+    {
+      "indicator": "I9",
+      "val_indicator": 0,
+      "val_den_indicator": "Provizioane"
+    },
+    {
+      "indicator": "I10",
+      "val_indicator": 2320000,
+      "val_den_indicator": "Capitaluri - total, din care:"
+    },
+    {
+      "indicator": "I11",
+      "val_indicator": 5000,
+      "val_den_indicator": "Capital subscris varsat"
+    },
+    {
+      "indicator": "I12",
+      "val_indicator": 0,
+      "val_den_indicator": "Patrimoniul regiei"
+    },
+    {
+      "indicator": "I13",
+      "val_indicator": 3900000,
+      "val_den_indicator": "Cifra de afaceri neta"
+    },
+    {
+      "indicator": "I14",
+      "val_indicator": 3939000,
+      "val_den_indicator": "VENITURI TOTALE"
+    },
+    {
+      "indicator": "I15",
+      "val_indicator": 3289400,
+      "val_den_indicator": "CHELTUIELI TOTALE"
+    },
+    {
+      "indicator": "I16",
+      "val_indicator": 649600,
+      "val_den_indicator": "Profit brut"
+    },
+    {
+      "indicator": "I17",
+      "val_indicator": 0,
+      "val_den_indicator": "Pierdere bruta"
+    },
+    {
+      "indicator": "I18",
+      "val_indicator": 560000,
+      "val_den_indicator": "Profit net"
+    },
+    {
+      "indicator": "I19",
+      "val_indicator": 0,
+      "val_den_indicator": "Pierdere neta"
+    },
+    {
+      "indicator": "I20",
+      "val_indicator": 31,
+      "val_den_indicator": "Numar mediu de salariati"
+    }
+  ]
+}

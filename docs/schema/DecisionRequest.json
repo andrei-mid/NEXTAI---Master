@@ -1,0 +1,35 @@
+{
+  "$defs": {
+    "DecisionKind": {
+      "enum": [
+        "approve",
+        "reject",
+        "escalate",
+        "request_info"
+      ],
+      "title": "DecisionKind",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "decision": {
+      "$ref": "#/$defs/DecisionKind"
+    },
+    "comment": {
+      "minLength": 1,
+      "title": "Comment",
+      "type": "string"
+    },
+    "analyst": {
+      "title": "Analyst",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision",
+    "comment",
+    "analyst"
+  ],
+  "title": "DecisionRequest",
+  "type": "object"
+}

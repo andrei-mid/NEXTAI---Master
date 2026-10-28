@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "fixture_mode": {
+      "title": "Fixture Mode",
+      "type": "boolean"
+    },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "fixture_mode",
+    "version"
+  ],
+  "title": "Health",
+  "type": "object"
+}

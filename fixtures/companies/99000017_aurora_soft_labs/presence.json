@@ -1,0 +1,21 @@
+{
+  "fictional": true,
+  "website": {
+    "url": "https://aurora-soft-labs.example",
+    "address_on_site": "Str. Algoritmului nr. 7, Localitatea Fictivă, Județul Fictiv"
+  },
+  "jobs": [
+    {
+      "title": "Dezvoltator Python",
+      "url": "https://joburi-fictive.example/aurora/1",
+      "posted": "2026-09-30"
+    },
+    {
+      "title": "QA Engineer",
+      "url": "https://joburi-fictive.example/aurora/2",
+      "posted": "2026-10-12"
+    }
+  ],
+  "seap": [],
+  "kohesio": []
+}

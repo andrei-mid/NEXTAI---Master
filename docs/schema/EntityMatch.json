@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "method": {
+      "title": "Method",
+      "type": "string"
+    },
+    "score": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Score",
+      "type": "number"
+    },
+    "ambiguous": {
+      "default": false,
+      "title": "Ambiguous",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "method",
+    "score"
+  ],
+  "title": "EntityMatch",
+  "type": "object"
+}

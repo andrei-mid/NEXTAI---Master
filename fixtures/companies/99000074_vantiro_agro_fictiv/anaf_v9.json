@@ -1,0 +1,83 @@
+{
+  "fictional": true,
+  "found": [
+    {
+      "date_generale": {
+        "cui": 99000074,
+        "data": "2026-10-28",
+        "denumire": "VANTIRO AGRO FICTIV SRL",
+        "adresa": "Sat Câmpul Fictiv nr. 12, Județul Fictiv",
+        "nrRegCom": "J99/3004/2019",
+        "telefon": "",
+        "fax": "",
+        "codPostal": "",
+        "act": "",
+        "stare_inregistrare": "INREGISTRAT din data 2019-03-03",
+        "data_inregistrare": "2019-03-03",
+        "cod_CAEN": "0111",
+        "iban": "",
+        "statusRO_e_Factura": true,
+        "organFiscalCompetent": "Administrația Fiscală Fictivă",
+        "forma_de_proprietate": "PROPR.PRIVATA-CAPITAL PRIVAT AUTOHTON",
+        "forma_organizare": "PERSOANA JURIDICA",
+        "forma_juridica": "SOCIETATE COMERCIALĂ CU RĂSPUNDERE LIMITATĂ"
+      },
+      "inregistrare_scop_Tva": {
+        "scpTVA": false,
+        "perioade_TVA": [
+          {
+            "data_inceput_ScpTVA": "2019-03-03",
+            "data_sfarsit_ScpTVA": "",
+            "data_anul_imp_ScpTVA": "",
+            "mesaj_ScpTVA": ""
+          }
+        ]
+      },
+      "inregistrare_RTVAI": {
+        "dataInceputTvaInc": "",
+        "dataSfarsitTvaInc": "",
+        "dataActualizareTvaInc": "",
+        "dataPublicareTvaInc": "",
+        "tipActTvaInc": "",
+        "statusTvaIncasare": false
+      },
+      "stare_inactiv": {
+        "dataInactivare": "2024-06-01",
+        "dataReactivare": "",
+        "dataPublicare": "2024-06-01",
+        "dataRadiere": "",
+        "statusInactivi": true
+      },
+      "inregistrare_SplitTVA": {
+        "dataInceputSplitTVA": "",
+        "dataAnulareSplitTVA": "",
+        "statusSplitTVA": false
+      },
+      "adresa_sediu_social": {
+        "sdenumire_Strada": "Sat Câmpul Fictiv nr. 12",
+        "snumar_Strada": "",
+        "sdenumire_Localitate": "",
+        "scod_Localitate": "",
+        "sdenumire_Judet": "Județul Fictiv",
+        "scod_Judet": "99",
+        "scod_JudetAuto": "FI",
+        "stara": "",
+        "sdetalii_Adresa": "",
+        "scod_Postal": ""
+      },
+      "adresa_domiciliu_fiscal": {
+        "ddenumire_Strada": "Sat Câmpul Fictiv nr. 12",
+        "dnumar_Strada": "",
+        "ddenumire_Localitate": "",
+        "dcod_Localitate": "",
+        "ddenumire_Judet": "Județul Fictiv",
+        "dcod_Judet": "99",
+        "dcod_JudetAuto": "FI",
+        "dtara": "",
+        "ddetalii_Adresa": "",
+        "dcod_Postal": ""
+      }
+    }
+  ],
+  "notFound": []
+}

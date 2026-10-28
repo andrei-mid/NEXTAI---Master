@@ -1,0 +1,282 @@
+{
+  "$defs": {
+    "AgentStatus": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "timeout",
+        "skipped"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "EntityMatch": {
+      "properties": {
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Score",
+          "type": "number"
+        },
+        "ambiguous": {
+          "default": false,
+          "title": "Ambiguous",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "method",
+        "score"
+      ],
+      "title": "EntityMatch",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "Signal": {
+      "properties": {
+        "signal_id": {
+          "title": "Signal Id",
+          "type": "string"
+        },
+        "cui": {
+          "title": "Cui",
+          "type": "string"
+        },
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "component": {
+          "$ref": "#/$defs/Component"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        },
+        "evidence_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence Date"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "validated": {
+          "default": true,
+          "title": "Validated",
+          "type": "boolean"
+        },
+        "auto_stop_candidate": {
+          "default": false,
+          "title": "Auto Stop Candidate",
+          "type": "boolean"
+        },
+        "entity_match": {
+          "$ref": "#/$defs/EntityMatch"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        }
+      },
+      "required": [
+        "signal_id",
+        "cui",
+        "agent",
+        "component",
+        "rule_id",
+        "claim",
+        "source",
+        "evidence_date",
+        "confidence",
+        "severity",
+        "entity_match"
+      ],
+      "title": "Signal",
+      "type": "object"
+    },
+    "SourceRef": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "retrieved_at"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "official",
+        "aggregator",
+        "web",
+        "mock",
+        "submitted"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "agent": {
+      "title": "Agent",
+      "type": "string"
+    },
+    "component": {
+      "$ref": "#/$defs/Component"
+    },
+    "status": {
+      "$ref": "#/$defs/AgentStatus"
+    },
+    "sources_checked": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Sources Checked",
+      "type": "array"
+    },
+    "sources_failed": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Sources Failed",
+      "type": "array"
+    },
+    "signals": {
+      "items": {
+        "$ref": "#/$defs/Signal"
+      },
+      "title": "Signals",
+      "type": "array"
+    },
+    "duration_ms": {
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "agent",
+    "component",
+    "status",
+    "sources_checked",
+    "sources_failed",
+    "signals",
+    "duration_ms"
+  ],
+  "title": "AgentResult",
+  "type": "object"
+}

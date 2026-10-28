@@ -1,0 +1,279 @@
+{
+  "identity_sheet": {
+    "cui": "99000025",
+    "fictional": true,
+    "trade_register_no": "J99/1234/2021",
+    "current_name": "ZEPHYRIA LOGISTIC NOVA SRL",
+    "names": [
+      {
+        "name": "ZEPHYRIA LOGISTIC NOVA SRL",
+        "valid_from": "2021-03-15",
+        "valid_to": null
+      }
+    ],
+    "legal_form": "SRL",
+    "status": "active",
+    "registration_date": "2021-03-15",
+    "registered_office": {
+      "raw": "Str. Exemplului nr. 1, Sector 9, București",
+      "county": "București",
+      "locality": null,
+      "street": null,
+      "number": null,
+      "postal_code": null,
+      "valid_from": "2021-03-15",
+      "valid_to": null
+    },
+    "office_history": [
+      {
+        "raw": "Str. Exemplului nr. 1, Sector 9, București",
+        "county": "București",
+        "locality": null,
+        "street": null,
+        "number": null,
+        "postal_code": null,
+        "valid_from": "2021-03-15",
+        "valid_to": null
+      }
+    ],
+    "caen_code": "4941",
+    "caen_revision": "rev2",
+    "authorized_caen_codes": [
+      "4941"
+    ],
+    "administrators": [
+      {
+        "name": "MARCELA INVENTATU",
+        "role": "administrator",
+        "is_company": false,
+        "cui": null,
+        "share_pct": null,
+        "valid_from": "2021-03-15",
+        "valid_to": "2025-11-02",
+        "source": {
+          "name": "ONRC open data (data.gov.ro)",
+          "type": "official",
+          "url": null,
+          "retrieved_at": "2026-10-28T08:00:00Z",
+          "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+          "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+        }
+      },
+      {
+        "name": "IONEL FICTIVESCU",
+        "role": "administrator",
+        "is_company": false,
+        "cui": null,
+        "share_pct": null,
+        "valid_from": "2025-11-02",
+        "valid_to": null,
+        "source": {
+          "name": "ONRC open data (data.gov.ro)",
+          "type": "official",
+          "url": null,
+          "retrieved_at": "2026-10-28T08:00:00Z",
+          "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+          "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+        }
+      }
+    ],
+    "shareholders": [
+      {
+        "name": "CALBRONA HOLDING FICTIV SRL",
+        "role": "shareholder",
+        "is_company": true,
+        "cui": "99000090",
+        "share_pct": 100.0,
+        "valid_from": "2021-03-15",
+        "valid_to": null,
+        "source": {
+          "name": "Shareholders (MOCK)",
+          "type": "mock",
+          "url": null,
+          "retrieved_at": "2026-10-28T08:00:00Z",
+          "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/shareholders.json",
+          "content_hash": "ca3f38b21e0086409d685058705c191a9885b0725c557592e1efbaee3e9bf473"
+        }
+      }
+    ],
+    "vat_registered": true,
+    "anaf_inactive": false,
+    "sources": [
+      {
+        "name": "ANAF VAT registry v9",
+        "type": "official",
+        "url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/anaf_v9.json",
+        "content_hash": "ffd87bd6eabe18e2bdd31477d0261338fc289043745eb10fa7f0d5255a52a9f6"
+      },
+      {
+        "name": "ONRC open data (data.gov.ro)",
+        "type": "official",
+        "url": null,
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+        "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+      }
+    ]
+  },
+  "score": 61.7,
+  "band": "red",
+  "components": [
+    {
+      "component": "identity",
+      "status": "ok",
+      "available": true,
+      "score": 70.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": [
+        "ID-ADMIN-CHANGE-01:d3ec8d35fc9bcfb1",
+        "ID-SHARED-OFFICE-01:d4ced78be89b57c4"
+      ]
+    },
+    {
+      "component": "financials",
+      "status": "ok",
+      "available": true,
+      "score": 20.0,
+      "weight": 20.0,
+      "effective_weight": 0.2,
+      "signal_ids": [
+        "FIN-REVENUE-JUMP-01:581dddaa7e01cb79",
+        "FIN-DEBT-RISE-01:f996f2247e915581",
+        "FIN-HEADCOUNT-01:b511b27b071a9b0c",
+        "FIN-NET-ASSETS-01:e04749ef823bb549"
+      ]
+    },
+    {
+      "component": "tax",
+      "status": "ok",
+      "available": true,
+      "score": 65.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": [
+        "TAX-DECLARED-GAP-01:f09bcd9990a5267f"
+      ]
+    },
+    {
+      "component": "litigation",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": []
+    },
+    {
+      "component": "network",
+      "status": "ok",
+      "available": true,
+      "score": 22.6,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": [
+        "NET-SERIAL-ADMIN-01:c3fe6669a9b1742f",
+        "NET-CIRCULAR-INVOICE-01:d2b11638d32fcf92",
+        "NET-PARTNER-INACTIVE-01:afa50b8bfa5181b8"
+      ]
+    },
+    {
+      "component": "sanctions",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 10.0,
+      "effective_weight": 0.1,
+      "signal_ids": []
+    },
+    {
+      "component": "media",
+      "status": "ok",
+      "available": true,
+      "score": 93.7,
+      "weight": 5.0,
+      "effective_weight": 0.05,
+      "signal_ids": [
+        "MED-ADVERSE-01:ffd43ed83858c2c7"
+      ]
+    },
+    {
+      "component": "presence",
+      "status": "ok",
+      "available": true,
+      "score": 88.0,
+      "weight": 5.0,
+      "effective_weight": 0.05,
+      "signal_ids": [
+        "PRE-NO-FOOTPRINT-01:10ef127cd631f2e3"
+      ]
+    }
+  ],
+  "coverage": {
+    "weight_pct": 100.0,
+    "available": 8,
+    "total": 8,
+    "missing": []
+  },
+  "sources": [
+    {
+      "name": "ANAF VAT registry v9",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/anaf_v9.json",
+      "content_hash": "ffd87bd6eabe18e2bdd31477d0261338fc289043745eb10fa7f0d5255a52a9f6"
+    },
+    {
+      "name": "ONRC open data (data.gov.ro)",
+      "type": "official",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+      "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+    },
+    {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    {
+      "name": "RO e-Factura invoices (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/efactura.json",
+      "content_hash": "570218478af06732e30e2499c18d7535b44e9ceb7c358d3b15892986195dc868"
+    },
+    {
+      "name": "Shareholders (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/shareholders.json",
+      "content_hash": "ca3f38b21e0086409d685058705c191a9885b0725c557592e1efbaee3e9bf473"
+    },
+    {
+      "name": "Web search (Tavily)",
+      "type": "web",
+      "url": "https://stiri-fictive.example/2026/04/perchezitii-transport",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/media.json",
+      "content_hash": "bac9ee799fe4f3b79e840f83af458e5ef2dbb16e71f210783e117ed716a38145"
+    },
+    {
+      "name": "Public footprint (web, SEAP, Kohesio)",
+      "type": "web",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/presence.json",
+      "content_hash": "dfb5f3fd7973bd981faeff917aefb17fd1962475e5644c2e769057c0c5edd746"
+    }
+  ],
+  "last_checked": "2026-10-28T08:00:00Z"
+}

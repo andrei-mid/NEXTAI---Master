@@ -1,0 +1,124 @@
+{
+  "nodes": [
+    {
+      "id": "company:99000025",
+      "type": "company",
+      "label": "ZEPHYRIA LOGISTIC NOVA SRL",
+      "status": "active",
+      "fictional": true
+    },
+    {
+      "id": "person:marcela-inventatu",
+      "type": "person",
+      "label": "MARCELA INVENTATU",
+      "status": null,
+      "fictional": true
+    },
+    {
+      "id": "person:ionel-fictivescu",
+      "type": "person",
+      "label": "IONEL FICTIVESCU",
+      "status": null,
+      "fictional": true
+    },
+    {
+      "id": "company:99000090",
+      "type": "company",
+      "label": "CALBRONA HOLDING FICTIV SRL",
+      "status": "inactive_anaf",
+      "fictional": true
+    },
+    {
+      "id": "company:99000041",
+      "type": "company",
+      "label": "KESTREL FICTIV TRANSPORT SRL",
+      "status": "bankruptcy",
+      "fictional": true
+    },
+    {
+      "id": "company:99000058",
+      "type": "company",
+      "label": "ORVANTO DISTRIBUTIE SRL",
+      "status": "deregistered",
+      "fictional": true
+    },
+    {
+      "id": "company:99000066",
+      "type": "company",
+      "label": "PELINOR CONSTRUCT GRUP SRL",
+      "status": "insolvency",
+      "fictional": true
+    },
+    {
+      "id": "company:99000074",
+      "type": "company",
+      "label": "VANTIRO AGRO FICTIV SRL",
+      "status": "inactive_anaf",
+      "fictional": true
+    },
+    {
+      "id": "company:99000082",
+      "type": "company",
+      "label": "MIRELDA SERVICII IMAGINARE SRL",
+      "status": "active",
+      "fictional": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "person:marcela-inventatu",
+      "target": "company:99000025",
+      "role": "former_administrator"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000025",
+      "role": "administrator"
+    },
+    {
+      "source": "company:99000090",
+      "target": "company:99000025",
+      "role": "shareholder"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000041",
+      "role": "administrator"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000058",
+      "role": "former_administrator"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000066",
+      "role": "administrator"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000074",
+      "role": "administrator"
+    },
+    {
+      "source": "person:ionel-fictivescu",
+      "target": "company:99000082",
+      "role": "administrator"
+    },
+    {
+      "source": "company:99000025",
+      "target": "company:99000082",
+      "role": "invoices"
+    },
+    {
+      "source": "company:99000082",
+      "target": "company:99000041",
+      "role": "invoices"
+    },
+    {
+      "source": "company:99000041",
+      "target": "company:99000025",
+      "role": "invoices"
+    }
+  ]
+}

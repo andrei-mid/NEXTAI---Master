@@ -1,0 +1,14 @@
+{
+  "fictional": true,
+  "cui": "99000066",
+  "proceedings": [
+    {
+      "case_no": "9002/99/2025",
+      "court": "Tribunalul Fictiv",
+      "type": "insolventa",
+      "opened_on": "2025-05-06",
+      "status": "in_desfasurare",
+      "publication_no": "BPI-FICTIV-2025-0506"
+    }
+  ]
+}

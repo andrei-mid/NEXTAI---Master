@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "MemoSentence": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "MemoSentence",
+      "type": "object"
+    },
+    "SectionKind": {
+      "enum": [
+        "summary",
+        "red_signals",
+        "yellow_signals",
+        "coverage",
+        "next_steps"
+      ],
+      "title": "SectionKind",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "kind": {
+      "$ref": "#/$defs/SectionKind"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "sentences": {
+      "items": {
+        "$ref": "#/$defs/MemoSentence"
+      },
+      "title": "Sentences",
+      "type": "array"
+    }
+  },
+  "required": [
+    "kind",
+    "title",
+    "sentences"
+  ],
+  "title": "MemoSection",
+  "type": "object"
+}

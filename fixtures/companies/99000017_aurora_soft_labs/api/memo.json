@@ -1,0 +1,11 @@
+{
+  "markdown": "## Summary\n\nAURORA SOFT LABS SRL (fictional) scores 100.0 (GREEN) with 8/8 sources available. No signals were raised.\n\n## Coverage\n\nAll 8 agents completed. MOCK sources used: tax arrears list, D300, e-Factura, shareholders.\n",
+  "questions": [],
+  "generated_at": "2026-10-28T08:00:00Z",
+  "verifier_report": {
+    "passed": true,
+    "checked_sentences": 2,
+    "rejected": [],
+    "verified_at": "2026-10-28T08:00:00Z"
+  }
+}

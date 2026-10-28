@@ -1,0 +1,202 @@
+{
+  "$defs": {
+    "AgentStatus": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "timeout",
+        "skipped"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "ComponentScore": {
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/Component"
+        },
+        "status": {
+          "$ref": "#/$defs/AgentStatus"
+        },
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "weight": {
+          "minimum": 0,
+          "title": "Weight",
+          "type": "number"
+        },
+        "effective_weight": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Effective Weight",
+          "type": "number"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component",
+        "status",
+        "available",
+        "weight"
+      ],
+      "title": "ComponentScore",
+      "type": "object"
+    },
+    "Coverage": {
+      "properties": {
+        "weight_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight Pct",
+          "type": "number"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "weight_pct",
+        "available",
+        "total"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "trust_score": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Trust Score"
+    },
+    "band": {
+      "$ref": "#/$defs/Band"
+    },
+    "band_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Band Reasons",
+      "type": "array"
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/ComponentScore"
+      },
+      "title": "Components",
+      "type": "array"
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage"
+    },
+    "auto_stop_signal_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Auto Stop Signal Ids",
+      "type": "array"
+    },
+    "natural_person_flow": {
+      "default": false,
+      "title": "Natural Person Flow",
+      "type": "boolean"
+    },
+    "config_version": {
+      "title": "Config Version",
+      "type": "string"
+    },
+    "computed_at": {
+      "format": "date-time",
+      "title": "Computed At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "cui",
+    "run_id",
+    "band",
+    "components",
+    "coverage",
+    "config_version",
+    "computed_at"
+  ],
+  "title": "Score",
+  "type": "object"
+}

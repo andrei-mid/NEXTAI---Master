@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "query": "ZEPHYRIA LOGISTIC NOVA SRL Ionel Fictivescu",
+  "results": [
+    {
+      "title": "Percheziții la firme de transport conduse de Ionel Fictivescu",
+      "url": "https://stiri-fictive.example/2026/04/perchezitii-transport",
+      "content": "Anchetatorii au efectuat percheziții la mai multe firme de transport administrate de Ionel Fictivescu, într-un dosar privind o posibilă evaziune fiscală. (articol fictiv)",
+      "score": 0.81,
+      "published_date": "2026-04-12"
+    }
+  ]
+}

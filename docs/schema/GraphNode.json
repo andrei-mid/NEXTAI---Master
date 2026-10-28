@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "NodeType": {
+      "enum": [
+        "company",
+        "person"
+      ],
+      "title": "NodeType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "$ref": "#/$defs/NodeType"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Status"
+    },
+    "fictional": {
+      "default": false,
+      "title": "Fictional",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "label"
+  ],
+  "title": "GraphNode",
+  "type": "object"
+}

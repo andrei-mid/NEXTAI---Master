@@ -1,0 +1,110 @@
+{
+  "fictional": true,
+  "an": 2022,
+  "cui": 99000025,
+  "deni": "ZEPHYRIA LOGISTIC NOVA SRL",
+  "caen": 4941,
+  "den_caen": "Transporturi rutiere de mărfuri",
+  "i": [
+    {
+      "indicator": "I1",
+      "val_indicator": 32800,
+      "val_den_indicator": "Active imobilizate - total"
+    },
+    {
+      "indicator": "I2",
+      "val_indicator": 156200,
+      "val_den_indicator": "Active circulante - total, din care"
+    },
+    {
+      "indicator": "I3",
+      "val_indicator": 20500,
+      "val_den_indicator": "Stocuri (materii prime, materiale, productie in curs de executie, semifabricate, produse finite, marfuri etc.)"
+    },
+    {
+      "indicator": "I4",
+      "val_indicator": 82000,
+      "val_den_indicator": "Creante"
+    },
+    {
+      "indicator": "I5",
+      "val_indicator": 12300,
+      "val_den_indicator": "Casa si conturi la banci"
+    },
+    {
+      "indicator": "I6",
+      "val_indicator": 0,
+      "val_den_indicator": "Cheltuieli in avans"
+    },
+    {
+      "indicator": "I7",
+      "val_indicator": 150000,
+      "val_den_indicator": "Datorii"
+    },
+    {
+      "indicator": "I8",
+      "val_indicator": 0,
+      "val_den_indicator": "Venituri in avans"
+    },
+    {
+      "indicator": "I9",
+      "val_indicator": 0,
+      "val_den_indicator": "Provizioane"
+    },
+    {
+      "indicator": "I10",
+      "val_indicator": 39000,
+      "val_den_indicator": "Capitaluri - total, din care:"
+    },
+    {
+      "indicator": "I11",
+      "val_indicator": 200,
+      "val_den_indicator": "Capital subscris varsat"
+    },
+    {
+      "indicator": "I12",
+      "val_indicator": 0,
+      "val_den_indicator": "Patrimoniul regiei"
+    },
+    {
+      "indicator": "I13",
+      "val_indicator": 410000,
+      "val_den_indicator": "Cifra de afaceri neta"
+    },
+    {
+      "indicator": "I14",
+      "val_indicator": 414100,
+      "val_den_indicator": "VENITURI TOTALE"
+    },
+    {
+      "indicator": "I15",
+      "val_indicator": 385100,
+      "val_den_indicator": "CHELTUIELI TOTALE"
+    },
+    {
+      "indicator": "I16",
+      "val_indicator": 29000,
+      "val_den_indicator": "Profit brut"
+    },
+    {
+      "indicator": "I17",
+      "val_indicator": 0,
+      "val_den_indicator": "Pierdere bruta"
+    },
+    {
+      "indicator": "I18",
+      "val_indicator": 25000,
+      "val_den_indicator": "Profit net"
+    },
+    {
+      "indicator": "I19",
+      "val_indicator": 0,
+      "val_den_indicator": "Pierdere neta"
+    },
+    {
+      "indicator": "I20",
+      "val_indicator": 1,
+      "val_den_indicator": "Numar mediu de salariati"
+    }
+  ]
+}

@@ -1,0 +1,437 @@
+[
+  {
+    "signal_id": "ID-ADMIN-CHANGE-01:d3ec8d35fc9bcfb1",
+    "cui": "99000025",
+    "agent": "identity",
+    "component": "identity",
+    "rule_id": "ID-ADMIN-CHANGE-01",
+    "claim": "The administrator changed on 2025-11-02 from Marcela Inventatu to Ionel Fictivescu.",
+    "source": {
+      "name": "ONRC open data (data.gov.ro)",
+      "type": "official",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+      "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+    },
+    "evidence_date": "2025-11-02",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "previous": "MARCELA INVENTATU",
+      "current": "IONEL FICTIVESCU",
+      "changed_on": "2025-11-02"
+    }
+  },
+  {
+    "signal_id": "ID-SHARED-OFFICE-01:d4ced78be89b57c4",
+    "cui": "99000025",
+    "agent": "identity",
+    "component": "identity",
+    "rule_id": "ID-SHARED-OFFICE-01",
+    "claim": "The registered office is shared by 63 companies.",
+    "source": {
+      "name": "ONRC open data (data.gov.ro)",
+      "type": "official",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+      "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+    },
+    "evidence_date": null,
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "address": "Str. Exemplului nr. 1, Sector 9, București",
+      "n_companies": 63,
+      "threshold": 20
+    }
+  },
+  {
+    "signal_id": "FIN-REVENUE-JUMP-01:581dddaa7e01cb79",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-REVENUE-JUMP-01",
+    "claim": "Turnover grew from 410,000 RON in 2022 to 1,900,000 RON in 2023 and 9,800,000 RON in 2024.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2024-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "turnover": {
+        "2022": 410000,
+        "2023": 1900000,
+        "2024": 9800000,
+        "2025": 18600000
+      },
+      "max_yoy_growth_pct": 415.8
+    }
+  },
+  {
+    "signal_id": "FIN-DEBT-RISE-01:f996f2247e915581",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-DEBT-RISE-01",
+    "claim": "Debts rose from 40,000 RON in 2021 to 14,200,000 RON in 2025, 76% of 2025 turnover.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "debts": {
+        "2021": 40000,
+        "2025": 14200000
+      },
+      "debt_to_turnover_2025": 0.76
+    }
+  },
+  {
+    "signal_id": "FIN-HEADCOUNT-01:b511b27b071a9b0c",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-HEADCOUNT-01",
+    "claim": "2025 turnover of 18,600,000 RON was reported with 2 employees (9,300,000 RON per employee).",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "turnover": 18600000,
+      "employees": 2,
+      "turnover_per_employee": 9300000
+    }
+  },
+  {
+    "signal_id": "FIN-NET-ASSETS-01:e04749ef823bb549",
+    "cui": "99000025",
+    "agent": "financials",
+    "component": "financials",
+    "rule_id": "FIN-NET-ASSETS-01",
+    "claim": "2025 equity was -111,000 RON, below half of the 200 RON share capital.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "equity": -111000,
+      "share_capital": 200,
+      "net_profit": -350000
+    }
+  },
+  {
+    "signal_id": "TAX-DECLARED-GAP-01:f09bcd9990a5267f",
+    "cui": "99000025",
+    "agent": "tax",
+    "component": "tax",
+    "rule_id": "TAX-DECLARED-GAP-01",
+    "claim": "Submitted 2025 figures differ from ANAF: turnover 25,400,000 vs 18,600,000 RON, net result +1,200,000 vs -350,000 RON, employees 14 vs 2.",
+    "source": {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2025&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2025.json",
+      "content_hash": "d960d902a44e8e39e59071e183602587a68ece8067bd874fbbb35ce60ffd5f8a"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 1.0,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "year": 2025,
+      "submitted": {
+        "turnover": 25400000,
+        "net_profit": 1200000,
+        "employees": 14
+      },
+      "official": {
+        "turnover": 18600000,
+        "net_profit": -350000,
+        "employees": 2
+      }
+    }
+  },
+  {
+    "signal_id": "NET-SERIAL-ADMIN-01:c3fe6669a9b1742f",
+    "cui": "99000025",
+    "agent": "network",
+    "component": "network",
+    "rule_id": "NET-SERIAL-ADMIN-01",
+    "claim": "Administrator Ionel Fictivescu administers or administered 4 companies that failed since 2023: Kestrel (bankruptcy 2024), Orvanto (deregistered 2023), Pelinor (insolvency 2025), Vantiro (ANAF inactive since 2024-06-01).",
+    "source": {
+      "name": "ONRC open data (data.gov.ro)",
+      "type": "official",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/onrc.json",
+      "content_hash": "e3bb1338a16d12eb27dd2197712cf391a7f9007f649876d03b110630d7a85d2c"
+    },
+    "evidence_date": "2025-05-06",
+    "confidence": 0.9,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "person_name",
+      "score": 0.95,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "person": "IONEL FICTIVESCU",
+      "failed": [
+        {
+          "cui": "99000041",
+          "name": "KESTREL FICTIV TRANSPORT SRL",
+          "event": "bankruptcy",
+          "date": "2024-04-15",
+          "case": "9001/99/2024"
+        },
+        {
+          "cui": "99000058",
+          "name": "ORVANTO DISTRIBUTIE SRL",
+          "event": "deregistered",
+          "date": "2023-07-20"
+        },
+        {
+          "cui": "99000066",
+          "name": "PELINOR CONSTRUCT GRUP SRL",
+          "event": "insolvency",
+          "date": "2025-05-06",
+          "case": "9002/99/2025"
+        },
+        {
+          "cui": "99000074",
+          "name": "VANTIRO AGRO FICTIV SRL",
+          "event": "anaf_inactive",
+          "date": "2024-06-01"
+        }
+      ],
+      "active": [
+        {
+          "cui": "99000082",
+          "name": "MIRELDA SERVICII IMAGINARE SRL"
+        }
+      ]
+    }
+  },
+  {
+    "signal_id": "NET-CIRCULAR-INVOICE-01:d2b11638d32fcf92",
+    "cui": "99000025",
+    "agent": "network",
+    "component": "network",
+    "rule_id": "NET-CIRCULAR-INVOICE-01",
+    "claim": "Invoices of 2,100,000 RON form a cycle Zephyria -> Mirelda -> Kestrel -> Zephyria in 2025.",
+    "source": {
+      "name": "RO e-Factura invoices (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/efactura.json",
+      "content_hash": "570218478af06732e30e2499c18d7535b44e9ceb7c358d3b15892986195dc868"
+    },
+    "evidence_date": "2025-12-31",
+    "confidence": 0.95,
+    "severity": "high",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "cycle": [
+        "99000025",
+        "99000082",
+        "99000041",
+        "99000025"
+      ],
+      "total_ron": 2100000
+    }
+  },
+  {
+    "signal_id": "NET-PARTNER-INACTIVE-01:afa50b8bfa5181b8",
+    "cui": "99000025",
+    "agent": "network",
+    "component": "network",
+    "rule_id": "NET-PARTNER-INACTIVE-01",
+    "claim": "The sole shareholder Calbrona Holding Fictiv SRL is ANAF inactive since 2023-09-01.",
+    "source": {
+      "name": "Shareholders (MOCK)",
+      "type": "mock",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/shareholders.json",
+      "content_hash": "ca3f38b21e0086409d685058705c191a9885b0725c557592e1efbaee3e9bf473"
+    },
+    "evidence_date": "2023-09-01",
+    "confidence": 0.95,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "partner_cui": "99000090",
+      "share_pct": 100.0,
+      "inactive_since": "2023-09-01"
+    }
+  },
+  {
+    "signal_id": "MED-ADVERSE-01:ffd43ed83858c2c7",
+    "cui": "99000025",
+    "agent": "media",
+    "component": "media",
+    "rule_id": "MED-ADVERSE-01",
+    "claim": "An article published on 2026-04-12 reports searches at transport firms run by Ionel Fictivescu in a suspected tax-evasion case.",
+    "source": {
+      "name": "Web search (Tavily)",
+      "type": "web",
+      "url": "https://stiri-fictive.example/2026/04/perchezitii-transport",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/media.json",
+      "content_hash": "bac9ee799fe4f3b79e840f83af458e5ef2dbb16e71f210783e117ed716a38145"
+    },
+    "evidence_date": "2026-04-12",
+    "confidence": 0.6,
+    "severity": "medium",
+    "validated": false,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "person_name",
+      "score": 0.7,
+      "ambiguous": true
+    },
+    "data": {
+      "fictional": true,
+      "url": "https://stiri-fictive.example/2026/04/perchezitii-transport",
+      "published": "2026-04-12"
+    }
+  },
+  {
+    "signal_id": "PRE-NO-FOOTPRINT-01:10ef127cd631f2e3",
+    "cui": "99000025",
+    "agent": "presence",
+    "component": "presence",
+    "rule_id": "PRE-NO-FOOTPRINT-01",
+    "claim": "No website, job postings, SEAP contracts or EU-funded projects were found despite 18,600,000 RON 2025 turnover.",
+    "source": {
+      "name": "Public footprint (web, SEAP, Kohesio)",
+      "type": "web",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/presence.json",
+      "content_hash": "dfb5f3fd7973bd981faeff917aefb17fd1962475e5644c2e769057c0c5edd746"
+    },
+    "evidence_date": null,
+    "confidence": 0.8,
+    "severity": "medium",
+    "validated": true,
+    "auto_stop_candidate": false,
+    "entity_match": {
+      "method": "cui_exact",
+      "score": 1.0,
+      "ambiguous": false
+    },
+    "data": {
+      "fictional": true,
+      "turnover": 18600000,
+      "website": false,
+      "jobs": 0,
+      "seap": 0,
+      "kohesio": 0
+    }
+  }
+]

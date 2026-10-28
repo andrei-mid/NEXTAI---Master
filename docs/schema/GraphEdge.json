@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "target": {
+      "title": "Target",
+      "type": "string"
+    },
+    "role": {
+      "title": "Role",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source",
+    "target",
+    "role"
+  ],
+  "title": "GraphEdge",
+  "type": "object"
+}

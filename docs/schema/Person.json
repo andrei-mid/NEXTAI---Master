@@ -1,0 +1,165 @@
+{
+  "$defs": {
+    "PersonRole": {
+      "enum": [
+        "administrator",
+        "legal_representative",
+        "shareholder",
+        "censor",
+        "other"
+      ],
+      "title": "PersonRole",
+      "type": "string"
+    },
+    "SourceRef": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "retrieved_at"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "official",
+        "aggregator",
+        "web",
+        "mock",
+        "submitted"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    }
+  },
+  "description": "A person or a company linked to the subject.\n\nNo CNP and no personal data beyond what the source publishes.\nShareholders are MOCK (ONRC open data has no shareholders): check `source.type`.",
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/PersonRole"
+    },
+    "is_company": {
+      "default": false,
+      "title": "Is Company",
+      "type": "boolean"
+    },
+    "cui": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cui"
+    },
+    "share_pct": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Share Pct"
+    },
+    "valid_from": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid From"
+    },
+    "valid_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Valid To"
+    },
+    "source": {
+      "$ref": "#/$defs/SourceRef"
+    }
+  },
+  "required": [
+    "name",
+    "role",
+    "source"
+  ],
+  "title": "Person",
+  "type": "object"
+}

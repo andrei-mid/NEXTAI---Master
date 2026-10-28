@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "DecisionKind": {
+      "enum": [
+        "approve",
+        "reject",
+        "escalate",
+        "request_info"
+      ],
+      "title": "DecisionKind",
+      "type": "string"
+    }
+  },
+  "description": "Append-only audit-log entry. The analyst decides, the AI never does.",
+  "properties": {
+    "decision_id": {
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "decision": {
+      "$ref": "#/$defs/DecisionKind"
+    },
+    "comment": {
+      "title": "Comment",
+      "type": "string"
+    },
+    "analyst": {
+      "title": "Analyst",
+      "type": "string"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Run Id"
+    },
+    "band_at_decision": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Band"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "recorded_at": {
+      "format": "date-time",
+      "title": "Recorded At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "decision_id",
+    "cui",
+    "decision",
+    "comment",
+    "analyst",
+    "run_id",
+    "band_at_decision",
+    "recorded_at"
+  ],
+  "title": "DecisionRecord",
+  "type": "object"
+}

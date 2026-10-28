@@ -1,0 +1,28 @@
+{
+  "identity_sheet": {
+    "cui": "2816464",
+    "fictional": false,
+    "trade_register_no": null,
+    "current_name": "DEDEMAN SRL",
+    "names": [],
+    "legal_form": "SRL",
+    "status": "unknown",
+    "registration_date": null,
+    "registered_office": null,
+    "office_history": [],
+    "caen_code": null,
+    "caen_revision": null,
+    "authorized_caen_codes": [],
+    "administrators": [],
+    "shareholders": [],
+    "vat_registered": null,
+    "anaf_inactive": null,
+    "sources": []
+  },
+  "score": null,
+  "band": null,
+  "components": [],
+  "coverage": null,
+  "sources": [],
+  "last_checked": null
+}

@@ -1,0 +1,28 @@
+{
+  "fictional": true,
+  "cui": "99000033",
+  "years": [
+    {
+      "year": 2025,
+      "turnover": null,
+      "net_profit": 300000,
+      "total_debts": null,
+      "equity": null,
+      "share_capital": null,
+      "employees": null,
+      "extra": {},
+      "source": {
+        "name": "Documents submitted by the applicant",
+        "type": "submitted",
+        "url": null,
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000033_brunaldo_trade_impex/submitted/financials.json",
+        "content_hash": null
+      }
+    }
+  ],
+  "document_names": [
+    "situatii_financiare_2025_brunaldo_trade_impex.pdf"
+  ],
+  "extracted_at": "2026-10-28T08:00:00Z"
+}

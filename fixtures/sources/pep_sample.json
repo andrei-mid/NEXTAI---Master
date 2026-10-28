@@ -1,0 +1,12 @@
+{
+  "fictional": true,
+  "entries": [
+    {
+      "name": "DEMNITAR EXEMPLESCU",
+      "function": "Ministru fictiv",
+      "country": "RO",
+      "since": "2020-01-01",
+      "until": null
+    }
+  ]
+}

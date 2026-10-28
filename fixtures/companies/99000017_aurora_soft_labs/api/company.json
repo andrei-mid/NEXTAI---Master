@@ -1,0 +1,204 @@
+{
+  "identity_sheet": {
+    "cui": "99000017",
+    "fictional": true,
+    "trade_register_no": "J99/2101/2019",
+    "current_name": "AURORA SOFT LABS SRL",
+    "names": [
+      {
+        "name": "AURORA SOFT LABS SRL",
+        "valid_from": "2019-05-20",
+        "valid_to": null
+      }
+    ],
+    "legal_form": "SRL",
+    "status": "active",
+    "registration_date": "2019-05-20",
+    "registered_office": {
+      "raw": "Str. Algoritmului nr. 7, Localitatea Fictivă, Județul Fictiv",
+      "county": "Județul Fictiv",
+      "locality": null,
+      "street": null,
+      "number": null,
+      "postal_code": null,
+      "valid_from": "2019-05-20",
+      "valid_to": null
+    },
+    "office_history": [
+      {
+        "raw": "Str. Algoritmului nr. 7, Localitatea Fictivă, Județul Fictiv",
+        "county": "Județul Fictiv",
+        "locality": null,
+        "street": null,
+        "number": null,
+        "postal_code": null,
+        "valid_from": "2019-05-20",
+        "valid_to": null
+      }
+    ],
+    "caen_code": "6201",
+    "caen_revision": "rev2",
+    "authorized_caen_codes": [
+      "6201"
+    ],
+    "administrators": [
+      {
+        "name": "ANA EXEMPLESCU",
+        "role": "administrator",
+        "is_company": false,
+        "cui": null,
+        "share_pct": null,
+        "valid_from": "2019-05-20",
+        "valid_to": null,
+        "source": {
+          "name": "ONRC open data (data.gov.ro)",
+          "type": "official",
+          "url": null,
+          "retrieved_at": "2026-10-28T08:00:00Z",
+          "raw_ref": "fixture:companies/99000017_aurora_soft_labs/onrc.json",
+          "content_hash": "73ea54af090a51c8c6f7dc4f656f868208f462e0d7dd1e4e038064656910c853"
+        }
+      }
+    ],
+    "shareholders": [
+      {
+        "name": "ANA EXEMPLESCU",
+        "role": "shareholder",
+        "is_company": false,
+        "cui": null,
+        "share_pct": 100.0,
+        "valid_from": "2019-05-20",
+        "valid_to": null,
+        "source": {
+          "name": "Shareholders (MOCK)",
+          "type": "mock",
+          "url": null,
+          "retrieved_at": "2026-10-28T08:00:00Z",
+          "raw_ref": "fixture:companies/99000017_aurora_soft_labs/shareholders.json",
+          "content_hash": "e97bf63fd4f1cc7910404f162ba176378c5defc5be54d14c6c5901293a50d885"
+        }
+      }
+    ],
+    "vat_registered": true,
+    "anaf_inactive": false,
+    "sources": [
+      {
+        "name": "ANAF VAT registry v9",
+        "type": "official",
+        "url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000017_aurora_soft_labs/anaf_v9.json",
+        "content_hash": "913d0172f6b99fb1ccd3ca5d2301b1b5c81a2bf325cc150f40bf50bd46a9aacd"
+      },
+      {
+        "name": "ONRC open data (data.gov.ro)",
+        "type": "official",
+        "url": null,
+        "retrieved_at": "2026-10-28T08:00:00Z",
+        "raw_ref": "fixture:companies/99000017_aurora_soft_labs/onrc.json",
+        "content_hash": "73ea54af090a51c8c6f7dc4f656f868208f462e0d7dd1e4e038064656910c853"
+      }
+    ]
+  },
+  "score": 100.0,
+  "band": "green",
+  "components": [
+    {
+      "component": "identity",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": []
+    },
+    {
+      "component": "financials",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 20.0,
+      "effective_weight": 0.2,
+      "signal_ids": []
+    },
+    {
+      "component": "tax",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": []
+    },
+    {
+      "component": "litigation",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": []
+    },
+    {
+      "component": "network",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 15.0,
+      "effective_weight": 0.15,
+      "signal_ids": []
+    },
+    {
+      "component": "sanctions",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 10.0,
+      "effective_weight": 0.1,
+      "signal_ids": []
+    },
+    {
+      "component": "media",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 5.0,
+      "effective_weight": 0.05,
+      "signal_ids": []
+    },
+    {
+      "component": "presence",
+      "status": "ok",
+      "available": true,
+      "score": 100.0,
+      "weight": 5.0,
+      "effective_weight": 0.05,
+      "signal_ids": []
+    }
+  ],
+  "coverage": {
+    "weight_pct": 100.0,
+    "available": 8,
+    "total": 8,
+    "missing": []
+  },
+  "sources": [
+    {
+      "name": "ANAF VAT registry v9",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/api/PlatitorTvaRest/v9/tva",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000017_aurora_soft_labs/anaf_v9.json",
+      "content_hash": "913d0172f6b99fb1ccd3ca5d2301b1b5c81a2bf325cc150f40bf50bd46a9aacd"
+    },
+    {
+      "name": "ONRC open data (data.gov.ro)",
+      "type": "official",
+      "url": null,
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000017_aurora_soft_labs/onrc.json",
+      "content_hash": "73ea54af090a51c8c6f7dc4f656f868208f462e0d7dd1e4e038064656910c853"
+    }
+  ],
+  "last_checked": "2026-10-28T08:00:00Z"
+}

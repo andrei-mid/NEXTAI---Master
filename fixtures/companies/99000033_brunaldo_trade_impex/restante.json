@@ -1,0 +1,15 @@
+{
+  "fictional": true,
+  "cui": "99000033",
+  "list_period": "2026-Q2",
+  "obligations": [
+    {
+      "type": "principal",
+      "amount_ron": 412560
+    },
+    {
+      "type": "accesorii",
+      "amount_ron": 96300
+    }
+  ]
+}

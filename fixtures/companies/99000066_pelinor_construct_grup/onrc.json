@@ -1,0 +1,44 @@
+{
+  "fictional": true,
+  "cui": "99000066",
+  "denumire": "PELINOR CONSTRUCT GRUP SRL",
+  "cod_inmatriculare": "J99/3003/2020",
+  "data_inmatriculare": "2020-01-10",
+  "forma_juridica": "SRL",
+  "stare": "insolventa",
+  "adresa": "Str. Schelei nr. 8, Sector 9, București",
+  "judet": "București",
+  "caen_principal": {
+    "cod": "4120",
+    "revizie": "rev2",
+    "denumire": "Lucrări de construcții a clădirilor"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "4120",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "PELINOR CONSTRUCT GRUP SRL",
+      "de_la": "2020-01-10",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Str. Schelei nr. 8, Sector 9, București",
+      "de_la": "2020-01-10",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "IONEL FICTIVESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2020-01-10",
+      "pana_la": null
+    }
+  ]
+}

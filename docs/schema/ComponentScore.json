@@ -1,0 +1,81 @@
+{
+  "$defs": {
+    "AgentStatus": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "timeout",
+        "skipped"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "component": {
+      "$ref": "#/$defs/Component"
+    },
+    "status": {
+      "$ref": "#/$defs/AgentStatus"
+    },
+    "available": {
+      "title": "Available",
+      "type": "boolean"
+    },
+    "score": {
+      "anyOf": [
+        {
+          "maximum": 100,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Score"
+    },
+    "weight": {
+      "minimum": 0,
+      "title": "Weight",
+      "type": "number"
+    },
+    "effective_weight": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Effective Weight",
+      "type": "number"
+    },
+    "signal_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Signal Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "component",
+    "status",
+    "available",
+    "weight"
+  ],
+  "title": "ComponentScore",
+  "type": "object"
+}

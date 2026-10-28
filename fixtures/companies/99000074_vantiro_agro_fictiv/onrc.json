@@ -1,0 +1,44 @@
+{
+  "fictional": true,
+  "cui": "99000074",
+  "denumire": "VANTIRO AGRO FICTIV SRL",
+  "cod_inmatriculare": "J99/3004/2019",
+  "data_inmatriculare": "2019-03-03",
+  "forma_juridica": "SRL",
+  "stare": "functiune",
+  "adresa": "Sat Câmpul Fictiv nr. 12, Județul Fictiv",
+  "judet": "Județul Fictiv",
+  "caen_principal": {
+    "cod": "0111",
+    "revizie": "rev2",
+    "denumire": "Cultivarea cerealelor"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "0111",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "VANTIRO AGRO FICTIV SRL",
+      "de_la": "2019-03-03",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Sat Câmpul Fictiv nr. 12, Județul Fictiv",
+      "de_la": "2019-03-03",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "IONEL FICTIVESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2019-03-03",
+      "pana_la": null
+    }
+  ]
+}

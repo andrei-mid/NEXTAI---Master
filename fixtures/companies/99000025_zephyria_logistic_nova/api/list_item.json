@@ -1,0 +1,19 @@
+{
+  "cui": "99000025",
+  "name": "ZEPHYRIA LOGISTIC NOVA SRL",
+  "band": "red",
+  "score": 61.7,
+  "coverage": {
+    "weight_pct": 100.0,
+    "available": 8,
+    "total": 8,
+    "missing": []
+  },
+  "last_checked": "2026-10-28T08:00:00Z",
+  "top_signal": {
+    "rule_id": "FIN-NET-ASSETS-01",
+    "claim": "2025 equity was -111,000 RON, below half of the 200 RON share capital.",
+    "severity": "high"
+  },
+  "fictional": true
+}

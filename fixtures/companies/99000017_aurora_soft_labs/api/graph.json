@@ -1,0 +1,30 @@
+{
+  "nodes": [
+    {
+      "id": "company:99000017",
+      "type": "company",
+      "label": "AURORA SOFT LABS SRL",
+      "status": "active",
+      "fictional": true
+    },
+    {
+      "id": "person:ana-exemplescu",
+      "type": "person",
+      "label": "ANA EXEMPLESCU",
+      "status": null,
+      "fictional": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "person:ana-exemplescu",
+      "target": "company:99000017",
+      "role": "administrator"
+    },
+    {
+      "source": "person:ana-exemplescu",
+      "target": "company:99000017",
+      "role": "shareholder"
+    }
+  ]
+}

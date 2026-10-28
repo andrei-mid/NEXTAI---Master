@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "RunTrigger": {
+      "enum": [
+        "application",
+        "recheck",
+        "sweep"
+      ],
+      "title": "RunTrigger",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "trigger": {
+      "$ref": "#/$defs/RunTrigger"
+    },
+    "document_keys": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Document Keys",
+      "type": "array"
+    },
+    "agents": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Agents"
+    },
+    "disabled_sources": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Disabled Sources",
+      "type": "array"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "cui",
+    "trigger",
+    "requested_at"
+  ],
+  "title": "RunRequest",
+  "type": "object"
+}

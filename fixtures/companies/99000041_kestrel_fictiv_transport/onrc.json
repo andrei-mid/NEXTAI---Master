@@ -1,0 +1,44 @@
+{
+  "fictional": true,
+  "cui": "99000041",
+  "denumire": "KESTREL FICTIV TRANSPORT SRL",
+  "cod_inmatriculare": "J99/3001/2018",
+  "data_inmatriculare": "2018-02-01",
+  "forma_juridica": "SRL",
+  "stare": "faliment",
+  "adresa": "Str. Paravanului nr. 3, Sector 9, București",
+  "judet": "București",
+  "caen_principal": {
+    "cod": "4941",
+    "revizie": "rev2",
+    "denumire": "Transporturi rutiere de mărfuri"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "4941",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "KESTREL FICTIV TRANSPORT SRL",
+      "de_la": "2018-02-01",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Str. Paravanului nr. 3, Sector 9, București",
+      "de_la": "2018-02-01",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "IONEL FICTIVESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2018-02-01",
+      "pana_la": null
+    }
+  ]
+}

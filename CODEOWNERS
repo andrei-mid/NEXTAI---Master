@@ -1,0 +1,54 @@
+# D11: 6 people. Roles 1-5 use Claude Code, role 6 uses Claude + Lovable.
+# Replace the @role-* placeholders with real GitHub handles (or teams) once known.
+# GitHub picks the LAST matching pattern, so specific paths come after general ones.
+# Paths: the brief's packages/<x>/ is verifirm/<x>/ in this repo.
+
+# ---- Role 2: Core. Default owner of shared plumbing, schema, core, scoring, orchestration
+*                                         @role-2-core
+/verifirm/schema/                         @role-2-core
+/verifirm/core/                           @role-2-core
+/verifirm/scoring/                        @role-2-core
+/verifirm/adapters/base.py                @role-2-core
+/verifirm/agents/base.py                  @role-2-core
+/apps/wiring.py                           @role-2-core
+/apps/worker/                             @role-2-core
+/tests/                                   @role-2-core
+
+# ---- Role 1: Database. Only role 1 writes Alembic migrations
+/verifirm/persistence/                    @role-1-database
+/apps/worker/jobs/ingest_*                @role-1-database
+/verifirm/adapters/onrc_bulk.py           @role-1-database
+/tests/architecture/test_migrations.py    @role-1-database
+
+# ---- Role 3: Official agents + ANAF and mock adapters
+/verifirm/agents/identity/                @role-3-official-agents
+/verifirm/agents/financials/              @role-3-official-agents
+/verifirm/agents/tax/                     @role-3-official-agents
+/verifirm/agents/network/                 @role-3-official-agents
+/verifirm/adapters/anaf_*                 @role-3-official-agents
+/verifirm/adapters/mocks/                 @role-3-official-agents
+/apps/worker/jobs/sweep_anaf_v9.py        @role-3-official-agents
+
+# ---- Role 4: External agents + court / sanctions / web / SEAP / Kohesio adapters
+/verifirm/agents/litigation/              @role-4-external-agents
+/verifirm/agents/sanctions/               @role-4-external-agents
+/verifirm/agents/media/                   @role-4-external-agents
+/verifirm/agents/presence/                @role-4-external-agents
+/verifirm/adapters/portal_just.py         @role-4-external-agents
+/verifirm/adapters/scj.py                 @role-4-external-agents
+/verifirm/adapters/sanctions_*            @role-4-external-agents
+/verifirm/adapters/web_search.py          @role-4-external-agents
+/verifirm/adapters/seap.py                @role-4-external-agents
+/verifirm/adapters/kohesio.py             @role-4-external-agents
+/apps/worker/jobs/poll_new_cases.py       @role-4-external-agents
+
+# ---- Role 5: AI + API
+/verifirm/llm/                            @role-5-ai-api
+/verifirm/consolidation/                  @role-5-ai-api
+/verifirm/adapters/documents.py           @role-5-ai-api
+/apps/api/                                @role-5-ai-api
+
+# ---- Role 6: Frontend + demo
+/frontend/                                @role-6-frontend-demo
+/fixtures/                                @role-6-frontend-demo
+/docs/DEMO.md                             @role-6-frontend-demo

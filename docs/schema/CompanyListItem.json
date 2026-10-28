@@ -1,0 +1,173 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "Coverage": {
+      "properties": {
+        "weight_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight Pct",
+          "type": "number"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "weight_pct",
+        "available",
+        "total"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "TopSignal": {
+      "properties": {
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      },
+      "required": [
+        "rule_id",
+        "claim",
+        "severity"
+      ],
+      "title": "TopSignal",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "band": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Band"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Score"
+    },
+    "coverage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Coverage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "last_checked": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Last Checked"
+    },
+    "top_signal": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TopSignal"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fictional": {
+      "title": "Fictional",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "cui",
+    "name",
+    "band",
+    "score",
+    "coverage",
+    "last_checked",
+    "top_signal",
+    "fictional"
+  ],
+  "title": "CompanyListItem",
+  "type": "object"
+}

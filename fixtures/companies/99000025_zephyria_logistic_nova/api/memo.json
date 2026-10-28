@@ -1,0 +1,47 @@
+{
+  "markdown": "## Summary\n\nZEPHYRIA LOGISTIC NOVA SRL (fictional) scores 61.7 (RED) with 8/8 sources available. High signals appear in financials, tax and network.\n\n## Red signals\n\n- Submitted 2025 figures differ from ANAF: turnover 25,400,000 vs 18,600,000 RON, net result +1,200,000 vs -350,000 RON, employees 14 vs 2. [TAX-DECLARED-GAP-01]\n- Administrator Ionel Fictivescu is linked to 4 failed companies (Kestrel, Orvanto, Pelinor, Vantiro). [NET-SERIAL-ADMIN-01]\n- Invoices of 2,100,000 RON form a cycle Zephyria -> Mirelda -> Kestrel -> Zephyria. [NET-CIRCULAR-INVOICE-01] (MOCK source)\n- 2025 equity was -111,000 RON, below half of the 200 RON share capital. [FIN-NET-ASSETS-01]\n\n## Yellow signals\n\n- Administrator changed on 2025-11-02. Registered office shared by 63 companies. [ID-ADMIN-CHANGE-01, ID-SHARED-OFFICE-01]\n- Turnover grew from 410,000 RON (2022) to 18,600,000 RON (2025) with 2 employees. [FIN-REVENUE-JUMP-01, FIN-HEADCOUNT-01]\n- No public footprint despite 18,600,000 RON turnover. [PRE-NO-FOOTPRINT-01]\n- **Unvalidated:** an article published on 2026-04-12 reports searches at firms run by Ionel Fictivescu. [MED-ADVERSE-01]\n\n## Coverage\n\nAll 8 agents completed. MOCK sources used: e-Factura, shareholders, tax arrears list, D300.\n",
+  "questions": [
+    {
+      "question": "Please explain the difference between the submitted 2025 turnover (25,400,000 RON) and the ANAF figure (18,600,000 RON).",
+      "reason_signal_ids": [
+        "TAX-DECLARED-GAP-01:f09bcd9990a5267f"
+      ]
+    },
+    {
+      "question": "What goods or services were invoiced to Mirelda Servicii Imaginare SRL, and by Kestrel Fictiv Transport SRL to you, in 2025?",
+      "reason_signal_ids": [
+        "NET-CIRCULAR-INVOICE-01:d2b11638d32fcf92"
+      ]
+    },
+    {
+      "question": "What is Ionel Fictivescu's role in Kestrel, Orvanto, Pelinor and Vantiro, and why did they fail?",
+      "reason_signal_ids": [
+        "NET-SERIAL-ADMIN-01:c3fe6669a9b1742f"
+      ]
+    },
+    {
+      "question": "How is 18,600,000 RON of transport turnover delivered with 2 employees (subcontractors, fleet)?",
+      "reason_signal_ids": [
+        "FIN-HEADCOUNT-01:b511b27b071a9b0c"
+      ]
+    },
+    {
+      "question": "What is the plan to bring equity back above half of the share capital?",
+      "reason_signal_ids": [
+        "FIN-NET-ASSETS-01:e04749ef823bb549"
+      ]
+    }
+  ],
+  "generated_at": "2026-10-28T08:00:00Z",
+  "verifier_report": {
+    "passed": false,
+    "checked_sentences": 10,
+    "rejected": [
+      {
+        "text": "The company is very likely a missing-trader fraud vehicle.",
+        "reason": "opinion / accusation not supported by any signal"
+      }
+    ],
+    "verified_at": "2026-10-28T08:00:00Z"
+  }
+}

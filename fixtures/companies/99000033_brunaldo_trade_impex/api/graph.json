@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    {
+      "id": "company:99000033",
+      "type": "company",
+      "label": "BRUNALDO TRADE IMPEX SRL",
+      "status": "active",
+      "fictional": true
+    },
+    {
+      "id": "person:sorin-imaginescu",
+      "type": "person",
+      "label": "SORIN IMAGINESCU",
+      "status": null,
+      "fictional": true
+    },
+    {
+      "id": "company:99000090",
+      "type": "company",
+      "label": "CALBRONA HOLDING FICTIV SRL",
+      "status": "inactive_anaf",
+      "fictional": true
+    }
+  ],
+  "edges": [
+    {
+      "source": "person:sorin-imaginescu",
+      "target": "company:99000033",
+      "role": "administrator"
+    },
+    {
+      "source": "company:99000090",
+      "target": "company:99000033",
+      "role": "shareholder"
+    }
+  ]
+}

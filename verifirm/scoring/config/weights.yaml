@@ -1,0 +1,53 @@
+# Scoring configuration. ALL VALUES ARE A PROPOSAL (docs/DECISIONS.md -> PENDING "scoring weights").
+# Loaded by verifirm/scoring/engine.py:load_scoring_config. Change values here, not in code.
+version: "proposal-2026-10-28"
+
+# Component weights, sum = 100
+weights:
+  identity: 15
+  financials: 20
+  tax: 15
+  litigation: 15
+  network: 15
+  sanctions: 10
+  media: 5
+  presence: 5
+
+# Penalty per signal severity.
+# component score = max(0, 100 - sum(penalty * confidence * entity_match.score))
+penalties:
+  info: 0
+  low: 5
+  medium: 15
+  high: 35
+  critical: 60
+
+# Trust score = weighted mean over AVAILABLE components (status ok/partial), weights re-normalized.
+# Coverage = sum of weights of available components (also shown as "7/8 sources").
+
+bands:
+  # Evaluated in this order. The first match wins.
+  grey_coverage_below: 60        # GREY: coverage < 60%
+  red_score_below: 50            # RED: score < 50
+  red_min_high_components: 2     #   or >= 2 HIGH signals in different components
+  yellow_score_below: 75         # YELLOW: 50-74
+  yellow_min_high_signals: 1     #   or 1 HIGH signal
+  yellow_coverage_below: 80      #   or coverage < 80%
+  green_requires_components:     # GREEN: >= 75, no high/critical, coverage >= 80%, AND these available
+    - identity
+    - sanctions
+  # A source outage can never produce GREEN (coverage + required components).
+
+# STOP: any validated, non-media signal with one of these rule ids.
+auto_stop_rules:
+  - SAN-MATCH-CONFIRMED-01
+  - LIT-INSOLVENCY-OPENED-01
+  - LIT-CRIMINAL-01
+  - ID-INACTIVE-01
+
+# Media signals can never trigger STOP (enforced in the Signal model AND in bands.py).
+never_stop_components:
+  - media
+
+# Natural persons -> separate flow (AI Act).
+natural_person_legal_forms: [PFA, II, IF]

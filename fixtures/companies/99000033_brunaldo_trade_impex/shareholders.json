@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "cui": "99000033",
+  "shareholders": [
+    {
+      "name": "CALBRONA HOLDING FICTIV SRL",
+      "is_company": true,
+      "cui": "99000090",
+      "share_pct": 100.0,
+      "since": "2012-06-11"
+    }
+  ]
+}

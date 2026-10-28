@@ -1,0 +1,19 @@
+{
+  "cui": "99000033",
+  "name": "BRUNALDO TRADE IMPEX SRL",
+  "band": "red",
+  "score": 64.8,
+  "coverage": {
+    "weight_pct": 100.0,
+    "available": 8,
+    "total": 8,
+    "missing": []
+  },
+  "last_checked": "2026-10-28T08:00:00Z",
+  "top_signal": {
+    "rule_id": "TAX-ARREARS-01",
+    "claim": "The company is on the Q2 2026 ANAF arrears list with 412,560 RON principal and 96,300 RON accessories.",
+    "severity": "high"
+  },
+  "fictional": true
+}

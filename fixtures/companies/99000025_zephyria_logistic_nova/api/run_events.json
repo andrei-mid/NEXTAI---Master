@@ -1,0 +1,106 @@
+[
+  {
+    "run_id": "fixture",
+    "agent": "identity_sheet",
+    "status": null,
+    "n_signals": 0,
+    "elapsed_ms": 900,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "identity",
+    "status": "ok",
+    "n_signals": 2,
+    "elapsed_ms": 1500,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "sanctions",
+    "status": "ok",
+    "n_signals": 0,
+    "elapsed_ms": 2400,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "financials",
+    "status": "ok",
+    "n_signals": 4,
+    "elapsed_ms": 3300,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "tax",
+    "status": "ok",
+    "n_signals": 1,
+    "elapsed_ms": 4200,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "network",
+    "status": "ok",
+    "n_signals": 3,
+    "elapsed_ms": 5100,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "presence",
+    "status": "ok",
+    "n_signals": 1,
+    "elapsed_ms": 6000,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "litigation",
+    "status": "ok",
+    "n_signals": 0,
+    "elapsed_ms": 6900,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "media",
+    "status": "ok",
+    "n_signals": 1,
+    "elapsed_ms": 7800,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "scoring",
+    "status": null,
+    "n_signals": 0,
+    "elapsed_ms": 9100,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "memo",
+    "status": null,
+    "n_signals": 0,
+    "elapsed_ms": 15200,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "critic",
+    "status": null,
+    "n_signals": 0,
+    "elapsed_ms": 18400,
+    "done": false
+  },
+  {
+    "run_id": "fixture",
+    "agent": "pipeline",
+    "status": null,
+    "n_signals": 0,
+    "elapsed_ms": 18500,
+    "done": true
+  }
+]

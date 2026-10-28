@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- fictional: true. Shape to be verified against the real FSF file. -->
+<export generationDate="2026-10-27T00:00:00"><sanctionEntity logicalId="900001"><subjectType code="person"/><nameAlias wholeName="Exemplu Sancționatescu" firstName="Exemplu" lastName="Sancționatescu"/><citizenship countryIso2Code="ZZ"/><birthdate birthdate="1970-01-01"/></sanctionEntity><sanctionEntity logicalId="900002"><subjectType code="enterprise"/><nameAlias wholeName="ENTITATE INTERZISA FICTIVA LTD"/></sanctionEntity></export>

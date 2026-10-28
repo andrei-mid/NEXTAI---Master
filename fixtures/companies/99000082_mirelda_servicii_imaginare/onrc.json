@@ -1,0 +1,44 @@
+{
+  "fictional": true,
+  "cui": "99000082",
+  "denumire": "MIRELDA SERVICII IMAGINARE SRL",
+  "cod_inmatriculare": "J99/3005/2022",
+  "data_inmatriculare": "2022-08-08",
+  "forma_juridica": "SRL",
+  "stare": "functiune",
+  "adresa": "Str. Ecoului nr. 2, Sector 9, București",
+  "judet": "București",
+  "caen_principal": {
+    "cod": "8299",
+    "revizie": "rev2",
+    "denumire": "Alte activități de servicii suport pentru întreprinderi"
+  },
+  "caen_autorizate": [
+    {
+      "cod": "8299",
+      "revizie": "rev2"
+    }
+  ],
+  "istoric_denumiri": [
+    {
+      "denumire": "MIRELDA SERVICII IMAGINARE SRL",
+      "de_la": "2022-08-08",
+      "pana_la": null
+    }
+  ],
+  "istoric_sedii": [
+    {
+      "adresa": "Str. Ecoului nr. 2, Sector 9, București",
+      "de_la": "2022-08-08",
+      "pana_la": null
+    }
+  ],
+  "reprezentanti": [
+    {
+      "nume": "IONEL FICTIVESCU",
+      "calitate": "ADMINISTRATOR",
+      "de_la": "2022-08-08",
+      "pana_la": null
+    }
+  ]
+}

@@ -1,0 +1,679 @@
+{
+  "$defs": {
+    "Address": {
+      "properties": {
+        "raw": {
+          "title": "Raw",
+          "type": "string"
+        },
+        "county": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "County"
+        },
+        "locality": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Locality"
+        },
+        "street": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Street"
+        },
+        "number": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Number"
+        },
+        "postal_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Postal Code"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        }
+      },
+      "required": [
+        "raw"
+      ],
+      "title": "Address",
+      "type": "object"
+    },
+    "AgentStatus": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "timeout",
+        "skipped"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    },
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "CompanyName": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "CompanyName",
+      "type": "object"
+    },
+    "CompanyStatus": {
+      "enum": [
+        "active",
+        "inactive_anaf",
+        "suspended",
+        "in_dissolution",
+        "insolvency",
+        "bankruptcy",
+        "deregistered",
+        "unknown"
+      ],
+      "title": "CompanyStatus",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "ComponentScore": {
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/Component"
+        },
+        "status": {
+          "$ref": "#/$defs/AgentStatus"
+        },
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "score": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Score"
+        },
+        "weight": {
+          "minimum": 0,
+          "title": "Weight",
+          "type": "number"
+        },
+        "effective_weight": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Effective Weight",
+          "type": "number"
+        },
+        "signal_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Signal Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "component",
+        "status",
+        "available",
+        "weight"
+      ],
+      "title": "ComponentScore",
+      "type": "object"
+    },
+    "Coverage": {
+      "properties": {
+        "weight_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight Pct",
+          "type": "number"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "weight_pct",
+        "available",
+        "total"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    },
+    "IdentitySheet": {
+      "properties": {
+        "cui": {
+          "title": "Cui",
+          "type": "string"
+        },
+        "fictional": {
+          "default": false,
+          "title": "Fictional",
+          "type": "boolean"
+        },
+        "trade_register_no": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trade Register No"
+        },
+        "current_name": {
+          "title": "Current Name",
+          "type": "string"
+        },
+        "names": {
+          "items": {
+            "$ref": "#/$defs/CompanyName"
+          },
+          "title": "Names",
+          "type": "array"
+        },
+        "legal_form": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Legal Form"
+        },
+        "status": {
+          "$ref": "#/$defs/CompanyStatus",
+          "default": "unknown"
+        },
+        "registration_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Registration Date"
+        },
+        "registered_office": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Address"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "office_history": {
+          "items": {
+            "$ref": "#/$defs/Address"
+          },
+          "title": "Office History",
+          "type": "array"
+        },
+        "caen_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caen Code"
+        },
+        "caen_revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Caen Revision"
+        },
+        "authorized_caen_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Authorized Caen Codes",
+          "type": "array"
+        },
+        "administrators": {
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "title": "Administrators",
+          "type": "array"
+        },
+        "shareholders": {
+          "items": {
+            "$ref": "#/$defs/Person"
+          },
+          "title": "Shareholders",
+          "type": "array"
+        },
+        "vat_registered": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Vat Registered"
+        },
+        "anaf_inactive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anaf Inactive"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "cui",
+        "current_name"
+      ],
+      "title": "IdentitySheet",
+      "type": "object"
+    },
+    "Person": {
+      "description": "A person or a company linked to the subject.\n\nNo CNP and no personal data beyond what the source publishes.\nShareholders are MOCK (ONRC open data has no shareholders): check `source.type`.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/$defs/PersonRole"
+        },
+        "is_company": {
+          "default": false,
+          "title": "Is Company",
+          "type": "boolean"
+        },
+        "cui": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cui"
+        },
+        "share_pct": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Share Pct"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        }
+      },
+      "required": [
+        "name",
+        "role",
+        "source"
+      ],
+      "title": "Person",
+      "type": "object"
+    },
+    "PersonRole": {
+      "enum": [
+        "administrator",
+        "legal_representative",
+        "shareholder",
+        "censor",
+        "other"
+      ],
+      "title": "PersonRole",
+      "type": "string"
+    },
+    "SourceRef": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/SourceType"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "raw_ref": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Ref"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        }
+      },
+      "required": [
+        "name",
+        "type",
+        "retrieved_at"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceType": {
+      "enum": [
+        "official",
+        "aggregator",
+        "web",
+        "mock",
+        "submitted"
+      ],
+      "title": "SourceType",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "identity_sheet": {
+      "$ref": "#/$defs/IdentitySheet"
+    },
+    "score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Score"
+    },
+    "band": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Band"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "components": {
+      "items": {
+        "$ref": "#/$defs/ComponentScore"
+      },
+      "title": "Components",
+      "type": "array"
+    },
+    "coverage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Coverage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "last_checked": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Last Checked"
+    }
+  },
+  "required": [
+    "identity_sheet",
+    "score",
+    "band",
+    "components",
+    "coverage",
+    "sources",
+    "last_checked"
+  ],
+  "title": "CompanyDetail",
+  "type": "object"
+}

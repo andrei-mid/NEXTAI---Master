@@ -1,0 +1,15 @@
+{
+  "cui": "99000017",
+  "name": "AURORA SOFT LABS SRL",
+  "band": "green",
+  "score": 100.0,
+  "coverage": {
+    "weight_pct": 100.0,
+    "available": 8,
+    "total": 8,
+    "missing": []
+  },
+  "last_checked": "2026-10-28T08:00:00Z",
+  "top_signal": null,
+  "fictional": true
+}

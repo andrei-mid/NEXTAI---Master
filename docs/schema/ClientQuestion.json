@@ -1,0 +1,21 @@
+{
+  "properties": {
+    "question": {
+      "title": "Question",
+      "type": "string"
+    },
+    "reason_signal_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Reason Signal Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "question",
+    "reason_signal_ids"
+  ],
+  "title": "ClientQuestion",
+  "type": "object"
+}

@@ -1,0 +1,30 @@
+{
+  "fictional": true,
+  "cui": "99000017",
+  "returns": [
+    {
+      "period": "2025-Q1",
+      "taxable_base_ron": 1150000,
+      "vat_collected_ron": 218500,
+      "vat_deductible_ron": 172500
+    },
+    {
+      "period": "2025-Q2",
+      "taxable_base_ron": 1150000,
+      "vat_collected_ron": 218500,
+      "vat_deductible_ron": 172500
+    },
+    {
+      "period": "2025-Q3",
+      "taxable_base_ron": 1150000,
+      "vat_collected_ron": 218500,
+      "vat_deductible_ron": 172500
+    },
+    {
+      "period": "2025-Q4",
+      "taxable_base_ron": 1150000,
+      "vat_collected_ron": 218500,
+      "vat_deductible_ron": 172500
+    }
+  ]
+}

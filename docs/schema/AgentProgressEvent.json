@@ -1,0 +1,58 @@
+{
+  "$defs": {
+    "AgentStatus": {
+      "enum": [
+        "ok",
+        "partial",
+        "unavailable",
+        "timeout",
+        "skipped"
+      ],
+      "title": "AgentStatus",
+      "type": "string"
+    }
+  },
+  "description": "One SSE event on GET /runs/{run_id}/events.",
+  "properties": {
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "agent": {
+      "title": "Agent",
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AgentStatus"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "n_signals": {
+      "default": 0,
+      "title": "N Signals",
+      "type": "integer"
+    },
+    "elapsed_ms": {
+      "default": 0,
+      "title": "Elapsed Ms",
+      "type": "integer"
+    },
+    "done": {
+      "default": false,
+      "title": "Done",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "run_id",
+    "agent"
+  ],
+  "title": "AgentProgressEvent",
+  "type": "object"
+}

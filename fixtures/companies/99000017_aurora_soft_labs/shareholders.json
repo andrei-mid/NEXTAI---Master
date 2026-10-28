@@ -1,0 +1,13 @@
+{
+  "fictional": true,
+  "cui": "99000017",
+  "shareholders": [
+    {
+      "name": "ANA EXEMPLESCU",
+      "is_company": false,
+      "cui": null,
+      "share_pct": 100.0,
+      "since": "2019-05-20"
+    }
+  ]
+}
