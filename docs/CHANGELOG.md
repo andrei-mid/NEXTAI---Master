@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-10-28: Time-travel reads in Postgres + persistence tests now run on a real Postgres 17 (role 1)
+
+**What:** `SqlRepository` has "as of date X" and "from X to Y" reads for the frontend's period view (role 6): `get_score_as_of`, `list_score_history`, `list_signals_as_of`, `list_events`, `list_portfolio_as_of`, `list_decisions_between`. Two time axes, never mixed: *known-at* (`computed_at`, `recorded_at`) and *happened-at* (`Signal.evidence_date`). They are **not on the `Repository` port yet**: the proposal is in `docs/DECISIONS.md` ("Time-travel reads", PENDING).
+
+All persistence tests (migrations, drift, append-only audit trigger, upserts, the new reads) pass on PostgreSQL 17.11.
+
+**What you must do:**
+- **Role 2:** add the six methods to the port + `MemoryRepository`.
+- **Role 5:** `?as_of=` and `GET /companies/{cui}/history?from=&to=` once the port has them.
+- **Role 6:** until then the period view can only be mocked. Say which screens need it.
+
+---
+
 ## 2026-10-28: `onrc_bulk` works in fixture mode (role 1)
 
 **What:** `verifirm/adapters/onrc_bulk.py` READ methods are implemented for `FIXTURE_MODE=1` (this replaces role 2's first fixture version below, same behaviour plus more). The per-company contract is now DECIDED in `docs/DECISIONS.md`.
