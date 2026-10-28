@@ -76,11 +76,63 @@ down, switched off, missing, not implemented, `notFound`, or returns data the ru
 (unknown arrears type, VAT history missing, D300 not covering the period, documents for another
 CUI). Confidence: 1.0, e-Factura gap 0.95, stale mirror data 0.8.
 
-## Where MOCK data will come from
+## Why three sources are MOCK (and where the real data will come from)
 
-The MOCK sources (arrears, D300, e-Factura) have no API we can legally call. The production
-route for each (the applicant's documents, or a paid provider) is in
-[docs/SOURCES.md](../../../docs/SOURCES.md). Going live changes only the adapter.
+Three of the agent's sources are simulated: the arrears list, D300 and e-Factura. Our mentor
+approved this. It isn't laziness: for each one, **we have no legal, reliable way to get the
+data ourselves**. Every MOCK signal carries `source.type = "mock"`, so the UI shows a badge and
+nobody mistakes simulated data for verified data.
+
+### 1. ANAF arrears list (`mock_restante`): public, but behind a captcha
+
+The list is **public by law** (art. 162 of the Fiscal Procedure Code, Law 207/2015): ANAF
+publishes it every quarter. But it only exists as a **search page protected by a captcha**,
+with no API and no download we could find. We deliberately don't bypass that captcha:
+
+- **A captcha is ANAF saying "humans only, no automated access."** Bypassing it, with a
+  captcha-solving service, browser automation or anything else, means doing on purpose
+  exactly what the site owner forbids. That is not a technical detail we can work around.
+- **ANAF's own terms:** "any attempt to overload the server is punished under the law". For
+  this project that rule is non-negotiable. A scraper that defeats a captcha is the
+  textbook case of unwanted automated traffic.
+- **Legal and compliance risk for a bank:** getting around a system's access protection can
+  count as unauthorized access to a computer system under Romanian law. Whether it applies
+  to a public page is a lawyer's question, but no bank compliance team would sign off on a
+  product built on it, and Raiffeisen is our client.
+- **It would be fragile.** Captchas change, scrapers break, and a check that silently stops
+  working is worse than no check. Our rule is "a source failure is never clean".
+- **There is a better source anyway.** Absence from the list proves little: ANAF lists only
+  debts above legal thresholds, once a quarter. The definitive proof is a **certificat de
+  atestare fiscală** (certificate of tax status), which the applicant gets from ANAF and
+  submits with the credit file. That is how banks already work.
+
+ANAF also publishes a **list of companies with NO arrears** (OPANAF 1923/2022). The mock
+accepts an optional `on_white_list`, so the real list can be plugged in the same way.
+
+### 2. D300 VAT returns (`mock_d300`): the company's confidential data
+
+D300 returns (and the SAF-T D406 file) are the company's own tax filings. ANAF keeps them
+private under **fiscal secrecy** (art. 11 of the Fiscal Procedure Code). They are reachable only
+through ANAF's private portal (SPV) with **the company's own qualified digital certificate**.
+A bank has no right to them without the client's consent.
+
+### 3. e-Factura invoices (`mock_efactura`): the same reason
+
+ANAF's e-Factura API exists, but it uses OAuth tied to **the company's certificate**. It shows
+a company's invoices only to that company, or to an app the company has authorized.
+
+### Production route: going live changes only the adapter
+
+| Mock | Real source in production |
+|---|---|
+| `mock_restante` | The applicant's **certificat de atestare fiscală** (through `adapters/documents.py`), or a licensed data provider |
+| `mock_d300` | D300 copies / SAF-T submitted in the credit file, or the client authorizing our app with their certificate |
+| `mock_efactura` | The client's consent (OAuth with their certificate), or exports submitted in the credit file |
+
+Each mock sits behind the same READ method the real source will have (`arrears(cui)`,
+`returns(cui)`, `invoice_flows(cui)`). So switching to the real source replaces the adapter,
+and **this agent doesn't change**. The production route for every mock in the project
+(including BPI, shareholders and PEP) is in [docs/SOURCES.md](../../../docs/SOURCES.md).
 
 ## Files
 
