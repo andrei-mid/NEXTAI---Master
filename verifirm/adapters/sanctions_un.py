@@ -4,6 +4,8 @@ Facts:
 - XML: https://scsanctions.un.org/resources/xml/en/consolidated.xml
 - Bulk download on a schedule. Normalize to the same entry shape as sanctions_eu.
 - Fixture: fixtures/sources/sanctions/un_sample.xml (fictional entries only).
+
+Local-first (docs/LOCAL_DATA.md): bulk: the ingest_sanctions job. sync() no-op. Screening reads local entries only.
 """
 
 from __future__ import annotations

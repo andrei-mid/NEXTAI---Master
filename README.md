@@ -2,6 +2,8 @@
 
 Agentic background checks for companies (Raiffeisen Bank Romania hackathon challenge). It continuously re-verifies the corporate portfolio and fact-checks new credit applications against official Romanian sources. The system produces a score, sourced signals and a memo. **The analyst decides, never the AI.**
 
+**Local-first:** external data (ANAF, courts, sanctions, …) is downloaded onto our server and the agents only process that local copy. See [docs/LOCAL_DATA.md](docs/LOCAL_DATA.md). What changed recently: [docs/CHANGELOG.md](docs/CHANGELOG.md).
+
 ## Run locally in fixture mode (no network, no API keys, no services)
 
 Prerequisites: [uv](https://docs.astral.sh/uv/) and GNU make.

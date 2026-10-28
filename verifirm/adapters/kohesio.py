@@ -6,6 +6,8 @@ Facts / to confirm:
   licence, then record them in docs/SOURCES.md.
 - Beneficiaries are matched by name (plus the CUI when present), so return match info.
 - Fixture: fixtures/companies/<cui>_<slug>/presence.json -> key "kohesio".
+
+Local-first (docs/LOCAL_DATA.md): bulk: an ingest job (to add) loads the beneficiaries export locally. sync() no-op. projects_for() reads local data only.
 """
 
 from __future__ import annotations
@@ -21,7 +23,7 @@ from verifirm.schema.signals import SourceType
 class KohesioAdapter(BaseAdapter):
     source_label = "Kohesio (EU funds)"
     source_type = SourceType.OFFICIAL
-    cache_ttl_s = 7 * 86_400
+    mirror_max_age_s = 7 * 86_400
 
     async def projects_for(
         self, company_name: str, cui: str | None

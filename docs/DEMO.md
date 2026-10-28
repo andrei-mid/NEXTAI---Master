@@ -6,7 +6,7 @@
 
 | CUI | Company | Role in the demo | Expected band |
 |---|---|---|---|
-| 2816464 | **DEDEMAN SRL** (REAL) | clean case. **Live** from ANAF at demo time. The last-known-good copy is the fallback | GREEN, 8/8 |
+| 2816464 | **DEDEMAN SRL** (REAL) | clean case. Real ANAF data, **synced to our server** before the demo (local mirror) | GREEN, 8/8 |
 | 99000017 | AURORA SOFT LABS SRL | fictional clean control: steady growth, no signals | GREEN |
 | 99000025 | **ZEPHYRIA LOGISTIC NOVA SRL** | serial administrator, declared-vs-ANAF gap, circular invoicing | RED (no STOP) |
 | 99000033 | **BRUNALDO TRADE IMPEX SRL** | tax problems + litigation | RED (not STOP) |
@@ -35,5 +35,5 @@
 ## Before the demo
 
 - [ ] `make demo-check` is green (fixtures-check + e2e bands).
-- [ ] Dedeman fetched live at least once that day (warms the last-known-good copies). See PENDING "Dedeman live run while FIXTURE_MODE=1" in DECISIONS.md.
+- [ ] Dedeman synced to the local mirror that day (`sync_company("2816464")`). See PENDING "Dedeman live run while FIXTURE_MODE=1" in DECISIONS.md.
 - [ ] Lovable app points at the demo API URL. CORS restricted to it.

@@ -3,6 +3,8 @@
 Fixture: fixtures/sources/pep_sample.json
   {"fictional": true, "entries": [{"name", "function", "country", "since", "until"}]}
 Fuzzy-matched against administrators (and mock shareholders). Feeds SAN-PEP-01.
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

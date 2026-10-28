@@ -21,7 +21,7 @@ class ObjectStore(ABC):
 
     @abstractmethod
     async def put_named(self, key: str, data: bytes) -> None:
-        """Store bytes under an explicit, overwritable key (e.g. `lastgood/<adapter>/<key>`)."""
+        """Store bytes under an explicit, overwritable key (e.g. the mirror entry `mirror/<adapter>/<key>`)."""
 
     @abstractmethod
     async def get(self, key: str) -> bytes | None: ...

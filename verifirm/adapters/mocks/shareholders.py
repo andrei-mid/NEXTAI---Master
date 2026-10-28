@@ -5,6 +5,8 @@ Fixture: fixtures/companies/<cui>_<slug>/shareholders.json
   {"fictional": true, "cui": "...", "shareholders": [{"name", "is_company", "cui",
    "share_pct", "since"}]}
 Becomes IdentitySheet.shareholders (Person.source.type == MOCK). Feeds NET-PARTNER-INACTIVE-01.
+
+Local-first (docs/LOCAL_DATA.md): mocks read fixtures/ only, in every mode. No sync, no network.
 """
 
 from __future__ import annotations

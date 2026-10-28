@@ -6,6 +6,8 @@
 
 Checks who the company is and whether its identity looks unstable.
 
+**Data access (local-first, [docs/LOCAL_DATA.md](../../../docs/LOCAL_DATA.md)):** `anaf_v9` + `onrc_bulk` READ methods (mirror / local tables), `mock_shareholders`. Never call external APIs from the agent. "Not in the local mirror yet" is unavailable, never clean. Reference: `agents/financials/`.
+
 | rule_id | Severity (PROPOSAL) | Condition |
 |---|---|---|
 | ID-INACTIVE-01 | critical, **auto-stop** | ANAF fiscally inactive |

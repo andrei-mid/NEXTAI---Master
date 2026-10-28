@@ -117,7 +117,7 @@
       }
     ]
   },
-  "score": 61.7,
+  "score": 65.3,
   "band": "red",
   "components": [
     {
@@ -136,14 +136,13 @@
       "component": "financials",
       "status": "ok",
       "available": true,
-      "score": 20.0,
+      "score": 38.0,
       "weight": 20.0,
       "effective_weight": 0.2,
       "signal_ids": [
-        "FIN-REVENUE-JUMP-01:581dddaa7e01cb79",
-        "FIN-DEBT-RISE-01:f996f2247e915581",
-        "FIN-HEADCOUNT-01:b511b27b071a9b0c",
-        "FIN-NET-ASSETS-01:e04749ef823bb549"
+        "FIN-NET-ASSETS-01:946fb6067dae21fe",
+        "FIN-REVENUE-JUMP-01:35f0f9cc85df8097",
+        "FIN-HEADCOUNT-01:26df309eeea01bf2"
       ]
     },
     {
@@ -273,6 +272,14 @@
       "retrieved_at": "2026-10-28T08:00:00Z",
       "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/presence.json",
       "content_hash": "dfb5f3fd7973bd981faeff917aefb17fd1962475e5644c2e769057c0c5edd746"
+    },
+    {
+      "name": "ANAF financial statements (bilanț)",
+      "type": "official",
+      "url": "https://webservicesp.anaf.ro/bilant?an=2024&cui=99000025",
+      "retrieved_at": "2026-10-28T08:00:00Z",
+      "raw_ref": "fixture:companies/99000025_zephyria_logistic_nova/bilant_2024.json",
+      "content_hash": "5ef46d997a5cc1ff6417d47a42a4fe1e07307fd66f61299c07e20699361bb5ce"
     }
   ],
   "last_checked": "2026-10-28T08:00:00Z"

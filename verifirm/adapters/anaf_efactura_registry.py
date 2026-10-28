@@ -6,6 +6,8 @@ Facts / to confirm before implementing:
 - If the separate "Registrul RO e-Factura" listing is needed, document its URL, auth and
   limits in docs/SOURCES.md first (open a PENDING entry in DECISIONS.md).
 - This is NOT the invoices themselves. Invoices need the company's certificate -> mocks/efactura.py.
+
+Local-first (docs/LOCAL_DATA.md): prefer deriving the answer from the anaf_v9 mirror entry (no extra download). If a separate source is needed, implement sync(cui) + a mirror-only READ method.
 """
 
 from __future__ import annotations

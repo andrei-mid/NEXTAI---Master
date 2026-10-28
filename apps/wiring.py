@@ -105,7 +105,17 @@ class Infra:
 
     @cached_property
     def adapters(self) -> dict[str, BaseAdapter]:
-        """One instance of every registered adapter, sharing rate limiter/cache/archive/http."""
+        """READ-ONLY adapters for agents and the identity sheet: local mirror only, no network
+        (docs/LOCAL_DATA.md)."""
+        return self._build_adapters(network=False)
+
+    @cached_property
+    def sync_adapters(self) -> dict[str, BaseAdapter]:
+        """Adapters allowed to download into the mirror. ONLY sync code uses these
+        (apps/worker/sync.py, jobs). Same rate limiter, so limits stay global."""
+        return self._build_adapters(network=True)
+
+    def _build_adapters(self, *, network: bool) -> dict[str, BaseAdapter]:
         deps = AdapterDeps(
             settings=self.settings,
             cache=self.cache,
@@ -113,6 +123,7 @@ class Infra:
             rate_limiter=self.rate_limiter,
             clock=self.clock,
             http=self.http,
+            network=network,
         )
         return {name: cls(deps) for name, cls in discover_adapters().items()}
 
