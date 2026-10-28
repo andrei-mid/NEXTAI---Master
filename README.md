@@ -25,7 +25,7 @@ curl -F cui=99000025 -F files=@some.pdf http://localhost:8000/applications   # -
 curl -N http://localhost:8000/runs/<run_id>/events                           # live agent progress (SSE)
 ```
 
-Optional services (Postgres 17 + Redis): `make up`, then set `REPOSITORY_BACKEND=postgres` in `.env` once role 1 ships the repository, and run `make db-upgrade`.
+**Real data (live mode):** Postgres 17 (`make up`, or see [infra/local/README.md](infra/local/README.md)), `make db-upgrade`, then `make seed-real` to load 6 real companies from ANAF into your own database.
 
 ## Where to read next
 

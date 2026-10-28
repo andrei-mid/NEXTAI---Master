@@ -72,6 +72,20 @@ async def test_memo_failure_keeps_the_score(monkeypatch: pytest.MonkeyPatch) -> 
     assert events[-1].done
 
 
+async def test_missing_llm_key_still_runs_the_agents(monkeypatch: pytest.MonkeyPatch) -> None:
+    """LLM_PROVIDER=anthropic without ANTHROPIC_API_KEY: agents and score still run."""
+    _fixture_identity(monkeypatch)
+    infra = build_infra(
+        Settings(fixture_mode=True, llm_provider="anthropic", anthropic_api_key=None)
+    )
+    status = await run_pipeline(_request("99000025"), infra)
+    results = await infra.repository.list_agent_results("t-99000025")
+    await infra.aclose()
+    assert status.state == RunState.COMPLETED and status.band is not None
+    assert (status.error or "").startswith("memo not generated")
+    assert {r.agent for r in results if r.status.value == "ok"} >= {"financials"}
+
+
 async def test_unexpected_crash_fails_the_run_instead_of_hanging(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
