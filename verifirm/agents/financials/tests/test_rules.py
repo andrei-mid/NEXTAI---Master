@@ -65,8 +65,22 @@ def test_headcount_uses_fallback_and_skips_zero_employees() -> None:
         rules.check_headcount(fy(2025, turnover=18_600_000, employees=0), "4941", CFG.headcount)
         is None
     )
-    f = rules.check_headcount(fy(2025, turnover=30_000_000, employees=1), "9999", CFG.headcount)
-    assert f is not None and f["caen_avg_turnover_per_employee"] == CFG.headcount.fallback_avg_ron
+    # Unlisted division: no benchmark, no comparison (real data: Hidroelectrica, Petrom, Dacia).
+    assert (
+        rules.check_headcount(fy(2025, turnover=30_000_000, employees=1), "9999", CFG.headcount)
+        is None
+    )
+    with_fallback = CFG.headcount.model_copy(update={"fallback_avg_ron": 500_000})
+    f = rules.check_headcount(fy(2025, turnover=30_000_000, employees=1), "9999", with_fallback)
+    assert f is not None and f["caen_avg_turnover_per_employee"] == 500_000
+
+
+def test_headcount_pads_caen_codes_anaf_sends_without_leading_zero() -> None:
+    """ANAF v9 sends Petrom's 0610 (oil extraction) as "610": that is division 06, not 61."""
+    table = {"06": 10_000_000}
+    cfg = CFG.headcount.model_copy(update={"caen_avg_turnover_per_employee_ron": table})
+    f = rules.check_headcount(fy(2025, turnover=600_000_000, employees=1), "610", cfg)
+    assert f is not None and f["caen_division"] == "06"
 
 
 def test_headcount_normal_company() -> None:

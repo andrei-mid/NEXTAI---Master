@@ -126,14 +126,51 @@ def _is(host: str, domains: tuple[str, ...]) -> bool:
     return any(host == d or host.endswith("." + d) for d in domains)
 
 
+# Extra words a company's own domain may carry next to its name ("dedeman-romania.ro").
+_DOMAIN_EXTRAS = {
+    "ro",
+    "romania",
+    "group",
+    "grup",
+    "online",
+    "shop",
+    "store",
+    "oficial",
+    "official",
+}
+
+
+def _name_tokens(name: str) -> set[str]:
+    folded = unicodedata.normalize("NFKD", name)
+    folded = "".join(ch for ch in folded if not unicodedata.combining(ch)).lower()
+    return {w for w in re.findall(r"[a-z0-9]+", folded) if len(w) >= 2}
+
+
+def domain_matches(label: str, company_name: str) -> bool:
+    """True if the domain label is made ONLY of words of the company's name (plus a few generic
+    extras), and at least one distinctive word. "omvpetrom" for OMV PETROM SA: yes. "getdante"
+    for DANTE INTERNATIONAL SA: no ("get" is not in the name)."""
+    tokens = _name_tokens(company_name) | _DOMAIN_EXTRAS
+    distinctive = set(company_words(company_name))
+    for part in label.split("-"):
+        # Cut `part` into known tokens: reach[i] = the prefix of length i can be cut.
+        reach = {0}
+        for i in range(len(part)):
+            if i in reach:
+                reach |= {i + len(tok) for tok in tokens if part.startswith(tok, i)}
+        if len(part) not in reach:
+            return False
+    return any(w in label for w in distinctive)
+
+
 def pick_website(results: list[WebResult], company_name: str) -> dict[str, Any] | None:
-    """The first result on a domain that carries a distinctive word of the company's name and is
-    not a directory / social network / press site. None: searched, no own website found."""
-    words = company_words(company_name)
+    """The first result on the company's OWN domain: made of its name's words (domain_matches)
+    and not a directory / social network / press site. None: searched, no own website found
+    (a brand that differs from the legal name, eMAG for DANTE INTERNATIONAL SA, is missed)."""
     for r in results:
         host = _host(r.url)
         label = host.split(".")[-2] if host.count(".") >= 1 else host
-        if host and not _is(host, NOT_OFFICIAL) and any(w in label for w in words):
+        if host and not _is(host, NOT_OFFICIAL) and domain_matches(label, company_name):
             return {"url": f"https://{host}", "address_on_site": None}
     return None
 

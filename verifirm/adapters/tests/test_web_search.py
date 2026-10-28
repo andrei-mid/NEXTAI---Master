@@ -225,3 +225,27 @@ async def test_search_reads_the_mirror_for_agents(tmp_path: Path) -> None:
 async def test_fixture_search_serves_media_json(tmp_path: Path) -> None:
     results = await adapter(tmp_path).search("Zephyria Logistic Nova")
     assert results and all(r.provider == "fixture" for r in results)
+
+
+@pytest.mark.parametrize(
+    ("label", "name", "own"),
+    [
+        ("dedeman", "DEDEMAN SRL", True),
+        ("omvpetrom", "OMV PETROM SA", True),
+        (
+            "hidroelectrica",
+            'SOCIETATEA DE PRODUCERE A ENERGIEI ELECTRICE IN HIDROCENTRALE " HIDROELECTRICA" S.A.',
+            True,
+        ),
+        ("dacia", "AUTOMOBILE-DACIA SA", True),
+        ("altex-romania", "ALTEX ROMANIA SRL", True),
+        ("getdante", "DANTE INTERNATIONAL SA", False),  # real false match seen on live data
+        ("dantelabs", "DANTE INTERNATIONAL SA", False),
+        ("emag", "DANTE INTERNATIONAL SA", False),  # brand differs from the legal name: missed
+        ("romania", "ALTEX ROMANIA SRL", False),  # only generic words, nothing distinctive
+    ],
+)
+def test_domain_must_be_made_of_the_companys_name(label: str, name: str, own: bool) -> None:
+    from verifirm.adapters.web_search import domain_matches
+
+    assert domain_matches(label, name) is own

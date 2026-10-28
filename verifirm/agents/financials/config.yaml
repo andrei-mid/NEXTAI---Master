@@ -41,4 +41,8 @@ headcount:                    # FIN-HEADCOUNT-01: turnover per employee far abov
     "62": 350000    # IT services
     "64": 1000000   # financial / holdings
     "82": 200000    # business support services
-  fallback_avg_ron: 500000    # divisions not listed above
+  # Divisions not listed above: NO comparison (null). A generic 500,000 RON average flagged
+  # Hidroelectrica, Petrom and Dacia on real data (2026-10-29): capital-heavy sectors (energy,
+  # oil, car making) naturally have very high turnover per employee. Add a division to the
+  # table (INS data) to check it.
+  fallback_avg_ron: null
