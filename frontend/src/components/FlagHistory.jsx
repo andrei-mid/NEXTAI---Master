@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { REVIEW_OPTIONS } from './ReviewPanel.jsx';
 import AnalystName from './AnalystName.jsx';
 import { getAnalyst } from '../mock/analysts.js';
@@ -31,7 +32,8 @@ function Row({ outcome, who, date, children }) {
 
 /**
  * Reviews that raised a flag plus the messages sent about this company, newest first.
- * Closed by default: the analyst opens it only when they want the history.
+ * Closed by default: the analyst opens it only when they want the history. It opens by itself
+ * when a new entry arrives (a review just recorded, a message just sent), so it is seen.
  * companyName: used in the subject of the e-mail to the analyst who made a review.
  * analystId: the signed-in account (no e-mail link to yourself).
  */
@@ -45,8 +47,19 @@ export default function FlagHistory({ entries, messages = [], cui, companyName, 
     ...messages.map((m) => ({ kind: 'message', at: m.sent_at, m })),
   ].sort((a, b) => b.at.localeCompare(a.at));
 
+  const [open, setOpen] = useState(false);
+  const seen = useRef(rows.length);
+  useEffect(() => {
+    if (rows.length > seen.current) setOpen(true);
+    seen.current = rows.length;
+  }, [rows.length]);
+
   return (
-    <details className="card section-toggle">
+    <details
+      className="card section-toggle"
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+    >
       <summary className="card-head">
         <h3>Flag history</h3>
         <span className="sidebar-count">{rows.length}</span>

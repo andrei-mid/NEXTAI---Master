@@ -12,6 +12,7 @@ import { MessagingContext, loadMessages, saveMessages } from './messaging.js';
 import { loadStored, saveStored } from './storage.js';
 
 const REVIEWS_KEY = 'verifirm.reviews.v1';
+const SIDEBAR_KEY = 'verifirm.sidebarCollapsed';
 
 const VIEWS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -31,6 +32,7 @@ export default function App() {
   const [messages, setMessages] = useState(loadMessages);
   const [chatWith, setChatWith] = useState(null);
   const [draftAlert, setDraftAlert] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadStored(SIDEBAR_KEY, false));
 
   useEffect(() => {
     getCompanies()
@@ -44,6 +46,7 @@ export default function App() {
 
   useEffect(() => saveMessages(messages), [messages]);
   useEffect(() => saveStored(REVIEWS_KEY, reviews), [reviews]);
+  useEffect(() => saveStored(SIDEBAR_KEY, sidebarCollapsed), [sidebarCollapsed]);
 
   const selected = items.find((c) => c.cui === selectedCui);
   const unread = messages.filter((m) => m.to === analystId && !m.read).length;
@@ -170,7 +173,13 @@ export default function App() {
 
       {view === 'alerts' && (
         <div className="shell">
-          <AlertsSidebar items={items} selectedCui={selectedCui} onSelect={setSelectedCui} />
+          <AlertsSidebar
+            items={items}
+            selectedCui={selectedCui}
+            onSelect={setSelectedCui}
+            collapsed={sidebarCollapsed}
+            onToggle={() => setSidebarCollapsed((c) => !c)}
+          />
 
           <main className="content">
             <p className="tagline">Prototype · a human analyst decides</p>

@@ -384,6 +384,15 @@ h2 {
   }
 }
 
+.review-confirm {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  color: #6fdc9b;
+  background: #1c3a2a;
+  border-radius: 6px;
+}
+
 .review-as {
   margin: 0 0 12px;
 }
@@ -463,6 +472,56 @@ h2 {
   border: 1px dashed var(--sev-info);
   border-radius: 8px;
   background: var(--sev-info-bg);
+}
+
+.inconclusive-box p {
+  margin: 0 0 8px;
+}
+
+/* What a check covered: components and cited sources */
+
+.checked-sources {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.checked-sources > div {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.checked-sources dt {
+  color: var(--muted);
+}
+
+.checked-sources dd {
+  margin: 0;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
+.checked-sources a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.checked-sources a:hover {
+  text-decoration: underline;
+}
+
+.source-missing-inline {
+  color: var(--sev-critical);
+}
+
+@media (max-width: 600px) {
+  .checked-sources > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }
 
 .source-list {
@@ -718,6 +777,61 @@ h2 {
   border-radius: 999px;
   background: var(--border);
   color: var(--text);
+}
+
+/* Collapse button, and the thin strip left when the list is hidden */
+
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.sidebar-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sidebar.is-collapsed {
+  width: 48px;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.sidebar.is-collapsed .sidebar-toggle {
+  margin-left: 0;
+}
+
+.sidebar-rail-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .alert-list {
@@ -1507,6 +1621,18 @@ th {
     max-height: 50vh;
     border-right: 0;
     border-bottom: 1px solid var(--border);
+  }
+
+  /* Stacked on a phone: the collapsed strip is a short horizontal bar. */
+  .sidebar.is-collapsed {
+    width: 100%;
+    flex-direction: row;
+    padding: 8px 16px;
+  }
+
+  .sidebar-rail-label {
+    writing-mode: horizontal-tb;
+    transform: none;
   }
 }
 

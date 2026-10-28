@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import SourceLink from './SourceLink.jsx';
+import CheckedSources from './CheckedSources.jsx';
 import { coverageLabel, formatUtc } from '../format.js';
 import { severityRank } from '../severity.js';
 
@@ -26,7 +27,7 @@ function componentLabel(component) {
 }
 
 /** Signals from GET /companies/{cui}/signals. null = no data yet (404). Collapsed rows; click to open. */
-export default function ClaimsList({ claims, lastChecked, coverage }) {
+export default function ClaimsList({ claims, lastChecked, coverage, company }) {
   const [sort, setSort] = useState('importance');
   const unsourced = (claims ?? []).filter((c) => !c.source?.url).length;
   const sorted = claims ? [...claims].sort(SORTS[sort].compare) : null;
@@ -58,10 +59,13 @@ export default function ClaimsList({ claims, lastChecked, coverage }) {
         <p className="muted">Not checked yet: no signals available for this company.</p>
       )}
       {claims?.length === 0 && (
-        <p className="muted">
-          No signals found in the checked sources as of {formatUtc(lastChecked)}
-          {coverage && <> ({coverageLabel(coverage)} checked)</>}.
-        </p>
+        <>
+          <p className="muted">
+            No signals found as of {formatUtc(lastChecked)}.
+            {coverage && <> Checked: {coverageLabel(coverage)}.</>}
+          </p>
+          {company && <CheckedSources company={company} />}
+        </>
       )}
 
       {sorted?.length > 0 && (
