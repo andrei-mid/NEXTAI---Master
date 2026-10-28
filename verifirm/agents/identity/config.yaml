@@ -1,0 +1,14 @@
+# Identity agent thresholds. ALL VALUES ARE A PROPOSAL (docs/DECISIONS.md).
+# Loaded by verifirm/agents/identity/rules.py:load_config. Change values here, not in code.
+
+# "In the last 12 months" for ID-REACTIVATED-01, ID-ADMIN-CHANGE-01, ID-OFFICE-CHANGE-01.
+window_days: 365
+
+# ID-SHARED-OFFICE-01: companies registered at the same address (the company included).
+shared_office_min_companies: 20
+
+# Signal confidence when ANAF and ONRC disagree on the same fact (e.g. deregistration).
+conflict_confidence: 0.6
+
+# Signal confidence when the data is a stale mirror copy (older than mirror_max_age_s).
+stale_confidence: 0.8

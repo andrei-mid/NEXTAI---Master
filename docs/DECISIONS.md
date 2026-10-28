@@ -47,3 +47,5 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | Port for bulk tables (ONRC / sanctions / SEAP / Kohesio lookups) | role 1 + 2 | Adapters need local lookup tables. Today that is implicit in `persistence`. Decide whether it becomes a port |
 | SQS dedupe strategy | role 2 | FIFO queue + MessageDeduplicationId vs standard queue + Repository idempotency |
 | Real handles for CODEOWNERS | team | Replace the `@role-N-…` placeholders |
+| Identity thresholds | role 3 | `verifirm/agents/identity/config.yaml` (PROPOSAL): `window_days` 365, `shared_office_min_companies` 20, `conflict_confidence` 0.6, `stale_confidence` 0.8. Same pattern as `agents/financials/config.yaml` |
+| `onrc_bulk` per-company contract | role 1 + role 3 | The identity agent reads `onrc_bulk.company(cui)` in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...) and `None` for not found. It passes the **raw** ONRC address to `companies_at_address()`, so normalization should happen inside the adapter. Confirm or propose another shape |

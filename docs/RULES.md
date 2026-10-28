@@ -22,8 +22,9 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 | `ID-OFFICE-CHANGE-01` | low |  | Registered office changed in the last 12 months | onrc_bulk, anaf_v9 |
 | `ID-SHARED-OFFICE-01` | medium |  | Registered office shared by >= 20 companies (threshold configurable) | onrc_bulk |
 | `ID-CAEN-UNAUTH-01` | medium |  | Main CAEN activity not among authorized CAEN codes (Rev.2<->Rev.3 mapped) | onrc_bulk |
-| `ID-STATUS-01` | high |  | ONRC status is not active (dissolution, suspension, deregistered...) | onrc_bulk |
+| `ID-STATUS-01` | high (per status: deregistered/bankruptcy critical, insolvency/dissolution high, suspended medium, unknown high) |  | ONRC status is not active (dissolution, suspension, deregistered...). Deregistration cross-checked with ANAF `dataRadiere`: on disagreement the worse value wins, `sources_agree=false` | onrc_bulk, anaf_v9 |
 | `ID-NATURAL-PERSON-01` | info |  | Legal form PFA/II/IF: route to the natural-person flow (AI Act) | onrc_bulk, anaf_v9 |
+| `ID-SOURCE-MISMATCH-01` | high |  | ANAF and ONRC disagree on CUI, register number (old Jxx/nnn/yyyy format only) or name: possible wrong entity | anaf_v9, onrc_bulk |
 
 ### financials
 
