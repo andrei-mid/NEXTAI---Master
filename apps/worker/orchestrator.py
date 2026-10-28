@@ -153,15 +153,30 @@ async def run_pipeline(request: RunRequest, infra: Infra, publish: Publish = _no
                 score=run_score,
                 generated_at=clock.now(),
             )
-            memo = await write_memo(report, infra.llm, settings.model_for("memo"))
-            await publish(AgentProgressEvent(run_id=request.run_id, agent="memo"))
-            memo = await verify_memo(memo, report, infra.llm, settings.model_for("critic"))
-            await repo.save_memo(memo)
-            await publish(AgentProgressEvent(run_id=request.run_id, agent="critic"))
+            # The score is deterministic and already saved: a memo failure (LLM down, invalid
+            # output, no API key) must not throw it away. The run completes without a memo.
+            try:
+                memo = await write_memo(report, infra.llm, settings.model_for("memo"))
+                await publish(AgentProgressEvent(run_id=request.run_id, agent="memo"))
+                memo = await verify_memo(memo, report, infra.llm, settings.model_for("critic"))
+                await repo.save_memo(memo)
+                await publish(AgentProgressEvent(run_id=request.run_id, agent="critic"))
+            except NotImplementedError:
+                raise
+            except Exception as exc:
+                log.warning("memo step failed, run completes without a memo", exc_info=True)
+                return await finish(
+                    RunState.COMPLETED,
+                    band=run_score.band,
+                    error=f"memo not generated: {type(exc).__name__}: {exc}"[:500],
+                )
         except NotImplementedError:
             log.warning("pipeline step not implemented yet", exc_info=True)
             return await finish(RunState.FAILED, error="a pipeline step is not implemented yet")
         except SourceUnavailable as exc:
             return await finish(RunState.FAILED, error=f"required source unavailable: {exc}")
+        except Exception as exc:  # never leave a run hanging: the SSE stream needs its `done`
+            log.exception("pipeline step crashed")
+            return await finish(RunState.FAILED, error=f"{type(exc).__name__}: {exc}"[:500])
 
         return await finish(RunState.COMPLETED, band=run_score.band)

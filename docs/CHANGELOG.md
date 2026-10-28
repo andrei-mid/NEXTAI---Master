@@ -6,9 +6,9 @@
 
 ## 2026-10-28: `onrc_bulk` works in fixture mode (role 1)
 
-**What:** `verifirm/adapters/onrc_bulk.py` READ methods are implemented for `FIXTURE_MODE=1`. The per-company contract is now DECIDED in `docs/DECISIONS.md`.
+**What:** `verifirm/adapters/onrc_bulk.py` READ methods are implemented for `FIXTURE_MODE=1` (this replaces role 2's first fixture version below, same behaviour plus more). The per-company contract is now DECIDED in `docs/DECISIONS.md`.
 
-- `company(cui)`: `onrc.json` when the company has a fixture folder, otherwise a record built from `fixtures/sources/onrc/*_sample.csv` (so the 63 shell companies and the affiliates resolve too). `None` = not in ONRC.
+- `company(cui)`: `onrc.json` when the company has one, otherwise a record built from `fixtures/sources/onrc/*_sample.csv` (so the 63 shell companies and the affiliates resolve too). A fixture folder without either (Dedeman) → `None`. A CUI with no fixture data at all → `SourceUnavailable` (kept from role 2's version: in fixture mode we can't say it's not in ONRC).
 - `companies_at_address(raw)`: normalizes inside (`normalize_address`: diacritics, case, `Strada`/`Str.`, `Bulevardul`/`B-dul`/`Bd.`, `nr.`). Zephyria's office → 63 CUIs.
 - `companies_of_person(name)`: affiliations with `stare` and `match {method, score, ambiguous}`. Ionel Fictivescu → Zephyria + 5 affiliates.
 - `iter_rows(path)`: streaming parser for the real files (delimiter + UTF-8/cp1250 sniffed, malformed lines counted). Used next by `ingest_onrc`.
@@ -17,8 +17,33 @@
 
 **What you must do:**
 - **Role 3:** you can replace `FakeOnrc` in `agents/identity/tests/` with `OnrcBulkAdapter` (fixture mode). The network agent can use `companies_of_person`.
-- **Role 5:** `identity_sheet` can read `onrc_bulk.company(cui)` now.
-- **Role 2:** please review the bulk-lookup port proposal in `docs/DECISIONS.md` (PENDING, "Port for bulk tables").
+- **Role 5:** `identity_sheet` already reads `onrc_bulk.company(cui)`: nothing to change.
+- **Role 2:** please review the bulk-lookup port proposal in `docs/DECISIONS.md` (PENDING, "Port for bulk tables"). It is what the live branch of `onrc_bulk` needs to read the tables.
+
+---
+
+## 2026-10-28: Live end to end: ANAF → mirror → agents → Postgres → API (role 2, with role 3/5 pieces)
+
+**What works now (tested on DEDEMAN SRL with real ANAF data):** `POST /companies/{cui}/recheck` → sync downloads ANAF v9 + 6 balance sheets into the local mirror → identity sheet → 8 agents → scoring → saved in Postgres → `GET /companies` serves it. Guide: [infra/local/README.md](../infra/local/README.md).
+
+- `verifirm/adapters/anaf_v9.py` (**role 3: done by role 2**): `lookup`, `sync`, `lookup_batch` (100/POST, one mirror entry per CUI). Tests: `adapters/tests/test_anaf_v9.py`. @role-3: the `sweep_anaf_v9` job can now call `lookup_batch`.
+- `verifirm/consolidation/identity_sheet.py` (**role 5: done by role 2**): built from ANAF v9 (required) + ONRC (optional) + mock shareholders (optional). Tests: `consolidation/tests/test_identity_sheet.py`. @role-5: extend freely.
+- `verifirm/adapters/onrc_bulk.py` (**role 1**): `company()` and `companies_at_address()` read fixtures in FIXTURE_MODE. Live they report unavailable until `ingest_onrc` exists. @role-1: replace the live branch with table reads.
+- `EMBEDDED_WORKER=1`: the API runs the queue consumer in-process (single box, in-memory queue). `apps/api/main.py`.
+- **Tests never touch your dev database any more:** `./conftest.py` swaps `DATABASE_URL` for `TEST_DATABASE_URL` (see `.env.example`). Persistence tests insert rows they never delete, and they used to fill the dev portfolio with test companies.
+- `tests/e2e` now runs the whole pipeline and skips with the list of agents still missing: tax, network, litigation, sanctions, media, presence.
+
+**What you must do:** local Postgres users: create `verifirm_test` and set `TEST_DATABASE_URL`. Agent authors: your agent is the only thing missing for its component. Copy `agents/financials/` + `adapters/anaf_bilant.py`.
+
+---
+
+## 2026-10-28: Pipeline never hangs on a memo/LLM failure (role 2)
+
+**What:** `apps/worker/orchestrator.py`. If the memo or critic step raises (LLM down, invalid output, no API key), the run now ends **COMPLETED** with its deterministic score saved and `RunStatus.error = "memo not generated: …"`. Any other unexpected exception ends the run **FAILED** with the error. Before, both escaped `run_pipeline`: the worker retried, and the SSE stream never sent `done`.
+
+**What you must do:** role 5 / frontend: a completed run can have no memo (`GET /companies/{cui}/memo` → 404). Show "memo unavailable" and keep showing the score. Tests: `apps/worker/tests/test_orchestrator.py`.
+
+**Integration status (smoke test on the demo companies, fixture mode):** only `financials` produces signals end to end. `identity` is implemented but reports unavailable until the `anaf_v9` + `onrc_bulk` adapters exist (roles 3/1). `consolidation/identity_sheet.py` (role 5) is still a stub, so the full pipeline stops at step 2 and `tests/e2e` stays skipped.
 
 ---
 

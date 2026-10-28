@@ -165,9 +165,14 @@ async def test_sample_record_has_same_keys_as_onrc_json(tmp_path: Path) -> None:
         assert built[key] == curated[key], key
 
 
-async def test_company_not_in_onrc_is_none(tmp_path: Path) -> None:
-    got = await _adapter(tmp_path).company("99009999")
+async def test_company_folder_without_onrc_data_is_none(tmp_path: Path) -> None:
+    got = await _adapter(tmp_path).company("2816464")  # Dedeman: real, no committed ONRC data
     assert got.data is None
+
+
+async def test_cui_without_any_fixture_is_unavailable(tmp_path: Path) -> None:
+    with pytest.raises(SourceUnavailable, match="no ONRC fixture"):
+        await _adapter(tmp_path).company("99009999")
 
 
 async def test_zephyria_office_is_shared_by_63(tmp_path: Path) -> None:

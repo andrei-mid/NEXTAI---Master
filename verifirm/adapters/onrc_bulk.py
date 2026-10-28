@@ -26,7 +26,9 @@ Per-company record (`company(cui)`), the `fixtures/companies/*/onrc.json` shape:
 Where the READ methods get their data:
 - FIXTURE_MODE=1: fixtures/companies/<cui>_<slug>/onrc.json when it exists, otherwise a record
   built from fixtures/sources/onrc/*_sample.csv (same columns as the real files, fictional
-  rows). Address and person lookups use the sample CSVs.
+  rows). A company folder with neither -> None. A CUI with no fixture data at all ->
+  SourceUnavailable (the fixtures are not the whole register). Address and person lookups use
+  the sample CSVs.
 - Otherwise: the Postgres onrc_* tables loaded by apps/worker/jobs/ingest_onrc.py. Adapters may
   not import persistence (tests/architecture/test_imports.py), so this needs the bulk-lookup
   port (PENDING in docs/DECISIONS.md). Until then the READ methods raise SourceUnavailable,
@@ -400,7 +402,11 @@ class OnrcBulkAdapter(BaseAdapter):
             )
             return Sourced(result.json(), result.source, stale=result.stale)
         index, source = await self._sample_index()
-        return Sourced(index.record(cui), source)
+        record = index.record(cui)
+        if record is None and self.company_fixture_dir(cui) is None:
+            # Fixtures are not the whole register: no data at all is unknown, not "not in ONRC".
+            raise SourceUnavailable(self.name, f"no ONRC fixture for {cui}")
+        return Sourced(record, source)
 
     async def companies_at_address(self, normalized_address: str) -> Sourced[list[str]]:
         """CUIs registered at the same address (rule ID-SHARED-OFFICE-01), the company itself
