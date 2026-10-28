@@ -4,15 +4,22 @@ from verifirm.core import registry
 
 
 def test_duplicate_agent_name_is_rejected() -> None:
-    @registry.register_agent("__test_dup")
-    class A:
-        pass
-
-    with pytest.raises(registry.RegistryError):
+    try:
 
         @registry.register_agent("__test_dup")
-        class B:
+        class A:
             pass
+
+        with pytest.raises(registry.RegistryError):
+
+            @registry.register_agent("__test_dup")
+            class B:
+                pass
+
+    finally:
+        # The registry is global: a leftover fake agent would be run by the orchestrator in
+        # every later test of the same session.
+        registry._agents.pop("__test_dup", None)
 
 
 def test_discovery_finds_all_eight_agents() -> None:

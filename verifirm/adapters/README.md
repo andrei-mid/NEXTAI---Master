@@ -18,9 +18,9 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | Adapter | Kind | Status | How data gets to the server |
 |---|---|---|---|
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
-| `anaf_v9` | batch per company | stub | `sweep_anaf_v9` job (100 CUIs/call) → `store_in_mirror` per CUI; `sync()` for single applicants |
+| `anaf_v9` | batch per company | **implemented** | `sync()` = 1 POST per applicant; `lookup_batch()` = 100 CUIs/POST + one mirror entry per CUI (for the `sweep_anaf_v9` job, still a stub); `lookup()` reads the mirror |
 | `anaf_efactura_registry` | per company | stub | probably derived from the v9 mirror entry (no extra call) |
-| `onrc_bulk` | bulk | stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
+| `onrc_bulk` | bulk | **fixture reads only** | `company()` + `companies_at_address()` read `fixtures/` in FIXTURE_MODE. Live: reports unavailable until `ingest_onrc` (role 1) loads the tables. `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |
 | `scj` | per company, time window | stub | nightly batch 03:30–06:30 → mirror. `sync()` no-op outside the window |
 | `sanctions_eu/un/ofac` | bulk | stub | `ingest_sanctions` job. `sync()` no-op |
