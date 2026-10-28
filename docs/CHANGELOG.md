@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-10-28: AI analyst opinion: dossier + LLM opinion + citation checks (role 1, steps 0-3) · CONTRACT ADDITION
+
+**What:** an LLM reads a company dossier built by code and returns its educated opinion: flags with evidence, an `opinion_score` 0-100 and an explanation. DECIDED in `docs/DECISIONS.md` ("AI analyst opinion"). Code: `verifirm/consolidation/analyst/` (README there).
+
+- **`schema/analyst.py` (new, role 2's folder):** `CompanyDossier`, `AnalystDraft`, `AnalystOpinion`, `DISCLAIMER`. Exported to `docs/schema/`.
+- **`core/config.py` (role 2's folder):** `LLM_MODEL_ANALYST`, `model_for("analyst")`. In `.env.example`.
+- The dossier compares ANAF with ONRC field by field (`match` true / false / null), lists the changes between the quarterly ANAF v9 snapshots, and has /bilant years plus indicators **computed in code**. People are aliases, never real names.
+- Every flag must cite dossier paths whose values check out, and every number in it must be in its evidence; otherwise it is rejected with the reason. Severity is capped at `high`, there is no decision wording, and the disclaimer is added by code.
+- **The official score and band are unchanged** (hard rule 8). The opinion is shown next to them.
+
+**What you must do:**
+- **Role 5:** the pipeline step (after scoring, like the memo) and `GET /companies/{cui}/analyst-opinion`. `write_opinion` raises on invalid output, so catch it like the memo step.
+- **Role 2:** review the two files in your folders.
+- **Everyone running it:** set `LLM_MODEL_ANALYST` in `.env` to a large model.
+
+---
+
 ## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
 
 **What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.

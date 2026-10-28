@@ -75,6 +75,7 @@ class Settings(BaseSettings):
     llm_model_memo: str | None = None
     llm_model_critic: str | None = None
     llm_model_classify: str | None = None
+    llm_model_analyst: str | None = None  # AI analyst opinion (docs/DECISIONS.md)
 
     # --- web search (D10: Tavily)
     web_search_provider: Literal["tavily", "fixture"] = "tavily"
@@ -90,11 +91,12 @@ class Settings(BaseSettings):
     def max_age_for(self, adapter: str, default: int | None = None) -> int:
         return self.mirror_max_age_overrides_s.get(adapter, default or self.mirror_max_age_s)
 
-    def model_for(self, task: Literal["memo", "critic", "classify"]) -> str:
+    def model_for(self, task: Literal["memo", "critic", "classify", "analyst"]) -> str:
         specific = {
             "memo": self.llm_model_memo,
             "critic": self.llm_model_critic,
             "classify": self.llm_model_classify,
+            "analyst": self.llm_model_analyst,
         }[task]
         return specific or self.llm_model_default
 

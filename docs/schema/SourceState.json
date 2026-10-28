@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "status": {
+      "title": "Status",
+      "type": "string"
+    },
+    "retrieved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retrieved At"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    }
+  },
+  "required": [
+    "status"
+  ],
+  "title": "SourceState",
+  "type": "object"
+}

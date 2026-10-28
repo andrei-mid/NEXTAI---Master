@@ -1,0 +1,664 @@
+{
+  "$defs": {
+    "AnafSnapshot": {
+      "description": "ANAF v9 as it was on one date (today + the last quarter-ends).",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Name"
+        },
+        "address": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Address"
+        },
+        "caen_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Caen Code"
+        },
+        "registration_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Registration Status"
+        },
+        "vat_payer": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Vat Payer"
+        },
+        "inactive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Inactive"
+        },
+        "found": {
+          "default": true,
+          "title": "Found",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "address",
+        "caen_code",
+        "registration_status",
+        "vat_payer",
+        "inactive"
+      ],
+      "title": "AnafSnapshot",
+      "type": "object"
+    },
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "CrossCheck": {
+      "description": "One identity fact as each official source publishes it.",
+      "properties": {
+        "anaf": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Anaf"
+        },
+        "onrc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Onrc"
+        },
+        "match": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Match"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "anaf",
+        "onrc",
+        "match"
+      ],
+      "title": "CrossCheck",
+      "type": "object"
+    },
+    "DossierPerson": {
+      "properties": {
+        "alias": {
+          "title": "Alias",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "valid_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid From"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Valid To"
+        }
+      },
+      "required": [
+        "alias",
+        "role",
+        "valid_from",
+        "valid_to"
+      ],
+      "title": "DossierPerson",
+      "type": "object"
+    },
+    "DossierSignal": {
+      "properties": {
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "agent": {
+          "title": "Agent",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "evidence_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Evidence Date"
+        },
+        "validated": {
+          "title": "Validated",
+          "type": "boolean"
+        },
+        "source_type": {
+          "title": "Source Type",
+          "type": "string"
+        },
+        "data": {
+          "additionalProperties": true,
+          "title": "Data",
+          "type": "object"
+        }
+      },
+      "required": [
+        "rule_id",
+        "agent",
+        "severity",
+        "claim",
+        "evidence_date",
+        "validated",
+        "source_type"
+      ],
+      "title": "DossierSignal",
+      "type": "object"
+    },
+    "DossierYear": {
+      "description": "One /bilant year. filed=False: nothing filed. filed=None: the year could not be read.",
+      "properties": {
+        "filed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Filed"
+        },
+        "turnover": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turnover"
+        },
+        "net_profit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Net Profit"
+        },
+        "total_debts": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Debts"
+        },
+        "equity": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equity"
+        },
+        "share_capital": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Share Capital"
+        },
+        "employees": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Employees"
+        }
+      },
+      "required": [
+        "filed"
+      ],
+      "title": "DossierYear",
+      "type": "object"
+    },
+    "OfficialScore": {
+      "properties": {
+        "trust_score": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Trust Score"
+        },
+        "band": {
+          "$ref": "#/$defs/Band"
+        },
+        "coverage": {
+          "title": "Coverage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "trust_score",
+        "band",
+        "coverage"
+      ],
+      "title": "OfficialScore",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SnapshotChange": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "date_from": {
+          "format": "date",
+          "title": "Date From",
+          "type": "string"
+        },
+        "date_to": {
+          "format": "date",
+          "title": "Date To",
+          "type": "string"
+        },
+        "old": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Old"
+        },
+        "new": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "New"
+        }
+      },
+      "required": [
+        "field",
+        "date_from",
+        "date_to",
+        "old",
+        "new"
+      ],
+      "title": "SnapshotChange",
+      "type": "object"
+    },
+    "SourceState": {
+      "properties": {
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retrieved At"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "SourceState",
+      "type": "object"
+    },
+    "YearIndicators": {
+      "description": "Computed in code from DossierYear (rounded as shown), None when not computable.",
+      "properties": {
+        "turnover_growth_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turnover Growth Pct"
+        },
+        "net_margin_pct": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Net Margin Pct"
+        },
+        "equity_to_share_capital": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Equity To Share Capital"
+        },
+        "turnover_per_employee": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Turnover Per Employee"
+        },
+        "debts_to_turnover": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Debts To Turnover"
+        }
+      },
+      "title": "YearIndicators",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "cui": {
+      "title": "Cui",
+      "type": "string"
+    },
+    "fictional": {
+      "title": "Fictional",
+      "type": "boolean"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "legal_form": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Legal Form"
+    },
+    "cross_checks": {
+      "additionalProperties": {
+        "$ref": "#/$defs/CrossCheck"
+      },
+      "title": "Cross Checks",
+      "type": "object"
+    },
+    "anaf_snapshots": {
+      "additionalProperties": {
+        "$ref": "#/$defs/AnafSnapshot"
+      },
+      "title": "Anaf Snapshots",
+      "type": "object"
+    },
+    "anaf_changes": {
+      "items": {
+        "$ref": "#/$defs/SnapshotChange"
+      },
+      "title": "Anaf Changes",
+      "type": "array"
+    },
+    "financials": {
+      "additionalProperties": {
+        "$ref": "#/$defs/DossierYear"
+      },
+      "title": "Financials",
+      "type": "object"
+    },
+    "indicators": {
+      "additionalProperties": {
+        "$ref": "#/$defs/YearIndicators"
+      },
+      "title": "Indicators",
+      "type": "object"
+    },
+    "administrators": {
+      "items": {
+        "$ref": "#/$defs/DossierPerson"
+      },
+      "title": "Administrators",
+      "type": "array"
+    },
+    "sources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/SourceState"
+      },
+      "title": "Sources",
+      "type": "object"
+    },
+    "agents": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Agents",
+      "type": "object"
+    },
+    "signals": {
+      "additionalProperties": {
+        "$ref": "#/$defs/DossierSignal"
+      },
+      "title": "Signals",
+      "type": "object"
+    },
+    "official_score": {
+      "$ref": "#/$defs/OfficialScore"
+    }
+  },
+  "required": [
+    "cui",
+    "fictional",
+    "run_id",
+    "generated_at",
+    "name",
+    "legal_form",
+    "cross_checks",
+    "anaf_snapshots",
+    "anaf_changes",
+    "financials",
+    "indicators",
+    "administrators",
+    "sources",
+    "agents",
+    "signals",
+    "official_score"
+  ],
+  "title": "CompanyDossier",
+  "type": "object"
+}

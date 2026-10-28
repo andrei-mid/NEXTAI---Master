@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "field": {
+      "title": "Field",
+      "type": "string"
+    },
+    "date_from": {
+      "format": "date",
+      "title": "Date From",
+      "type": "string"
+    },
+    "date_to": {
+      "format": "date",
+      "title": "Date To",
+      "type": "string"
+    },
+    "old": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Old"
+    },
+    "new": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "New"
+    }
+  },
+  "required": [
+    "field",
+    "date_from",
+    "date_to",
+    "old",
+    "new"
+  ],
+  "title": "SnapshotChange",
+  "type": "object"
+}

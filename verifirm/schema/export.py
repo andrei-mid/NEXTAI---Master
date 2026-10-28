@@ -8,9 +8,9 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from verifirm.schema import api, financials, identity, memo, runs, scoring, signals
+from verifirm.schema import analyst, api, financials, identity, memo, runs, scoring, signals
 
-MODULES = [signals, identity, financials, scoring, memo, runs, api]
+MODULES = [signals, identity, financials, scoring, memo, runs, api, analyst]
 
 
 def contract_models() -> dict[str, type[BaseModel]]:

@@ -1,0 +1,106 @@
+{
+  "$defs": {
+    "AnalystFlag": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/FlagCategory"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "claim",
+        "category",
+        "severity",
+        "evidence"
+      ],
+      "title": "AnalystFlag",
+      "type": "object"
+    },
+    "Citation": {
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "value"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "FlagCategory": {
+      "enum": [
+        "cross_source_mismatch",
+        "financial_inconsistency",
+        "suspicious_change",
+        "data_gap",
+        "other"
+      ],
+      "title": "FlagCategory",
+      "type": "string"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "description": "What the LLM returns (validated). Everything else is added by code.",
+  "properties": {
+    "flags": {
+      "items": {
+        "$ref": "#/$defs/AnalystFlag"
+      },
+      "title": "Flags",
+      "type": "array"
+    },
+    "opinion_score": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Opinion Score",
+      "type": "integer"
+    },
+    "explanation": {
+      "title": "Explanation",
+      "type": "string"
+    }
+  },
+  "required": [
+    "flags",
+    "opinion_score",
+    "explanation"
+  ],
+  "title": "AnalystDraft",
+  "type": "object"
+}
