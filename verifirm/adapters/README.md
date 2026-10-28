@@ -20,7 +20,7 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
 | `anaf_v9` | batch per company | **implemented** | READ `lookup` / `lookup_batch` (mirror only, key = CUI). `sync()`: 1 request per applicant. `lookup_batch` on a network adapter: 100 CUIs per request → `store_in_mirror` per CUI (for the `sweep_anaf_v9` job, still a stub). Never retries a 429. Role 2 and role 3 versions merged |
 | `anaf_efactura_registry` | per company | **implemented** | derived from the v9 mirror entry (`statusRO_e_Factura`). No call, no sync of its own |
-| `onrc_bulk` | bulk | **fixture reads only** | `company()` + `companies_at_address()` read `fixtures/` in FIXTURE_MODE. Live: reports unavailable until `ingest_onrc` (role 1) loads the tables. `sync()` no-op |
+| `onrc_bulk` | bulk | **fixture reads only** (`company`, `companies_at_address`, `companies_of_person`, streaming `iter_rows`). Live: reports unavailable until `ingest_onrc` (role 1) loads the tables and the bulk-lookup port (PENDING) lets the adapter read them. `download()` stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |
 | `scj` | per company, time window | stub | nightly batch 03:30–06:30 → mirror. `sync()` no-op outside the window |
 | `sanctions_eu/un/ofac` | bulk | stub | `ingest_sanctions` job. `sync()` no-op |

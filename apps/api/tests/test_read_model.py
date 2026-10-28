@@ -192,3 +192,84 @@ async def test_live_sse_closes_when_the_run_already_ended() -> None:
     events = [chunk async for chunk in _live_events(infra, "run_x")]
     assert len(events) == 1 and '"done":true' in events[0]
     await infra.aclose()
+
+
+# ---------------------------------------------------------------------- time travel
+def checkpoint(month: int) -> datetime:
+    return datetime(2026, month, 15, 9, 0, tzinfo=UTC)
+
+
+async def seeded_history() -> RepoReadModel:
+    """Brunaldo checked in January (green), June (yellow) and September (red). Each run knows
+    one more fact, dated the 1st of its month."""
+    repo = MemoryRepository()
+    await repo.save_identity_sheet("run_1", identity())
+    facts: list[Signal] = []
+    for n, (month, band) in enumerate(((1, Band.GREEN), (6, Band.YELLOW), (9, Band.RED)), start=1):
+        facts.append(
+            sig(f"TAX-ARREARS-01:{month}", Severity.HIGH).model_copy(
+                update={"evidence_date": date(2026, month, 1)}
+            )
+        )
+        await repo.save_agent_result(
+            f"run_{n}",
+            AgentResult(
+                agent="tax",
+                component=Component.TAX,
+                status=AgentStatus.OK,
+                sources_checked=["anaf"],
+                sources_failed=[],
+                signals=list(facts),
+                duration_ms=1,
+            ),
+        )
+        await repo.save_score(
+            score().model_copy(
+                update={"run_id": f"run_{n}", "band": band, "computed_at": checkpoint(month)}
+            )
+        )
+    return RepoReadModel(repo)
+
+
+async def test_list_as_of_shows_the_band_known_that_day() -> None:
+    rm = await seeded_history()
+    before = await rm.list_companies(
+        band=None, q=None, page=1, page_size=10, as_of=date(2026, 1, 1)
+    )
+    assert before.items == [] and before.total == 0
+    march = await rm.list_companies(band=None, q=None, page=1, page_size=10, as_of=date(2026, 3, 1))
+    assert [(i.band, i.last_checked) for i in march.items] == [(Band.GREEN, checkpoint(1))]
+    july = await rm.list_companies(
+        band=Band.YELLOW, q=None, page=1, page_size=10, as_of=date(2026, 7, 1)
+    )
+    assert july.total == 1
+    assert (await rm.list_companies(band=None, q=None, page=1, page_size=10)).items[
+        0
+    ].band == Band.RED
+
+
+async def test_as_of_is_inclusive_of_the_whole_day() -> None:
+    rm = await seeded_history()
+    detail = await rm.detail(CUI, as_of=date(2026, 6, 15))  # checked at 09:00 that day
+    assert detail.band == Band.YELLOW
+
+
+async def test_detail_and_signals_as_of() -> None:
+    rm = await seeded_history()
+    assert len(await rm.signals(CUI, as_of=date(2026, 7, 1))) == 2
+    assert len(await rm.signals(CUI)) == 3
+    with pytest.raises(HTTPException) as err:
+        await rm.detail(CUI, as_of=date(2025, 12, 31))
+    assert err.value.status_code == 404
+
+
+async def test_history_between_two_dates() -> None:
+    rm = await seeded_history()
+    history = await rm.history(CUI, date(2026, 2, 1), date(2026, 9, 30))
+    assert [(p.run_id, p.band) for p in history.scores] == [
+        ("run_2", Band.YELLOW),
+        ("run_3", Band.RED),
+    ]
+    assert [e.evidence_date for e in history.events] == [date(2026, 6, 1), date(2026, 9, 1)]
+    whole = await rm.history(CUI, None, None)
+    assert len(whole.scores) == 3 and len(whole.events) == 3

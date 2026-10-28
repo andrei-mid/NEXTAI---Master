@@ -1,0 +1,99 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    },
+    "Component": {
+      "enum": [
+        "identity",
+        "financials",
+        "tax",
+        "litigation",
+        "network",
+        "sanctions",
+        "media",
+        "presence"
+      ],
+      "title": "Component",
+      "type": "string"
+    },
+    "Coverage": {
+      "properties": {
+        "weight_pct": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Weight Pct",
+          "type": "number"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/Component"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "weight_pct",
+        "available",
+        "total"
+      ],
+      "title": "Coverage",
+      "type": "object"
+    }
+  },
+  "description": "One check of the company on its timeline (known-at axis: when the bank knew it).",
+  "properties": {
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "computed_at": {
+      "format": "date-time",
+      "title": "Computed At",
+      "type": "string"
+    },
+    "band": {
+      "$ref": "#/$defs/Band"
+    },
+    "score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Score"
+    },
+    "coverage": {
+      "$ref": "#/$defs/Coverage"
+    }
+  },
+  "required": [
+    "run_id",
+    "computed_at",
+    "band",
+    "score",
+    "coverage"
+  ],
+  "title": "ScorePoint",
+  "type": "object"
+}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +13,7 @@ from verifirm.persistence.models.companies import (
     IdentitySheetRow,
     SubmittedFinancialsRow,
 )
+from verifirm.persistence.repositories.scores import ScoresStore
 from verifirm.schema.financials import SubmittedFinancials
 from verifirm.schema.identity import IdentitySheet
 from verifirm.schema.scoring import Band, Score
@@ -83,12 +86,29 @@ class CompaniesStore:
         await self.session.execute(stmt)
 
     async def list_portfolio(
-        self, *, band: Band | None, q: str | None, page: int, page_size: int
+        self,
+        *,
+        band: Band | None,
+        q: str | None,
+        page: int,
+        page_size: int,
+        as_of: datetime | None = None,
     ) -> tuple[list[str], int]:
-        """CUIs ordered by cui. `q` matches the CUI or the current name (ILIKE)."""
+        """CUIs ordered by cui. `q` matches the CUI or the current name (ILIKE).
+
+        `as_of`: the portfolio as the bank saw it then. Only companies already scored at
+        `as_of`, and `band` filters on the band of their newest score at that moment.
+        """
         where = []
-        if band is not None:
-            where.append(Company.latest_band == band.value)
+        base = select(Company.cui)
+        if as_of is None:
+            if band is not None:
+                where.append(Company.latest_band == band.value)
+        else:
+            latest = ScoresStore(self.session).latest_per_cui(as_of)
+            base = base.join(latest, latest.c.cui == Company.cui)
+            if band is not None:
+                where.append(latest.c.band == band.value)
         if q:
             pattern = f"%{_escape_like(q)}%"
             where.append(
@@ -97,13 +117,10 @@ class CompaniesStore:
                     Company.current_name.ilike(pattern, escape="\\"),
                 )
             )
-        total = await self.session.scalar(select(func.count()).select_from(Company).where(*where))
+        filtered = base.where(*where)
+        total = await self.session.scalar(select(func.count()).select_from(filtered.subquery()))
         rows = await self.session.scalars(
-            select(Company.cui)
-            .where(*where)
-            .order_by(Company.cui)
-            .offset((page - 1) * page_size)
-            .limit(page_size)
+            filtered.order_by(Company.cui).offset((page - 1) * page_size).limit(page_size)
         )
         return list(rows), int(total or 0)
 

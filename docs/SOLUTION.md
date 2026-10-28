@@ -13,9 +13,10 @@ Base URL: `http://localhost:8000` locally (OpenAPI at `/docs`). JSON Schemas for
 | Method & path | Returns |
 |---|---|
 | `GET /health` | `{status, fixture_mode, version}` |
-| `GET /companies?band=&q=&page=&page_size=` | `{items: [{cui, name, band, score, coverage, last_checked, top_signal, fictional}], page, page_size, total}` |
-| `GET /companies/{cui}` | `{identity_sheet, score, band, components[], coverage, sources[], last_checked}` |
-| `GET /companies/{cui}/signals` | `Signal[]` (see below) |
+| `GET /companies?band=&q=&page=&page_size=&as_of=` | `{items: [{cui, name, band, score, coverage, last_checked, top_signal, fictional}], page, page_size, total}` |
+| `GET /companies/{cui}?as_of=` | `{identity_sheet, score, band, components[], coverage, sources[], last_checked}` |
+| `GET /companies/{cui}/signals?as_of=` | `Signal[]` (see below) |
+| `GET /companies/{cui}/history?from=&to=` | `{cui, date_from, date_to, scores[{run_id, computed_at, band, score, coverage}], events: Signal[], decisions: DecisionRecord[]}`. All oldest first. See "Time travel" below |
 | `GET /companies/{cui}/memo` | `{markdown, questions[{question, reason_signal_ids}], generated_at, verifier_report}` |
 | `GET /companies/{cui}/graph?depth=2` | `{nodes[{id, type: company\|person, label, status, fictional}], edges[{source, target, role}]}`. `role` is administrator, former_administrator, shareholder or invoices |
 | `POST /applications` (multipart: `cui`, `files[]`) | `202 {run_id}` |
@@ -24,6 +25,11 @@ Base URL: `http://localhost:8000` locally (OpenAPI at `/docs`). JSON Schemas for
 | `POST /companies/{cui}/decision` | body `{decision: approve\|reject\|escalate\|request_info, comment, analyst}` → `201` audit record |
 
 Invalid CUI → `422`. Unknown company → `404`.
+
+**Time travel** (dates `YYYY-MM-DD`, bounds inclusive, all optional):
+- `as_of=2026-09-15` on the list, the company and its signals: what the bank knew **at the end of that day**. A company not checked yet by then is left out of the list, and its detail / signals return `404`.
+- `/history?from=2026-01-01&to=2026-11-30`: `scores` = the checks made in the period (the band over time), `decisions` = analyst decisions recorded in the period, `events` = what **happened** to the company in the period (signals by `evidence_date`). `from` after `to` → `422`.
+- Fixture mode: each demo company has one check (`last_checked`), so `scores` has at most one point; `events` are the fixture signals by date.
 
 **Signal:** `{signal_id, cui, agent, component, rule_id, claim, source{name, type, url, retrieved_at, raw_ref, content_hash}, evidence_date, confidence (0–1), severity (info|low|medium|high|critical), validated, auto_stop_candidate, entity_match{method, score, ambiguous}, data{}}`.
 `source.type` is one of `official | aggregator | web | mock | submitted`.

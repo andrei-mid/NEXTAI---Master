@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import date
 
 from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
@@ -58,6 +59,24 @@ class SignalsStore:
             select(SignalRow.payload)
             .where(SignalRow.run_id == run_id)
             .order_by(SignalRow.agent, SignalRow.signal_id)
+        )
+        return [Signal.model_validate(p) for p in payloads]
+
+    async def list_events(
+        self, run_id: str, since: date | None = None, until: date | None = None
+    ) -> list[Signal]:
+        """Signals of one run whose fact happened in [since, until] (evidence_date, inclusive),
+        oldest first: the timeline of what occurred. Signals without an evidence_date have no
+        place on a timeline and are left out."""
+        stmt = select(SignalRow.payload).where(
+            SignalRow.run_id == run_id, SignalRow.evidence_date.is_not(None)
+        )
+        if since is not None:
+            stmt = stmt.where(SignalRow.evidence_date >= since)
+        if until is not None:
+            stmt = stmt.where(SignalRow.evidence_date <= until)
+        payloads = await self.session.scalars(
+            stmt.order_by(SignalRow.evidence_date, SignalRow.signal_id)
         )
         return [Signal.model_validate(p) for p in payloads]
 
