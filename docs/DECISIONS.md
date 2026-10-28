@@ -43,3 +43,8 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | Port for bulk tables (ONRC / sanctions / SEAP / Kohesio lookups) | role 1 + 2 | Adapters need local lookup tables. Today that is implicit in `persistence`. Decide whether it becomes a port |
 | SQS dedupe strategy | role 2 | FIFO queue + MessageDeduplicationId vs standard queue + Repository idempotency |
 | Real handles for CODEOWNERS | team | Replace the `@role-N-…` placeholders |
+| LLM timeout setting (`LLM_TIMEOUT_S`) in `core/config.py` | role 5 -> role 2 | `llm/providers/_http.py` uses `max(HTTP_TIMEOUT_S, 90)` until it exists |
+| Entity-resolution tunables (ambiguous factor, name thresholds) in `scoring/config/weights.yaml` | role 5 -> role 2 | Today a `ResolutionConfig` dataclass with defaults in `consolidation/entity_resolution.py` |
+| `LLM_MODEL_DEFAULT` default is a Claude id | role 5 -> role 2 | With `LLM_PROVIDER=openai` / `openai_compatible` the model names must be set in `.env`. The providers raise a clear error otherwise |
+| Anthropic / OpenAI providers use httpx, not the vendor SDKs | role 5 | No new dependency needed. Bedrock stays a stub (needs SigV4: boto3 or the anthropic SDK). Say if you want it |
+| Graph depth > 1 in the live read model | role 5 + role 1 | `GET /companies/{cui}/graph` returns one hop from the identity sheet until graph tables exist |
