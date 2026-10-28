@@ -28,6 +28,7 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | Local-first data | DECIDED (2026-10-28): external data is downloaded onto our server (ingest jobs + per-company `sync()`). Agents only read the local mirror and never call external APIs. See `docs/LOCAL_DATA.md` |
 | Tests layout | Next to the code (`<folder>/tests/`), pytest `--import-mode=importlib` |
 | Tooling on Windows | `winget install astral-sh.uv ezwinports.make` |
+| `onrc_bulk` per-company contract | DECIDED (2026-10-28, role 1 + role 3): `company(cui)` returns the `fixtures/companies/*/onrc.json` shape, `None` = not in ONRC. Records built from the bulk CSVs have `caen_principal: None` and empty `istoric_*` lists (the files are a snapshot). `companies_at_address()` takes the raw address and normalizes inside the adapter (`onrc_bulk.normalize_address`); the count includes the company itself. `companies_of_person()` items: `cui, denumire, cod_inmatriculare, judet, stare, nume, calitate, de_la, pana_la, match {method: "person_name", score, ambiguous}` (score 1.0 same name, 0.9 same words in another order) |
 
 ## PENDING
 
@@ -44,7 +45,7 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | Scheduler runtime | role 2 | APScheduler in the worker vs cron vs EventBridge (Fargate). Job definitions are in `apps/worker/scheduler.py` |
 | PDF parsing library for `documents.py` | role 5 | Not chosen |
 | Read API for the audit log (`GET /companies/{cui}/decisions`) | role 5 + 6 | DEMO step 8 shows the audit log, but the contract has no read route yet. Schema change → needs DECIDED |
-| Port for bulk tables (ONRC / sanctions / SEAP / Kohesio lookups) | role 1 + 2 | Adapters need local lookup tables. Today that is implicit in `persistence`. Decide whether it becomes a port |
+| Port for bulk tables (ONRC / sanctions / SEAP / Kohesio lookups) | role 1 + 2 | Adapters may not import `persistence` (test_imports), so `onrc_bulk` can't read the `onrc_*` tables today: outside FIXTURE_MODE its READ methods raise `SourceUnavailable("... bulk-lookup port PENDING")`. **Role 1 proposal:** (1) role 2 adds `verifirm/core/ports/bulk_lookup.py` with an ABC `BulkLookup` (`onrc_company(cui) -> dict \| None`, `onrc_companies_at_address(normalized) -> list[str]`, `onrc_companies_of_person(normalized_name) -> list[dict]`, later sanctions / SEAP / Kohesio methods); (2) `AdapterDeps.bulk: BulkLookup \| None = None` in `adapters/base.py`; (3) `apps/wiring.py` passes role 1's `persistence.repositories.bulk_lookup.SqlBulkLookup` when `REPOSITORY_BACKEND=postgres`. Role 1 writes the implementation and switches `onrc_bulk` to it. Alternative rejected: one mirror entry per company written by ingest (1M+ objects, plus an address index) |
 | SQS dedupe strategy | role 2 | FIFO queue + MessageDeduplicationId vs standard queue + Repository idempotency |
 | Real handles for CODEOWNERS | team | Replace the `@role-N-…` placeholders |
 | LLM timeout setting (`LLM_TIMEOUT_S`) in `core/config.py` | role 5 -> role 2 | `llm/providers/_http.py` uses `max(HTTP_TIMEOUT_S, 90)` until it exists |
@@ -53,4 +54,3 @@ Decision log. **DECIDED** entries are binding. **PENDING** entries are open: if 
 | Anthropic / OpenAI providers use httpx, not the vendor SDKs | role 5 | No new dependency needed. Bedrock stays a stub (needs SigV4: boto3 or the anthropic SDK). Say if you want it |
 | Graph depth > 1 in the live read model | role 5 + role 1 | `GET /companies/{cui}/graph` returns one hop from the identity sheet until graph tables exist |
 | Identity thresholds | role 3 | `verifirm/agents/identity/config.yaml` (PROPOSAL): `window_days` 365, `shared_office_min_companies` 20, `conflict_confidence` 0.6, `stale_confidence` 0.8. Same pattern as `agents/financials/config.yaml` |
-| `onrc_bulk` per-company contract | role 1 + role 3 | The identity agent reads `onrc_bulk.company(cui)` in the **`fixtures/companies/*/onrc.json` shape** (`cui`, `denumire`, `cod_inmatriculare`, `stare`, ...) and `None` for not found. It passes the **raw** ONRC address to `companies_at_address()`, so normalization should happen inside the adapter. Confirm or propose another shape |

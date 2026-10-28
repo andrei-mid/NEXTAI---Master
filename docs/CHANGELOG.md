@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-10-28: `onrc_bulk` works in fixture mode (role 1)
+
+**What:** `verifirm/adapters/onrc_bulk.py` READ methods are implemented for `FIXTURE_MODE=1`. The per-company contract is now DECIDED in `docs/DECISIONS.md`.
+
+- `company(cui)`: `onrc.json` when the company has a fixture folder, otherwise a record built from `fixtures/sources/onrc/*_sample.csv` (so the 63 shell companies and the affiliates resolve too). `None` = not in ONRC.
+- `companies_at_address(raw)`: normalizes inside (`normalize_address`: diacritics, case, `Strada`/`Str.`, `Bulevardul`/`B-dul`/`Bd.`, `nr.`). Zephyria's office → 63 CUIs.
+- `companies_of_person(name)`: affiliations with `stare` and `match {method, score, ambiguous}`. Ionel Fictivescu → Zephyria + 5 affiliates.
+- `iter_rows(path)`: streaming parser for the real files (delimiter + UTF-8/cp1250 sniffed, malformed lines counted). Used next by `ingest_onrc`.
+- The identity agent run with the real adapter gives the same signals as with its `FakeOnrc` on all 9 fictional companies (only `source.raw_ref` is more precise).
+- Outside fixture mode the READ methods raise `SourceUnavailable` (never empty) until the bulk-lookup port exists.
+
+**What you must do:**
+- **Role 3:** you can replace `FakeOnrc` in `agents/identity/tests/` with `OnrcBulkAdapter` (fixture mode). The network agent can use `companies_of_person`.
+- **Role 5:** `identity_sheet` can read `onrc_bulk.company(cui)` now.
+- **Role 2:** please review the bulk-lookup port proposal in `docs/DECISIONS.md` (PENDING, "Port for bulk tables").
+
+---
+
 ## 2026-10-28: Ownership guard removed (role 2) · ACTION NEEDED
 
 **What:** the Claude Code ownership hook (`.claude/settings.json` + `.claude/hooks/ownership_guard.py`) and everything tied to `VERIFIRM_ROLE` are gone. They blocked teammates' work. CODEOWNERS is back to the `@role-N-…` placeholders. The ownership *rules* in CLAUDE.md ("Stay inside your folder") still apply. They are just not enforced by a hook any more.

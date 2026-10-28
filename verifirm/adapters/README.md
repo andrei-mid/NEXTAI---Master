@@ -20,7 +20,7 @@ Both halves use the **same `cache_key`s**. That's how sync fills exactly what RE
 | `anaf_bilant` | per company | **implemented** | `sync()`: 6 years, filed years downloaded once ever |
 | `anaf_v9` | batch per company | stub | `sweep_anaf_v9` job (100 CUIs/call) → `store_in_mirror` per CUI; `sync()` for single applicants |
 | `anaf_efactura_registry` | per company | stub | probably derived from the v9 mirror entry (no extra call) |
-| `onrc_bulk` | bulk | stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
+| `onrc_bulk` | bulk | **fixture mode implemented** (`company`, `companies_at_address`, `companies_of_person`, streaming `iter_rows`). Outside fixture mode: `SourceUnavailable` until the bulk-lookup port lands (PENDING). `download()` stub | `ingest_onrc` job → Postgres (COPY). `sync()` no-op |
 | `portal_just` | per company | stub | `sync()` per company name. `poll_new_cases` job keeps it fresh |
 | `scj` | per company, time window | stub | nightly batch 03:30–06:30 → mirror. `sync()` no-op outside the window |
 | `sanctions_eu/un/ofac` | bulk | stub | `ingest_sanctions` job. `sync()` no-op |
