@@ -4,6 +4,16 @@
 
 ---
 
+## 2026-10-29: Presence agent implemented (role 4's files, built by role 3 with the human's approval)
+
+**What:** `verifirm/agents/presence/` is done: 3 rules, `config.yaml`, tests with the real adapters in FIXTURE_MODE, and a full-pipeline check (Zephyria gets PRE-NO-FOOTPRINT-01, Aurora nothing). Adapters: `seap.contracts_for`, `kohesio.projects_for` and the new `web_search.footprint` (website + job postings) read `presence.json` in FIXTURE_MODE through `adapters/presence_fixture.py`. **Live they report unavailable**, never empty. PRE-NO-FOOTPRINT-01 needs all four parts checked. With no footprint source at all, the agent is `unavailable` (turnover alone is not a presence check).
+
+**What you must do:**
+- **Role 4:** presence is done. `TavilyWebSearch.search()` (media) is still yours. For live presence data: run the website / job queries in `web_search.sync()`, plus ingest jobs for SEAP and Kohesio.
+- **Role 6:** `fixtures/companies/99000025_*/api/signals.json` has a stale `content_hash` for the presence signal (presence.json changed after it was generated). Regenerate with `make fixtures` when convenient.
+
+---
+
 ## 2026-10-29: Live company list ~4x faster (role 3, in role 5's `apps/api/read_model.py`, approved by the human)
 
 **What:** on a hosted Postgres (Neon, about 0.1 s per round trip from a laptop), `GET /companies` took about 14 s: every company's identity, score and signals were read one after another. `RepoReadModel.list_companies` now loads the companies concurrently (at most `LIST_CONCURRENCY = 8` at once), and each company's three reads in parallel. `detail()` reads identity, score and signals in parallel too. Measured on real data: list 14.2 s → 3.3 s, one company 3.1 s → 1.0 s. Same responses, same order. Test: `test_list_loads_companies_concurrently_and_keeps_the_page_order`.

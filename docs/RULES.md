@@ -85,6 +85,6 @@ Every `rule_id` an agent can emit. The source of truth is each agent's `rules.py
 
 | rule_id | Severity (PROPOSAL) | Auto-stop | Condition | Source |
 |---|---|---|---|---|
-| `PRE-NO-FOOTPRINT-01` | medium |  | Turnover > 5M RON but no website, no job postings, no SEAP contracts and no EU funds | presence sources |
-| `PRE-ADDRESS-MISMATCH-01` | low |  | Address on the company website differs from the ONRC registered office | website vs onrc_bulk |
+| `PRE-NO-FOOTPRINT-01` | medium |  | Turnover > 5M RON and ALL four parts checked and empty: no website, no job postings, no SEAP contracts, no EU funds (one unknown part: no conclusion). Confidence 0.8 | web_search, seap, kohesio, anaf_bilant |
+| `PRE-ADDRESS-MISMATCH-01` | low |  | Address on the company website shares < 60% of its words with the ONRC registered office (normalized). Website text: validated=false | web_search vs identity sheet |
 | `PRE-PUBLIC-CONTRACTS-01` | info |  | Company has SEAP contracts or EU-funded projects (positive footprint) | seap, kohesio |
