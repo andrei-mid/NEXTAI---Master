@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-10-28: File ownership is enforced (role 2) · ACTION NEEDED
+
+**What:** a Claude Code hook (`.claude/settings.json` → `.claude/hooks/ownership_guard.py`) refuses Edit/Write on files CODEOWNERS doesn't give you. CODEOWNERS now names `@andrei-mid` for role 2. `agents/financials/` + `adapters/anaf_bilant.py` are co-owned by `@andrei-mid` and role 3. On GitHub, `main` requires review from Code Owners.
+
+**What you must do (everyone):**
+1. Create `.claude/settings.local.json` with `{"env": {"VERIFIRM_ROLE": "@your-handle"}}` and restart Claude Code. Until you do, the hook refuses all edits.
+2. Send your GitHub handle to role 2 so the `@role-N-…` placeholder in CODEOWNERS is replaced.
+3. If your Claude gets "owned by …": don't work around it. Add a PENDING entry in `docs/DECISIONS.md` (editable by everyone) and tell the owner.
+
+---
+
 ## 2026-10-28: Local-first data access (role 2) · DECIDED
 
 **What:** external data is downloaded onto our server first. Agents only read the local copy (the "mirror") and never call external APIs. Full guide: [docs/LOCAL_DATA.md](LOCAL_DATA.md).
