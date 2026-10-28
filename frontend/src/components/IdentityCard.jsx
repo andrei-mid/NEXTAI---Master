@@ -1,6 +1,7 @@
 import BandBadge from './BandBadge.jsx';
 import OriginBadges from './OriginBadges.jsx';
 import SourceLink from './SourceLink.jsx';
+import CheckedSources from './CheckedSources.jsx';
 import { coverageLabel, formatUtc, statusLabel } from '../format.js';
 
 function PersonList({ people, showShare }) {
@@ -48,9 +49,11 @@ export default function IdentityCard({ company, signals, origin }) {
 
       {company.band === 'grey' && (
         <div className="inconclusive-box" role="note">
-          <strong>Inconclusive.</strong> Only {coverageLabel(company.coverage)} were checked, so the
-          score is not a verdict. Not checked yet:{' '}
-          {company.coverage?.missing?.length ? company.coverage.missing.join(', ') : 'unknown'}.
+          <p>
+            <strong>Inconclusive.</strong> Only {coverageLabel(company.coverage)} were checked, so
+            the score is not a verdict.
+          </p>
+          <CheckedSources company={company} />
         </div>
       )}
 

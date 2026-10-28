@@ -62,6 +62,7 @@ export default function CompanyDetail({ item, sessionReviews, messages, analystI
         claims={signals && sortSignals(signals)}
         lastChecked={company.last_checked}
         coverage={company.coverage}
+        company={company}
       />
       {DATA_MODE !== 'mock' && item.origin === 'backend' && (
         <CheckHistory history={checkHistory} />

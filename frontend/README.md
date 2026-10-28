@@ -1,15 +1,15 @@
 # frontend/
 
-**Owner:** `@role-6-frontend-demo`. Built in Lovable (D8 = L1: frontend only).
+**Owner:** `@role-6-frontend-demo`. React 18 + Vite 5, plain JavaScript and CSS.
+What is built, the stack and the open points: **[HANDOFF.md](HANDOFF.md)**.
 
-- The API contract, band colours, UI rules and the "never" list are in **[../docs/SOLUTION.md](../docs/SOLUTION.md)**. Paste it into Lovable as project knowledge.
+- The API contract, band colours, UI rules and the "never" list are in **[../docs/SOLUTION.md](../docs/SOLUTION.md)**.
 - JSON Schemas for every response: [../docs/schema/](../docs/schema/).
-- The API serves fixture data from day one: `make run-api`, then open http://localhost:8000/docs.
 - Demo script: [../docs/DEMO.md](../docs/DEMO.md).
 
 No scoring logic in the frontend: display what the API returns.
 
-## Run locally (React + Vite)
+## Run locally
 
 Requires Node.js LTS. In this folder:
 
@@ -20,18 +20,23 @@ npm run dev
 
 Open http://localhost:5173. On Windows PowerShell, if `npm` is blocked by the execution policy, use `npm.cmd` instead.
 
-- `src/App.jsx`: the page
+- `src/App.jsx`: top menu and the three views (Dashboard, Alerts, Messages)
+- `src/api.js`: the only file that loads data
 - `src/styles.css`: colours (top of the file) and styles
 
-## Data: mock or real API
+## Data: live API, snapshot or mock
 
-`src/api.js` is the only file that loads data. Shapes follow the API's Pydantic models
-(`verifirm/schema/api.py`, JSON Schemas in `docs/schema/`).
+Shapes follow the API's Pydantic models (`verifirm/schema/api.py`, JSON Schemas in `docs/schema/`).
 
-- **Mock (default):** no `VITE_API_URL`. Shows the team's fixtures (`fixtures/companies/*/api/*.json`,
-  read-only) plus invented UI companies from `src/mock/`.
-- **Real API:** copy `.env.example` to `.env.local` (sets `VITE_API_URL=http://localhost:8000`),
-  start the API with `make run-api`, then restart `npm run dev`. The top bar shows "Live API".
+- **Live API:** copy `.env.example` to `.env.local` and set `VITE_API_URL` (e.g. `http://localhost:8000`,
+  or the tunnel URL from the backend team), then restart `npm run dev`. The top bar shows "Live API".
+- **Snapshot:** while the API is reachable, run `npm run snapshot`. It saves the API's answers to
+  `snapshot/data.json` (git-ignored: it can hold real-company figures). Remove or comment out
+  `VITE_API_URL` and restart: the site reads the snapshot offline. The top bar shows "Snapshot · date".
+- **Mock:** no `VITE_API_URL` and no snapshot. Shows the team's fixtures
+  (`fixtures/companies/*/api/*.json`, read-only). The top bar shows "MOCK DATA".
 
-Bank relationship and flag history are not in the API contract yet: they are always mock and only
-shown for fictional companies.
+In every mode, 10 invented companies from `src/mock/` are added, labelled FICTIV.
+
+Accounts, bank relationship, flag history and messages are not in the API contract yet: they are mock,
+and reviews and messages are kept in this browser only.
