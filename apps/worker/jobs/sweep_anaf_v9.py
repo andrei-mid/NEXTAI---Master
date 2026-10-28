@@ -15,6 +15,9 @@ Usage (from the repo root, on the machine that holds the mirror):
         Max 100 entries (20 companies with nothing in the mirror yet).
     uv run python -m apps.worker.jobs.sweep_anaf_v9 bilant CUI [--send]
         ONE /bilant request: the newest missing year of the last 5. Run again for the next one.
+    uv run python -m apps.worker.jobs.sweep_anaf_v9 web CUI [CUI ...] [--send]
+        Tavily (not ANAF): the presence searches (website + jobs), 2 per company, only the ones
+        not in the mirror yet. Needs TAVILY_API_KEY and the company's v9 record (name).
 
 Then process the mirror with ZERO ANAF requests (agents -> scoring -> Postgres):
     SYNC_ON_APPLICATION=0 uv run python -m apps.worker.seed CUI [CUI ...]
@@ -39,6 +42,7 @@ from typing import Any, cast
 from apps.wiring import Infra, build_infra
 from verifirm.adapters.anaf_bilant import AnafBilantAdapter
 from verifirm.adapters.anaf_v9 import MAX_BATCH, AnafV9Adapter, Entry, _body
+from verifirm.adapters.web_search import TavilyWebSearch, presence_queries
 from verifirm.agents.financials.rules import expected_last_year
 from verifirm.agents.financials.rules import load_config as financials_config
 from verifirm.core.config import Settings
@@ -185,9 +189,36 @@ async def cmd_bilant(infra: Infra, cui: str, send: bool, stamp: Path) -> None:
     print(f"  {cui} {year}: {'filed' if result.data else 'nothing filed'}")
 
 
+async def cmd_web(infra: Infra, cuis: list[str], send: bool) -> None:
+    v9 = cast(AnafV9Adapter, infra.adapters["anaf_v9"])  # mirror only: no ANAF request here
+    web = cast(TavilyWebSearch, infra.sync_adapters["web_search"])
+    today = infra.clock.today()
+    planned = 0
+    for cui in cuis:
+        try:
+            record = (await v9.lookup(cui, today)).data
+        except Exception:
+            record = None
+        name = ((record or {}).get("date_generale") or {}).get("denumire")
+        if not name:
+            print(f"  {cui:>10}  no company name: run the v9 fetch first. Skipped.")
+            continue
+        queries = list(presence_queries(name).values())
+        planned += len(queries)
+        print(f"  {cui:>10}  {name[:40]}: {queries}")
+        if send:
+            report = await web.sync(cui)
+            print(
+                f"             downloaded {report.downloaded}, reused {report.reused}, "
+                f"failed {report.failed or 'none'}"
+            )
+    if not send:
+        print(f"  dry run: nothing sent (at most {planned} Tavily searches). Add --send.")
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="sweep_anaf_v9", description=__doc__.split("\n")[0])
-    parser.add_argument("command", choices=["status", "v9", "bilant"])
+    parser.add_argument("command", choices=["status", "v9", "bilant", "web"])
     parser.add_argument("cuis", nargs="+")
     parser.add_argument("--send", action="store_true", help="really send the ONE request")
     args = parser.parse_args(argv)
@@ -205,6 +236,8 @@ def main(argv: list[str] | None = None) -> None:
                 await cmd_status(infra, cuis)
             elif args.command == "v9":
                 await cmd_v9(infra, cuis, args.send, stamp)
+            elif args.command == "web":
+                await cmd_web(infra, cuis, args.send)
             else:
                 await cmd_bilant(infra, cuis[0], args.send, stamp)
         finally:

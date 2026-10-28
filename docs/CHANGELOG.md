@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-10-29: Tavily web search live + a hidden ANAF request fixed (role 3, role 4's `web_search.py` with the human's approval)
+
+**What:**
+- `adapters/web_search.py` is implemented: `search()` (Tavily, mirror only for agents), `sync(cui)` (the 2 presence searches, website + jobs), `footprint()` live (picks the company's own site, never a directory or social network, plus job ads on known boards). Query builders live in the module (`presence_queries`), so sync and agents ask the same thing. No `TAVILY_API_KEY`: unavailable, never "no results".
+- Fetch tool: `sweep_anaf_v9 web <CUIs> [--send]`. Dry run by default, 2 Tavily searches per company.
+- **Bug fixed:** `web_search.sync`, `anaf_efactura_registry.is_registered` and the tool's `web` command looked up the company through a *network* v9 adapter. With no v9 data stored, that would have **sent a request to ANAF** from a non-ANAF path. They now read the v9 **mirror** only (`replace(deps, network=False)`). Regression tests fail on any request to ANAF.
+
+**What you must do:** role 4 (media agent): `ctx.web_search.search(query, since=...)` works live now (mirror only), so add your media queries to `web_search.sync()`. Everyone: never call `AnafV9Adapter(deps)` with network deps outside sync code.
+
+---
+
 ## 2026-10-29: Presence agent implemented (role 4's files, built by role 3 with the human's approval)
 
 **What:** `verifirm/agents/presence/` is done: 3 rules, `config.yaml`, tests with the real adapters in FIXTURE_MODE, and a full-pipeline check (Zephyria gets PRE-NO-FOOTPRINT-01, Aurora nothing). Adapters: `seap.contracts_for`, `kohesio.projects_for` and the new `web_search.footprint` (website + job postings) read `presence.json` in FIXTURE_MODE through `adapters/presence_fixture.py`. **Live they report unavailable**, never empty. PRE-NO-FOOTPRINT-01 needs all four parts checked. With no footprint source at all, the agent is `unavailable` (turnover alone is not a presence check).

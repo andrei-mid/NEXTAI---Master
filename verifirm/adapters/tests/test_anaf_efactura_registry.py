@@ -60,3 +60,14 @@ async def test_no_v9_data_is_unavailable_and_never_calls(tmp_path: Path) -> None
     with pytest.raises(SourceUnavailable):
         await adapter.is_registered("99000025")
     assert calls == []
+
+
+async def test_a_sync_adapter_still_never_calls_anaf(tmp_path: Path) -> None:
+    calls: list[httpx.Request] = []
+    transport = httpx.MockTransport(lambda r: calls.append(r) or httpx.Response(500))
+    deps = _adapter(tmp_path, fixture_mode=False).deps
+    deps.http = httpx.AsyncClient(transport=transport)
+    deps.network = True
+    with pytest.raises(SourceUnavailable):
+        await AnafEfacturaRegistryAdapter(deps).is_registered("99000025")
+    assert calls == []

@@ -14,7 +14,8 @@ Does the company leave the public trace a business of its size normally leaves?
 |---|---|
 | `rules.py` (3 checks) + `config.yaml` | **done**, unit-tested |
 | `agent.py` | **done**, tested with the real adapters in `FIXTURE_MODE` and in the full pipeline. Zephyria's signal matches `api/signals.json` |
-| `web_search.footprint`, `seap.contracts_for`, `kohesio.projects_for` | **fixture mode only** (`presence.json`). Live they report **unavailable**: SEAP and Kohesio need an ingest job, website / jobs need the Tavily sync + `TAVILY_API_KEY` |
+| `web_search.footprint` (website + jobs) | **live** with Tavily: `sweep_anaf_v9 web <CUIs> --send` downloads the 2 searches per company into the mirror, the agent reads them. Fixture mode: `presence.json` |
+| `seap.contracts_for`, `kohesio.projects_for` | **fixture mode only**. Live: unavailable until their ingest jobs exist. So on real companies PRE-NO-FOOTPRINT-01 is never concluded (one part unknown), and presence is `partial` |
 
 ## Rules
 
@@ -48,7 +49,7 @@ uv run pytest verifirm/agents/presence verifirm/adapters/tests/test_seap.py veri
 
 ## Next (to get real data)
 
-- **Website + jobs:** implement the Tavily presence queries in `web_search.sync()` (Tavily's free tier is enough for a demo; needs `TAVILY_API_KEY`).
+- **Website + jobs:** done (Tavily). Limit: the official site is found by a distinctive word of the legal name in the domain, so a brand that differs from the legal name (eMAG for DANTE INTERNATIONAL SA) shows "no website". Directories (listafirme, termene...) never count.
 - **SEAP:** an ingest job for the procurement exports on data.gov.ro, then `contracts_for` reads the local table.
 - **Kohesio:** an ingest job for the Romanian beneficiaries export.
 
