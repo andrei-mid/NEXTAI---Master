@@ -171,3 +171,68 @@ def test_bilant_takes_one_cui_per_run() -> None:
 async def test_scheduled_sweep_never_calls_anaf_on_its_own() -> None:
     with pytest.raises(NotImplementedError, match="human"):
         await tool.run(cast(Any, None))
+
+
+# -------------------------------------------------------------- web (Tavily, not ANAF)
+class _TavilyOnly:
+    """Fake HTTP: answers Tavily, FAILS the test on anything else (an ANAF request)."""
+
+    def __init__(self) -> None:
+        self.requests: list[httpx.Request] = []
+
+    def __call__(self, request: httpx.Request) -> httpx.Response:
+        self.requests.append(request)
+        assert request.url.host == "api.tavily.com", f"unexpected request to {request.url.host}"
+        query = json.loads(request.content)["query"]
+        return httpx.Response(200, json={"query": query, "results": []})
+
+
+def _web_infra(tmp_path: Path, http: _TavilyOnly) -> Any:
+    from verifirm.adapters.web_search import TavilyWebSearch
+
+    def deps(network: bool) -> AdapterDeps:
+        return AdapterDeps(
+            settings=Settings(fixture_mode=False, http_max_retries=0, tavily_api_key="tvly-x"),
+            cache=MemoryCache(),
+            object_store=FilesystemObjectStore(tmp_path / "objects"),
+            rate_limiter=MemoryRateLimiter(),
+            clock=FixedClock(NOW),
+            http=httpx.AsyncClient(transport=httpx.MockTransport(http)),
+            network=network,
+        )
+
+    return SimpleNamespace(
+        adapters={"anaf_v9": AnafV9Adapter(deps(False))},
+        sync_adapters={
+            "anaf_v9": AnafV9Adapter(deps(True)),
+            "web_search": TavilyWebSearch(deps(True)),
+        },
+        clock=FixedClock(NOW),
+    )
+
+
+async def _store_name(infra: Any, cui: str, name: str) -> None:
+    from verifirm.adapters.anaf_v9 import _single_body
+
+    record = {"date_generale": {"cui": int(cui), "denumire": name}}
+    await infra.adapters["anaf_v9"].store_in_mirror(cui, _single_body(cui, record), None)
+
+
+async def test_web_dry_run_sends_nothing(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    http = _TavilyOnly()
+    infra = _web_infra(tmp_path, http)
+    await _store_name(infra, DEDEMAN, "DEDEMAN SRL")
+    await tool.cmd_web(infra, [DEDEMAN], False)
+    assert http.requests == []
+    assert "dedeman site oficial" in capsys.readouterr().out
+
+
+async def test_web_send_makes_the_two_searches_and_never_calls_anaf(tmp_path: Path) -> None:
+    http = _TavilyOnly()
+    infra = _web_infra(tmp_path, http)
+    await _store_name(infra, DEDEMAN, "DEDEMAN SRL")
+    await tool.cmd_web(infra, [DEDEMAN, DACIA], True)  # Dacia has no name stored: skipped
+    assert len(http.requests) == 2
+    assert {r.url.host for r in http.requests} == {"api.tavily.com"}

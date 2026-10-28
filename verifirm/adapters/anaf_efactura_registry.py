@@ -9,6 +9,8 @@ call and NO sync of its own: anaf_v9's sync / sweep already put the record in th
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from verifirm.adapters.anaf_v9 import AnafV9Adapter
 from verifirm.adapters.base import BaseAdapter, Sourced
 from verifirm.core.registry import register_adapter
@@ -23,7 +25,10 @@ class AnafEfacturaRegistryAdapter(BaseAdapter):
     async def is_registered(self, cui: str) -> Sourced[bool | None]:
         """True/False if v9 says so, None if v9 doesn't publish the flag or the CUI is notFound.
         SourceUnavailable when the v9 entry can't be read. Rule: TAX-EFACTURA-REG-01."""
-        v9 = await AnafV9Adapter(self.deps).lookup(cui, self.deps.clock.today())
+        # Mirror only, even on a sync adapter: this adapter never sends a request to ANAF.
+        v9 = await AnafV9Adapter(replace(self.deps, network=False)).lookup(
+            cui, self.deps.clock.today()
+        )
         flag = (v9.data or {}).get("date_generale", {}).get("statusRO_e_Factura")
         registered = flag if isinstance(flag, bool) else None
         return Sourced(data=registered, source=v9.source, stale=v9.stale)
