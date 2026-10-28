@@ -1,0 +1,57 @@
+{
+  "description": "One identity fact as each official source publishes it.",
+  "properties": {
+    "anaf": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Anaf"
+    },
+    "onrc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Onrc"
+    },
+    "match": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Match"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Note"
+    }
+  },
+  "required": [
+    "anaf",
+    "onrc",
+    "match"
+  ],
+  "title": "CrossCheck",
+  "type": "object"
+}

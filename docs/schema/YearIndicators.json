@@ -1,0 +1,67 @@
+{
+  "description": "Computed in code from DossierYear (rounded as shown), None when not computable.",
+  "properties": {
+    "turnover_growth_pct": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Turnover Growth Pct"
+    },
+    "net_margin_pct": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Net Margin Pct"
+    },
+    "equity_to_share_capital": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Equity To Share Capital"
+    },
+    "turnover_per_employee": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Turnover Per Employee"
+    },
+    "debts_to_turnover": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Debts To Turnover"
+    }
+  },
+  "title": "YearIndicators",
+  "type": "object"
+}

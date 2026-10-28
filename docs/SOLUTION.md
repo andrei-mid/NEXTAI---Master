@@ -17,6 +17,7 @@ Base URL: `http://localhost:8000` locally (OpenAPI at `/docs`). JSON Schemas for
 | `GET /companies/{cui}?as_of=` | `{identity_sheet, score, band, components[], coverage, sources[], last_checked}` |
 | `GET /companies/{cui}/signals?as_of=` | `Signal[]` (see below) |
 | `GET /companies/{cui}/history?from=&to=` | `{cui, date_from, date_to, scores[{run_id, computed_at, band, score, coverage}], events: Signal[], decisions: DecisionRecord[]}`. All oldest first. See "Time travel" below |
+| `GET /companies/{cui}/analyst-opinion` | `{cui, run_id, generated_at, model, flags[{title, claim, category, severity, evidence[{path, value}]}], rejected[{flag, reason}], opinion_score (0-100, 100 = no concern), explanation, disclaimer, official_band, official_score}`. The AI analyst's **opinion**: show it next to the official score, never instead of it, and always show `disclaimer`. `404` until a run produced one (needs an LLM key) |
 | `GET /companies/{cui}/memo` | `{markdown, questions[{question, reason_signal_ids}], generated_at, verifier_report}` |
 | `GET /companies/{cui}/graph?depth=2` | `{nodes[{id, type: company\|person, label, status, fictional}], edges[{source, target, role}]}`. `role` is administrator, former_administrator, shareholder or invoices |
 | `POST /applications` (multipart: `cui`, `files[]`) | `202 {run_id}` |

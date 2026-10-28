@@ -15,6 +15,23 @@
 
 ---
 
+## 2026-10-29: AI analyst opinion runs in the pipeline, is stored and served (role 1, steps 4-6) · CONTRACT ADDITION
+
+**What:** every run now also produces the AI analyst's opinion, after scoring (see the 2026-10-28 entry below for what it is).
+
+- **`apps/worker/orchestrator.py` (role 2's folder):** step 9 `analyse()`, independent of the memo: if one LLM step fails the other still runs. A failure completes the run (the error says `analyst opinion not generated: …`) and **keeps the official score**. `ANALYST_ENABLED=0` switches it off (one LLM call per run). Sources switched off for the run (`disabled_sources`) are reported as such in the dossier.
+- **`core/ports/repository.py` + `MemoryRepository` (role 2's folder):** `save_analyst_opinion(opinion, dossier)`, `get_latest_analyst_opinion(cui)`.
+- **`persistence` (role 1):** table `analyst_opinions` (migration `analyst_create_tables`, new area `analyst`), with the dossier the model saw for audit and replay. `AnalystStore.get_dossier(run_id)`.
+- **`apps/api` (role 5's folder):** `GET /companies/{cui}/analyst-opinion` (contract in `docs/SOLUTION.md`). `404` until a run produced one.
+
+**What you must do:**
+- **Whoever hosts the database (Bianca):** run `uv run alembic -c verifirm/persistence/alembic.ini upgrade head` (new table `analyst_opinions`).
+- **Role 6:** show the opinion next to the official score, never instead of it, and always show `disclaimer`.
+- **Everyone running live:** `LLM_MODEL_ANALYST` in `.env` (a large model). Without an LLM key, runs complete without an opinion.
+- **Role 2 / role 5:** review the changes in your folders.
+
+---
+
 ## 2026-10-29: Tavily web search live + a hidden ANAF request fixed (role 3, role 4's `web_search.py` with the human's approval)
 
 **What:**
@@ -49,6 +66,23 @@
 **What:** the first real-data run (6 real companies, ANAF v9 into Neon) flagged Dacia, Petrom, eMAG and Altex as "not enrolled in RO e-Factura". That's impossible, because e-Factura has been mandatory for B2B since 2024. ANAF v9's `statusRO_e_Factura` is the **old opt-in register**, not current e-Factura use. The rule is now **off by default** (`efactura_registration_check: false` in `verifirm/agents/tax/config.yaml`). The agent doesn't even read that source while the rule is off, so it is never a "failed source".
 
 **What you must do:** nothing. Role 5 / memo: there is no `TAX-EFACTURA-REG-01` on real companies any more.
+
+---
+
+## 2026-10-28: AI analyst opinion: dossier + LLM opinion + citation checks (role 1, steps 0-3) · CONTRACT ADDITION
+
+**What:** an LLM reads a company dossier built by code and returns its educated opinion: flags with evidence, an `opinion_score` 0-100 and an explanation. DECIDED in `docs/DECISIONS.md` ("AI analyst opinion"). Code: `verifirm/consolidation/analyst/` (README there).
+
+- **`schema/analyst.py` (new, role 2's folder):** `CompanyDossier`, `AnalystDraft`, `AnalystOpinion`, `DISCLAIMER`. Exported to `docs/schema/`.
+- **`core/config.py` (role 2's folder):** `LLM_MODEL_ANALYST`, `model_for("analyst")`. In `.env.example`.
+- The dossier compares ANAF with ONRC field by field (`match` true / false / null), lists the changes between the quarterly ANAF v9 snapshots, and has /bilant years plus indicators **computed in code**. People are aliases, never real names.
+- Every flag must cite dossier paths whose values check out, and every number in it must be in its evidence; otherwise it is rejected with the reason. Severity is capped at `high`, there is no decision wording, and the disclaimer is added by code.
+- **The official score and band are unchanged** (hard rule 8). The opinion is shown next to them.
+
+**What you must do:**
+- **Role 5:** the pipeline step (after scoring, like the memo) and `GET /companies/{cui}/analyst-opinion`. `write_opinion` raises on invalid output, so catch it like the memo step.
+- **Role 2:** review the two files in your folders.
+- **Everyone running it:** set `LLM_MODEL_ANALYST` in `.env` to a large model.
 
 ---
 

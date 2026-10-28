@@ -1,0 +1,68 @@
+{
+  "$defs": {
+    "Severity": {
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "rule_id": {
+      "title": "Rule Id",
+      "type": "string"
+    },
+    "agent": {
+      "title": "Agent",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity"
+    },
+    "claim": {
+      "title": "Claim",
+      "type": "string"
+    },
+    "evidence_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Evidence Date"
+    },
+    "validated": {
+      "title": "Validated",
+      "type": "boolean"
+    },
+    "source_type": {
+      "title": "Source Type",
+      "type": "string"
+    },
+    "data": {
+      "additionalProperties": true,
+      "title": "Data",
+      "type": "object"
+    }
+  },
+  "required": [
+    "rule_id",
+    "agent",
+    "severity",
+    "claim",
+    "evidence_date",
+    "validated",
+    "source_type"
+  ],
+  "title": "DossierSignal",
+  "type": "object"
+}

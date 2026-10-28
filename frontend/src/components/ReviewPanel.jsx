@@ -16,6 +16,8 @@ const labelOf = (value) => REVIEW_OPTIONS.find((o) => o.value === value)?.label 
 export default function ReviewPanel({ company, analystId, history, onSubmit }) {
   const [choice, setChoice] = useState(null);
   const [comment, setComment] = useState('');
+  // The choice of the review just recorded, for the confirmation line.
+  const [recorded, setRecorded] = useState(null);
   const canSubmit = choice !== null && comment.trim().length > 0;
 
   function handleSubmit(event) {
@@ -27,6 +29,7 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
       analyst_id: analystId,
       recorded_at: new Date().toISOString(),
     });
+    setRecorded(choice);
     setChoice(null);
     setComment('');
   }
@@ -74,7 +77,15 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
         <button type="submit" className="btn btn-primary review-submit" disabled={!canSubmit}>
           Record review
         </button>
-        {!canSubmit && (
+        {recorded && (
+          <p className="review-confirm" role="status">
+            ✓ Recorded: {labelOf(recorded)}.{' '}
+            {recorded === 'no_risk'
+              ? 'Saved below; No risk reviews are not listed in the Flag history.'
+              : 'Added to the Flag history.'}
+          </p>
+        )}
+        {!canSubmit && !recorded && (
           <p className="review-hint muted">Pick an assessment and write a comment to record it.</p>
         )}
       </form>
@@ -91,6 +102,7 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
               <div className="small">
                 <AnalystName
                   id={r.analyst_id}
+                  alert={{ cui: company.cui, name: company.name }}
                   mailSubject={
                     r.analyst_id === analystId
                       ? undefined
@@ -103,7 +115,7 @@ export default function ReviewPanel({ company, analystId, history, onSubmit }) {
           ))}
         </ul>
       )}
-      <p className="review-hint muted">Saved in this browser tab only. Not sent anywhere yet.</p>
+      <p className="review-hint muted">Saved in this browser only. Not sent anywhere yet.</p>
     </aside>
   );
 }

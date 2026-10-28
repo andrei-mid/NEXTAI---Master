@@ -5,12 +5,41 @@ import { coverageLabel } from '../format.js';
 /**
  * Left sidebar: one compact card per company (GET /companies item), already sorted by the
  * caller. Severity is the coloured left border; CUI and coverage are on the company page.
+ * collapsed: only a thin strip with the button to open it again.
  */
-export default function AlertsSidebar({ items, selectedCui, onSelect }) {
+export default function AlertsSidebar({ items, selectedCui, onSelect, collapsed, onToggle }) {
+  if (collapsed) {
+    return (
+      <aside className="sidebar is-collapsed" aria-label="Company alerts">
+        <button
+          type="button"
+          className="sidebar-toggle"
+          aria-expanded="false"
+          aria-label="Show the alerts list"
+          title="Show the alerts list"
+          onClick={onToggle}
+        >
+          ›
+        </button>
+        <span className="sidebar-rail-label">Alerts · {items.length}</span>
+      </aside>
+    );
+  }
+
   return (
     <aside className="sidebar" aria-label="Company alerts">
       <h2 className="sidebar-title">
         Alerts <span className="sidebar-count">{items.length}</span>
+        <button
+          type="button"
+          className="sidebar-toggle"
+          aria-expanded="true"
+          aria-label="Hide the alerts list"
+          title="Hide the alerts list"
+          onClick={onToggle}
+        >
+          ‹
+        </button>
       </h2>
       <ul className="alert-list">
         {items.map((item) => {

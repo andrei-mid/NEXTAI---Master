@@ -109,3 +109,33 @@ async def test_memory_repository_time_travel_matches_postgres_semantics() -> Non
     between = await repo.list_decisions_between("99000017", since=at(1), until=at(12))
     assert [d.decision_id for d in between] == ["d1", "d2"]
     assert await repo.list_events("99000017", since=date(2026, 1, 1)) == []  # no signals stored
+
+
+async def test_memory_repository_analyst_opinion_latest_by_generated_at() -> None:
+    from datetime import UTC, datetime
+
+    from verifirm.core.impl_local.repository import MemoryRepository
+    from verifirm.schema.analyst import AnalystOpinion, CompanyDossier, OfficialScore
+    from verifirm.schema.scoring import Band
+
+    def opinion(run_id: str, day: int) -> AnalystOpinion:
+        return AnalystOpinion(
+            cui="99000025",
+            run_id=run_id,
+            generated_at=datetime(2026, 10, day, tzinfo=UTC),
+            model="m",
+            flags=[],
+            explanation="e",
+            official_band=Band.RED,
+            official_score=None,
+        )
+
+    dossier = CompanyDossier.model_construct(
+        official_score=OfficialScore(trust_score=None, band=Band.RED, coverage="0/8 sources")
+    )
+    repo = MemoryRepository()
+    assert await repo.get_latest_analyst_opinion("99000025") is None
+    await repo.save_analyst_opinion(opinion("r2", 20), dossier)
+    await repo.save_analyst_opinion(opinion("r1", 10), dossier)  # older, saved later
+    latest = await repo.get_latest_analyst_opinion("99000025")
+    assert latest is not None and latest.run_id == "r2"

@@ -1,0 +1,42 @@
+{
+  "$defs": {
+    "Band": {
+      "enum": [
+        "green",
+        "yellow",
+        "red",
+        "stop",
+        "grey"
+      ],
+      "title": "Band",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "trust_score": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Trust Score"
+    },
+    "band": {
+      "$ref": "#/$defs/Band"
+    },
+    "coverage": {
+      "title": "Coverage",
+      "type": "string"
+    }
+  },
+  "required": [
+    "trust_score",
+    "band",
+    "coverage"
+  ],
+  "title": "OfficialScore",
+  "type": "object"
+}

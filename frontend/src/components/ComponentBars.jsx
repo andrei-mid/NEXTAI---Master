@@ -2,11 +2,19 @@
  * One bar per component, drawn from the list the API sends (not a fixed list of 8),
  * so a new agent shows up without code changes. Scores are shown exactly as received.
  * An unavailable component is a grey bar, never a clean one.
+ * Closed by default; the title shows how many components were checked.
  */
 export default function ComponentBars({ components }) {
+  const checked = components.filter((c) => c.available).length;
+
   return (
-    <section className="card">
-      <h3>Components</h3>
+    <details className="card section-toggle">
+      <summary className="card-head">
+        <h3>Components</h3>
+        <span className="sidebar-count">
+          {checked}/{components.length} checked
+        </span>
+      </summary>
       {components.length === 0 ? (
         <p className="muted">Not checked yet: no component results. This is not a clean result.</p>
       ) : (
@@ -34,6 +42,6 @@ export default function ComponentBars({ components }) {
           })}
         </ul>
       )}
-    </section>
+    </details>
   );
 }

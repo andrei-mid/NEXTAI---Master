@@ -13,7 +13,7 @@ import CheckHistory from './CheckHistory.jsx';
  * Centre of the page for one company: GET /companies/{cui} and /signals first, then /history
  * on its own, so a slow history never holds back the rest of the page.
  */
-export default function CompanyDetail({ item, sessionReviews, analystId }) {
+export default function CompanyDetail({ item, sessionReviews, messages, analystId }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   // undefined = still loading, null = none or failed
@@ -62,16 +62,22 @@ export default function CompanyDetail({ item, sessionReviews, analystId }) {
         claims={signals && sortSignals(signals)}
         lastChecked={company.last_checked}
         coverage={company.coverage}
+        company={company}
       />
-      {DATA_MODE === 'api' && item.origin === 'backend' && <CheckHistory history={checkHistory} />}
+      {DATA_MODE !== 'mock' && item.origin === 'backend' && (
+        <CheckHistory history={checkHistory} />
+      )}
       <FlagHistory
         entries={history}
+        messages={messages}
+        cui={item.cui}
         companyName={company.identity_sheet.current_name}
         analystId={analystId}
       />
       {fictional ? (
         <BankRelationship
           bank={getBankRelationship(item.cui)}
+          cui={item.cui}
           companyName={company.identity_sheet.current_name}
           analystId={analystId}
         />

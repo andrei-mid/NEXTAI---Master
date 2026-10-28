@@ -308,3 +308,25 @@ async def test_list_loads_companies_concurrently_and_keeps_the_page_order() -> N
     assert [i.cui for i in page.items] == expected  # the repository's page order, unchanged
     assert len(page.items) == len(cuis)
     assert elapsed < 0.05 * 3 * len(cuis) / 2  # well below one-after-another (1.2 s)
+
+
+async def test_analyst_opinion_from_the_repository() -> None:
+    from verifirm.schema.analyst import DISCLAIMER, AnalystOpinion, CompanyDossier
+
+    rm = await seeded()
+    with pytest.raises(HTTPException) as err:
+        await rm.analyst_opinion(CUI)
+    assert err.value.status_code == 404
+    opinion = AnalystOpinion(
+        cui=CUI,
+        run_id="run_1",
+        generated_at=NOW,
+        model="m",
+        flags=[],
+        explanation="e",
+        official_band=Band.RED,
+        official_score=64.8,
+    )
+    await rm.repo.save_analyst_opinion(opinion, CompanyDossier.model_construct())
+    got = await rm.analyst_opinion(CUI)
+    assert got.disclaimer == DISCLAIMER and got.official_band == Band.RED

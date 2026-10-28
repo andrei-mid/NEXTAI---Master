@@ -1,9 +1,13 @@
 # RiskLens dashboard: specification (from the team lead, 2026-10-28)
 
-> Verbatim brief for the new analyst dashboard. **Read `../HANDOFF.md` first**: several points below were
-> changed or clarified with the team lead (location, banner wording, Dedeman data, rule ids).
-> Visual reference: [`RiskLens-design-reference.html`](RiskLens-design-reference.html) (layout, styles,
-> animations and ALL mock data).
+> **Status: not what the code does.** This is the original brief, kept as written. The frontend was
+> not replaced: the existing React + Vite app (plain JavaScript and CSS, no TypeScript, Tailwind,
+> router or query library) was kept and extended. What is actually built, and how each point below
+> compares with it, is in **[`../HANDOFF.md`](../HANDOFF.md)**. The visual reference
+> `RiskLens-design-reference.html` was removed from the folder (still in git history, `bc6e2f9`).
+
+> Verbatim brief for the new analyst dashboard. Several points below were changed or clarified with
+> the team lead (location, banner wording, Dedeman data, rule ids).
 
 ---
 
